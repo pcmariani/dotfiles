@@ -1,0 +1,253 @@
+## Alias expansion ##
+# https://blog.sebastian-daschner.com/entries/zsh-aliases
+
+# blank aliases
+# typeset -a baliases
+# baliases=()
+#
+# balias() {
+#   alias $@
+#   args="$@"
+#   args=${args%%\=*}
+#   baliases+=(${args##* })
+# }
+#
+# # ignored aliases
+# typeset -a ialiases
+# ialiases=()
+#
+# ialias() {
+#   alias $@
+#   args="$@"
+#   args=${args%%\=*}
+#   ialiases+=(${args##* })
+# }
+#
+# alias expansion function
+# expand-alias-space() {
+#   [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
+#   if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
+#     zle _expand_alias
+#   fi
+#   zle self-insert
+#   if [[ "$insertBlank" = "0" ]]; then
+#     zle backward-delete-char
+#   fi
+# }
+# zle -N expand-alias-space
+#
+# bindkey " " expand-alias-space
+bindkey -M isearch " " magic-space
+source $HOME/.config/aliases
+
+
+# alias namespaces (sort of)
+# t: todo
+# n: note
+# e: edit
+# g: git
+# d: dotfiles
+# c: config
+# x: tmux TODO
+# v: vim
+# z: zsh
+# f: find
+# h: history
+# ssh: ssh
+# gpg: gpg
+
+# note on aliases:
+# alias: expand (default)
+# balias: expand with no trailing space
+# ialias: do not expand
+
+# Boomi
+# Usage: boomi -d data.xml -p props.properties script.groovy
+# BOOMI_PATH="$HOME/projects"
+# BOOMI_PATH="/mnt/c/Users/peter_mariani/Documents/scripts_boomi"
+# BOOMI_PATH="C:\\Users\\peter_mariani\\Documents\\scripts_boomi"
+# ialias boomi="groovy.exe $BOOMI_PATH\\BoomiTestBed\\src\\GroovyTestBed.groovy"
+
+# Environment
+# alias env-export='environment-export'
+# alias env-unset='environment-unset'
+
+function rgr() { rg --files --hidden -g "$1" }
+
+# alias 256="$HOME/scripts/256-colors.sh"
+# alias cfa="$EDITOR $HOME/winhome/AppData/Roaming/alacritty/alacritty.yml"
+
+# BOOMI_PATH="C:/Users/peter_mariani/Documents/scripts_boomi"
+# ialias boomi="groovy.exe $BOOMI_PATH/BoomiTestBed/src/GroovyTestBed.groovy"
+
+# alias -g btbd="$HOME/winhome/Documents/scripts_boomi/BoomiTestBed/src/"
+# alias -g bstd="$HOME/winhome/Documents/scripts_boomi/BoomiScriptTaster/"
+# alias -g scr-b="$HOME/winhome/Documents/scripts_boomi"
+# ialias btb="cmd.exe /c BoomiTestBed"
+
+
+# tempcontent() { jq -r '.content' "$@" > ~/temp$(echo "$@" | sed 's/.json//').mkd }
+# jqmv() { jq --arg c "$(cat ~/temp"$@".mkd)" '.content = $c' ~/.sncli/"$@".json > ~/temp"$@".json && mv ~/temp"$@".json ~/.sncli/"$@".json }
+
+
+
+# awk
+# alias -g A="| awk"
+# alias -g A1="| awk '{print \$1}'"
+
+# SimpleNote
+alias sn="$EDITOR '+:SimplenoteList'"
+alias snv="$EDITOR '+:let g:SimplenoteSingleWindow=1 :SimplenoteOpen 386cd5bd582f48899ed71515ede2860c'"
+# TOO SLOW - TODO replace with bash and jq
+function ned() { sn -k "$(nid $@)" edit } # edit note by name
+function nid() { sn list "$@" | awk "{if (\$4 ~ /$@/) print \$1}" } # get note id by name
+# alias -g nactive="grep 'deleted.*false' *.json | sed 's/:.*//'"
+# alias -g ndel="grep 'deleted.*true' *.json | sed 's/:.*//'"
+# function ngrepbytag() { grep "\"$@\"" $(nactive) | sed 's/:.*//' }
+# function nidbytitle() { grep "content.*$@" $(nactive) | sed 's/\..*//' }
+# function nedbytitle() { sn -k "$(nidbytitle $@)" edit }
+alias ntags="for i in \$(nactive); do jq -r '.tags[]' \$i; done | sort -u"
+alias ntitles="for i in \$(nactive); do jq -r '.content' \$i | head -n1; done | sort"
+# function ntag() { for i in $(ngrepbytag $@); do echo -n "$i: "; jq -r '.content' $i | head -n1 | tr -d '\n$'; jq '.content' $i; done }
+# function ntagids() { ntag $@ | sed 's/\..*//' }
+# function ntagfilenames() { ntag $@ | sed 's/:.*//' }
+# function ntagtitles() { ntag $@ | sed 's/.*: //' }
+# function ntagcontent() { for i in $(ngrepbytag $@); do echo -n "$i: "; jq -r '.content' $i | head -n1; done | sort }
+
+
+# global aliases
+# alias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
+# alias -g A="| awk"
+# alias -g A1="| awk '{print \$1}'"
+# alias -g v='nvim'
+# alias -g vt='nvim -p'
+# alias -g L='| less'
+# alias -g G='| grep'
+# alias -g H='| head'
+# alias -g T='| tail'
+# alias -g C='| clip.exe'
+# alias -g P="2>&1| pygmentize -l pytb"
+# alias -g W='| wc -l'
+# alias -g LL="2>&1 | less"
+# alias -g CA="2>&1 | cat -A"
+# alias -g NE="2> /dev/null"
+# alias -g NUL="> /dev/null 2>&1"
+# alias -g P="2>&1| pygmentize -l pytb"
+
+# ssh
+# alias sshls="ls -al ~/.ssh"
+# alias sshkg="ssh-keygen -t rsa -b 4096 -C" # enter email address
+# alias ssheval="eval `ssh-agent -s`"
+# alias sshadd="ssh-add ~/.ssh/id_rsa"
+# alias sshkill="ssh-agent -k" # kill agent server
+# alias sshprocs="ps -e | grep ssh-agent"
+# # Kill all stray ssh-agent procs:
+# function func_sshkillall() {
+#     for i in $( ps -e | grep ssh-agent | sed 's/^ *//' | cut -d' ' -f1 | sort -u ); do
+#         echo -n killing PID "$i" 
+#         kill "$i"
+#         echo
+#     done
+# }
+# alias sshkillall=func_sshkillall
+
+# gpg
+# alias gpgls="gpg --list-secret-keys --keyid-format LONG"
+# alias gpggen="gpg --full-generate-key"
+# alias gpge="gpg -r pcmariani@gmail.com -e" # enter filename
+# alias gpgd="gpg -d" # enter filename
+
+
+# command aliases
+# alias h='history'
+# alias hgrep="fc -El 0 | grep"
+# alias dud='du -d 1 -h'
+# alias duf='du -sh *'
+# alias fd='find . -type d -name'
+# alias ff='find . -type f -name'
+# alias curl='curl --silent --show-error'
+# alias clh='curl localhost:'
+# alias diff='diff --color=auto'
+# alias ccat='highlight --out-format=ansi'
+# alias al='alias | sort | less'
+# alias zs='source $ZDOTDIR/.zshrc'
+# alias ddg='ddgr'
+# # ialias sn='sncli'
+# alias pse='ps -e'
+#
+
+# Changing "ls" to "exa"; from DistoTube
+# alias l='exa -al --color=always --group-directories-first'
+# alias ls='exa --color=always --group-directories-first'
+# alias la='exa -a --color=always --group-directories-first'
+# alias ll='exa -l --color=always --group-directories-first'
+# alias lla='exa -al --color=always --group-directories-first'
+# alias lt='exa -aT --color=always --group-directories-first' # tree listing
+# TODO prevent tree from following symlinks (or just winhome)
+
+# dotfile bare git repo
+# https://www.atlassian.com/git/tutorials/dotfiles
+# DOTFILEREPO='/usr/bin/git --git-dir=/home/pete/.dotrepo/ --work-tree=/home/pete'
+# alias dot="$DOTFILEREPO"
+# alias da="$DOTFILEREPO add"
+# alias dc="$DOTFILEREPO commit -am"
+# alias dp="$DOTFILEREPO push"
+# alias ds="$DOTFILEREPO status"
+# alias dcp="$DOTFILEREPO commit -am 'changes were made' && $DOTFILEREPO push"
+# TODO ialias ddi="$DOTFILEREPO diff"
+
+# file shorcuts
+# TODO cd also ls
+# TODO mkdir also cd
+# alias -g ea="$EDITOR $HOME/.config/aliases"
+# alias ef="$EDITOR $HOME/.config/functions"
+# alias cfh="$EDITOR $HISTFILE"
+# alias cfg="$EDITOR $HOME/.gitconfig"
+# alias cfx="$EDITOR $HOME/.tmux.conf"
+# alias cfv="$EDITOR $HOME/.config/nvim/init.vim"
+# alias cfz="$EDITOR $ZDOTDIR/.zshrc"
+# alias cfze="$EDITOR $ZDOTDIR/.zshenv"
+# alias cfzp="$EDITOR $HOME/.zprofile"
+# alias et="$EDITOR $HOME/todo.txt"
+# alias cft="$EDITOR $HOME/.todotxt/todo.txt_cli*/todo.cfg"
+# alias cftx="$EDITOR $HOME/.tmux.conf"
+# tmux
+# alias txn="tmux new -s"
+# alias txa="tmux a -t"
+
+# directory navigation
+# alias d='dirs -v | head -10 | sed -e "1s/0\s*\(.*\)/\1/" -e "s/^\([0-9]\)\s*/    \1)  /"'
+# alias d='dirs -v | head -10 | sed -e "1s/.*//" -e "s/^\([0-9]\)\s*/    \1)  /"'
+# alias 0='cd ~'
+# alias 1='cd ~1'
+# alias 2='cd ~2'
+# alias 3='cd ~3'
+# alias 4='cd ~4'
+# alias 5='cd ~5'
+# alias 6='cd ~6'
+# alias 7='cd ~7'
+# alias 8='cd ~8'
+# alias 9='cd ~9'
+# alias tree="tree -d -L 4"
+#
+TODO="todo.sh"
+alias t="$TODO"
+alias ta="$TODO add "
+alias tls="todo-list "
+alias tlsh="todo-list @home"
+alias te="nvim /mnt/c/Users/PeterMariani/Dropbox/todo.txt/todo.txt"
+# ialias tls="echo && cat \
+#     <($TODO ls | head -n-2 | sed \
+#             -e 's/[+@]/\t&/g' \
+#             -e 's/(\(.\))/\t/' \
+#             -e 's/^[0-9]\+/&\t/' \
+#             -e '0,/[0-9]\+ x/  s/[0-9]\+ x/\nDONE\n\n&/' \
+#             -e 's/[0-9]\+ x/&\t/' \
+#         | column -t -s $'\t' )"
+    # <($TODO ls | tail -n1 | sed 's/ tasks shown//' && echo) \
+    # <($TODO ls | tail -n2 | sed -e '/--/s/--//' -e '/TODO/s/ tasks shown//')"
+    # | sort -t $'\t' -k2 \
+    # <($TODO ls | head -n-2 | sed -e 's/[+@]/\t&/g' -e 's/(\(.\))/\t\1\t/' -e 's/^[0-9]\+/&\tV\t/' \
+    # | sed '/\tV\t/s/\tV\t/\t \t/' \
+# ialias tas="$TODO addto stuff.txt"
+# ialias lss="$TODO lf stuff.txt"
