@@ -63,6 +63,7 @@ shopt -s globstar
 # Sources
 [ -f ~/.config/aliases ] && . ~/.config/aliases
 [ -f ~/.config/bash_functions ] && . ~/.config/bash_functions
+[ -f ~/.config/local_exports ] && . ~/.config/local_exports
 
 
 # enable programmable completion features (you don't need to enable
