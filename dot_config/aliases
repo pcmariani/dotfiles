@@ -33,7 +33,7 @@ alias cheap='chezmoi edit --apply '
 alias chs='chezmoi status'
 alias chd='chezmoi diff'
 alias chap='chezmoi -v apply'
-alias chcd'chezmoi cd'
+alias chcd='chezmoi cd'
 # ch() { chezmoi edit "$@" ; }
 
 # --- Dotfiles git bare repo --- #
