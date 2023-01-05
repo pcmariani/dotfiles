@@ -37,7 +37,7 @@ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 [ -d "$HOME/bin" ]	    && PATH="$PATH:$HOME/bin"
 [ -d "$HOME/.local/bin" ]   && PATH="$PATH:$HOME/.local/bin"
 [ -d "$HOME/.emacs.d/bin" ] && PATH="$PATH:$HOME/.emacs.d/bin"
-[ -d "$HOME/neovim/bin" ]   && PATH="$PATH:$HOME/neovim/bin"
+[ -d "$HOME/.local/bin/neovim/bin" ]   && PATH="$PATH:$HOME/.local/bin/neovim/bin"
 
 # for wsl, remove windows dirs with lots of items which slow down completion
 PATH=$(echo "$PATH" | sed 's|:/mnt/c/WINDOWS:|:|')
