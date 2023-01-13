@@ -34,45 +34,46 @@ alias fvf='v $(fzf)'
 f() { fzf --query="$@" ; }
 
 # --- Edit files --- #
-alias eb="v ~/.bashrc"
 alias ea="v ~/.config/aliases"
+alias eb="v ~/.bashrc"
 alias ef="v ~/.config/bash_functions"
-alias .b='. ~/.bashrc && echo .bashrc sourced'
-alias .a='. ~/.config/aliases && echo .config/aliases sourced'
-alias .f='. ~/.config/bash_functions && echo .config/bash_functions sourced'
+alias eg="v ~/.gitconfig"
 alias ei="v ~/.inputrc"
+alias ev="v ~/.config/nvim/init.vim"
 alias ebp="v ~/.bash_profile"
 alias est="v ~/.config/starship.toml"
+alias etx="v ~/.tmux.conf"
+alias .a='. ~/.config/aliases && echo .config/aliases sourced'
+if [ -n "$ZSH_VERSION" ]; then
+  alias ez="v $ZDOTDIR/.zshrc"
+  alias eze="v $ZDOTDIR/.zshenv"
+  alias ezp="v $HOME/.zprofile"
+else
+  alias .b='. ~/.bashrc && echo .bashrc sourced'
+  alias .bf='. ~/.config/bash_functions && echo .config/bash_functions sourced'
+fi
+# alias cfh="$EDITOR $HISTFILE"
+# alias et="$EDITOR $HOME/todo.txt"
+# alias cft="$EDITOR $HOME/.todotxt/todo.txt_cli*/todo.cfg"
 
 # --- Dotfiles git bare repo --- #
 alias g='lazygit'
 alias gs='git status'
 alias gls='git ls-tree --full-tree -r --name-only HEAD'
-# https://www.atlassian.com/git/tutorials/dotfiles
-alias dotrepo='--git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
-alias dot='git --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
-alias dg='lazygit --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
-alias ds='dot status'
-alias da='dot add '
-alias dac='dot commit -am '
-alias dc='dot commit -m '
-alias dls='git ls-tree --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
 alias gh.create='git init && git add . && git commit -m "initial commit" && gh repo create $(pwd | sed "s/.*\///") --private --source=. --remote=origin --push'
+# https://www.atlassian.com/git/tutorials/dotfiles
+# alias dotrepo='--git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
+# alias dot='git --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
+# alias dg='lazygit --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
+# alias ds='dot status'
+# alias da='dot add '
+# alias dac='dot commit -am '
+# alias dc='dot commit -m '
+# alias dls='git ls-tree --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
 
 # file shorcuts
 # TODO cd also ls
 # TODO mkdir also cd
-# alias ea="$EDITOR $HOME/.config/aliases"
-# alias ef="$EDITOR $HOME/.config/functions"
-alias cfh="$EDITOR $HISTFILE"
-alias cfg="$EDITOR $HOME/.gitconfig"
-alias cfx="$EDITOR $HOME/.tmux.conf"
-alias cfv="$EDITOR $HOME/.config/nvim/init.vim"
-alias cfz="$EDITOR $ZDOTDIR/.zshrc"
-alias cfze="$EDITOR $ZDOTDIR/.zshenv"
-alias cfzp="$EDITOR $HOME/.zprofile"
-alias et="$EDITOR $HOME/todo.txt"
-alias cft="$EDITOR $HOME/.todotxt/todo.txt_cli*/todo.cfg"
 
 # --- textql --- #
 # alias csvheaders='textql -header -output-header -sql "* limit 0"'
@@ -151,6 +152,15 @@ else
 	alias ll="ls -l"
 	alias la="ls -lA"
 fi
+cdls() {
+  local dir="$1"
+  local dir="${dir:=$HOME}"
+  if [[ -d "$dir" ]]; then
+    cd "$dir" >/dev/null; ls
+  else
+    echo "bash: cdls: $dir: Directory not found"
+  fi
+}
 
 #alias zls='z \!*;ls;cd -'
 #zz() { z $@; la ;}
