@@ -183,6 +183,7 @@ vim.g.maplocalleader = ' '
 -- See `:help vim.keymap.set()`
 
 -- --- MY MAPS ---
+
 -- easy to command mode
 vim.keymap.set('n',';',':', { noremap = true })
 vim.keymap.set('n',':',';', { noremap = true })
@@ -250,6 +251,12 @@ vim.keymap.set('n','<ESC>',':nohlsearch<CR>', { noremap = true, silent = true })
 -- Select all
 vim.keymap.set('n','<C-a>','gg0vG$', { noremap = true, silent = true }) -- TODO:don't add gg to jump list
 vim.keymap.set('i','<C-a>','<Esc>gg0vG$', { noremap = true, silent = true })
+--
+-- Stay in indent mode
+vim.keymap.set("n", "<", "<<", { noremap = true, silent = true })
+vim.keymap.set("n", ">", ">>", { noremap = true, silent = true })
+vim.keymap.set("v", "<", "<gv", { noremap = true, silent = true })
+vim.keymap.set("v", ">", ">gv", { noremap = true, silent = true })
 
 -- New blank file
 vim.keymap.set('n','<Leader>n',':enew<CR>', { noremap = true, silent = true })
@@ -298,11 +305,14 @@ vim.keymap.set('v','<leader>h', [["hy/\V<C-r>h<CR>:%s/<C-r>h//gc<Left><Left><Lef
 -- global search/replace word under cursor
 vim.keymap.set('v','<leader><leader>h', [["hy/<C-r>h<CR>:silent exe "grep "shellescape(substitute(@/,'[()\]\[{}]','\\&','g'))<CR>:cdo s/<C-r>h//gc<Left><Left><Left>]], { noremap = true })
 
--- shell command filter
-vim.keymap.set("n", "=;", ":%!", { noremap = true })
-vim.keymap.set("v", "=;", ":!", { noremap = true })
+--- Formatting ---
+-- format all
+vim.keymap.set('n','=a','gg0vG$==', { noremap = true, silent = true })
 
--- Filetypes --
+-- set indent
+vim.keymap.set('n','=2',':set tabstop=2 shiftwidth=2<CR>', { noremap = true, silent = true })
+vim.keymap.set('n','=4',':set tabstop=4 shiftwidth=4<CR>', { noremap = true, silent = true })
+
 -- csv
 vim.keymap.set('n','=ra',':RainbowAlign<CR>', { noremap = true, silent = true })
 vim.keymap.set('n','=rs',':RainbowShrink<CR>', { noremap = true, silent = true })
@@ -313,17 +323,10 @@ vim.keymap.set('n','=rn',':RainbowNoDelim<CR>', { noremap = true, silent = true 
 vim.keymap.set('n','=j',':set filetype=json<CR>:%!jq .<CR>:set foldmethod=syntax<CR>zR', { noremap = true, silent = true })
 
 -- xml
-vim.keymap.set('n','=x', ':set filetype=xml<CR>:1s/<?xml .*?>//e<CR>:silent %!xmllint --encode UTF-8 --format -<CR>:1d<CR><ESC>', { noremap = true, silent = true })
+-- vim.keymap.set('n','=x', ':set filetype=xml<CR>:1s/<?xml .*?>//e<CR>:silent %!xmllint --encode UTF-8 --format -<CR>:1d<CR><ESC>', { noremap = true, silent = true })
+vim.keymap.set('n','=x', ':set filetype=xml<CR>:%s/></>\r</g<CR>==', { noremap = true, silent = true })
 
-
-
--- --- END MY MAPS ---
-
-
-
-
-
-
+-- allow space leader
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
 -- Remap for dealing with word wrap
@@ -346,7 +349,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 require('lualine').setup {
   options = {
     icons_enabled = false,
-    theme = 'base16',
+    theme = 'auto',
     component_separators = '|',
     section_separators = '',
   },
@@ -545,7 +548,7 @@ local servers = {
 }
 
 -- Setup neovim lua configuration
--- require('neodev').setup()
+require('neodev').setup()
 --
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
