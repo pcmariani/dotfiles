@@ -26,7 +26,7 @@ nvimWithChezmoiFilter() {
   chezmoi edit --apply "$@" 2>/dev/null
   [ "$?" -eq 1 ] && nvim "$@" || chs
 }
-alias ea="@HOME/.config/aliases && . @HOME/.config/aliases && echo .aliases sourced"
+alias ea="$HOME/.config/aliases && . $HOME/.config/aliases && echo .aliases sourced"
 
 alias ch='chezmoi'
 alias chls='chezmoi managed'
