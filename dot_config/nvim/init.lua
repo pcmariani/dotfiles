@@ -234,8 +234,8 @@ vim.keymap.set("n", "<leader>c", ":Bdelete<CR>", { noremap = true, silent = true
 vim.keymap.set("n", "<leader><S-c>", ":Bdelete!<CR>", { noremap = true, silent = true })
 
 -- Swap mark keys
-vim.keymap.set('n','`','\'', { noremap = true, silent = true })
-vim.keymap.set('n','\'','`', { noremap = true, silent = true })
+-- vim.keymap.set('n','`','\'', { noremap = true, silent = true })
+-- vim.keymap.set('n','\'','`', { noremap = true, silent = true })
 
 -- Terminal --
 -- vim.keymap.set("n", "<C-\\>", ":ToggleTerm size=80 direction=vertical<CR>", { noremap = true, silent = true })
