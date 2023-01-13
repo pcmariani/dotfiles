@@ -155,7 +155,7 @@ cdls() {
   local dir="$1"
   local dir="${dir:=$HOME}"
   if [[ -d "$dir" ]]; then
-    cd "$dir" >/dev/null; l
+    cd "$dir" >/dev/null; ls
   else
     echo "bash: cdls: $dir: Directory not found"
   fi
