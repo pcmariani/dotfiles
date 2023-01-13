@@ -168,8 +168,9 @@ cdls() {
 alias cd='cdls'
 alias ..='cd ..'
 alias ...='cd ../../'
-alias ~='cd ~;l'
-alias home='cd ~;l'
+alias ~='cd ~'
+alias -='cd -'
+alias home='cd ~'
 
 
 #alias zls='z \!*;ls;cd -'
