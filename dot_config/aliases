@@ -38,7 +38,7 @@ f() { fzf --query="$@" ; }
 
 
 # --- Edit files --- #
-alias ea="v $HOME/.config/aliases && . $HOME/.config/aliases && echo .aliases sourced"
+alias ea="v $HOME/.config/aliases; . $HOME/.config/aliases; echo .aliases sourced"
 alias eb="$EDITOR ~/.bashrc; . ~/.bashrc; echo .bashrc sourced"
 alias ebp="$EDITOR ~/.bash_profile"
 alias ei="$EDITOR ~/.inputrc"
