@@ -160,7 +160,7 @@ cdls() {
     echo "bash: cdls: $dir: Directory not found"
   fi
 }
-alias cd='cdls'
+# alias cd='cdls'
 alias ..='cd ..'
 alias ...='cd ../../'
 alias ~='cd ~;l'
