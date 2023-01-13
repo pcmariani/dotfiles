@@ -169,7 +169,7 @@ alias cd='cdls'
 alias ..='cd ..'
 alias ...='cd ../../'
 alias ~='cd ~'
-alias j='cd -'
+alias j='\cd - && l'
 alias home='cd ~'
 
 
