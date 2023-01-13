@@ -38,15 +38,15 @@ f() { fzf --query="$@" ; }
 
 
 # --- Edit files --- #
+alias eb="v ~/.bashrc"
 alias ea="v ~/.config/aliases"
-alias eb="$EDITOR ~/.bashrc; . ~/.bashrc; echo .bashrc sourced"
-alias ebp="$EDITOR ~/.bash_profile"
-alias ei="$EDITOR ~/.inputrc"
-alias ef="$EDITOR ~/.bash_functions; . ~/.bash_functions; echo .bash_functions sourced"
-alias est="$EDITOR ~/.config/starship.toml"
-alias plan="$EDITOR ~/documents/bootstrap.md"
+alias ef="v ~/.config/bash_functions"
 alias .b='. ~/.bashrc && echo .bashrc sourced'
 alias .a='. ~/.config/aliases && echo .config/aliases sourced'
+alias .f='. ~/.config/bash_functions && echo .config/bash_functions sourced'
+alias ei="v ~/.inputrc"
+alias ebp="v ~/.bash_profile"
+alias est="v ~/.config/starship.toml"
 
 
 
