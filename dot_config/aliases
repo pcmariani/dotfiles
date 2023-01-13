@@ -47,15 +47,15 @@ alias ez='v ~/.config/zsh/.zshrc'
 alias eza='v ~/.config/zsh/zsh-aliases'
 alias eze='v ~/.zshenv'
 alias ezf='v ~/.config/zsh/zsh-functions'
-alias .a='. ~/.config/aliases && echo .config/aliases sourced'
+alias .a='. ~/.config/aliases && echo aliases sourced'
 if [ -n "$ZSH_VERSION" ]; then
-  alias .z='source ~/.config/zsh/.zshrc'
-  alias .za='source ~/.config/zsh/zsh-aliases'
-  alias .zf='source ~/.config/zsh/zsh-functions'
-  alias .ze='source ~/.zshenv'
+  alias .z='source ~/.config/zsh/.zshrc && echo .zshrc sourced'
+  alias .za='source ~/.config/zsh/zsh-aliases && echo zsh-aliases sourced'
+  alias .ze='source ~/.zshenv && echo .zshenv sourced'
+  alias .zf='source ~/.config/zsh/zsh-functions && echo zsh-functions sourced'
 else
   alias .b='. ~/.bashrc && echo .bashrc sourced'
-  alias .bf='. ~/.config/bash_functions'
+  alias .bf='. ~/.config/bash_functions && echo bash_functions sourced'
 fi
 # alias cfh="$EDITOR $HISTFILE"
 # alias et="$EDITOR $HOME/todo.txt"
@@ -155,12 +155,12 @@ cdls() {
   local dir="$1"
   local dir="${dir:=$HOME}"
   if [[ -d "$dir" ]]; then
-    cd "$dir" >/dev/null; ls
+    \cd "$dir" >/dev/null; ls
   else
     echo "bash: cdls: $dir: Directory not found"
   fi
 }
-# alias cd='cdls'
+alias cd='cdls'
 alias ..='cd ..'
 alias ...='cd ../../'
 alias ~='cd ~;l'
