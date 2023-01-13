@@ -15,7 +15,6 @@ alias yt='youtube-dl'
 alias eb="$EDITOR ~/.bashrc; . ~/.bashrc; echo .bashrc sourced"
 alias ebp="$EDITOR ~/.bash_profile"
 alias ei="$EDITOR ~/.inputrc"
-alias ea="$EDITOR ~/.bash_aliases; . ~/.bash_aliases; echo .bash_aliases sourced"
 alias ef="$EDITOR ~/.bash_functions; . ~/.bash_functions; echo .bash_functions sourced"
 alias est="$EDITOR ~/.config/starship.toml"
 alias plan="$EDITOR ~/documents/bootstrap.md"
@@ -23,6 +22,12 @@ alias .b='. ~/.bashrc && echo .bashrc sourced'
 alias .a='. ~/.config/aliases && echo .config/aliases sourced'
 
 # --- chezmoi --- #
+nvimWithChezmoiFilter() { 
+  chezmoi edit --apply "$@" 2>/dev/null
+  [ "$?" -eq 1 ] && nvim "$@" || chs
+}
+alias ea="@HOME/.config/aliases && . @HOME/.config/aliases && echo .aliases sourced"
+
 alias ch='chezmoi'
 alias chls='chezmoi managed'
 alias che='chezmoi edit '
