@@ -172,7 +172,8 @@ alias home='cd ~;l'
 
 # --- Commands --- #
 alias cls='clear'
-alias mkdir='mkdir -p'
+mkdircd () { \mkdir -p -- "$1" && \cd -P -- "$1" ;}
+alias mkdir='mkdircd'
 alias ps='ps axf'
 alias ping='ping -c 10'
 alias less='less -R'
