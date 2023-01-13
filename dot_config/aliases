@@ -11,23 +11,11 @@ alias t='/home/linuxbrew/.linuxbrew/bin/todo.sh'
 alias v.todos='$EDITOR /mnt/c/Users/peter_mariani/Dropbox/todo.txt/todo.txt'
 alias yt='youtube-dl'
 
-# --- Edit files --- #
-alias eb="$EDITOR ~/.bashrc; . ~/.bashrc; echo .bashrc sourced"
-alias ebp="$EDITOR ~/.bash_profile"
-alias ei="$EDITOR ~/.inputrc"
-alias ef="$EDITOR ~/.bash_functions; . ~/.bash_functions; echo .bash_functions sourced"
-alias est="$EDITOR ~/.config/starship.toml"
-alias plan="$EDITOR ~/documents/bootstrap.md"
-alias .b='. ~/.bashrc && echo .bashrc sourced'
-alias .a='. ~/.config/aliases && echo .config/aliases sourced'
-
 # --- chezmoi --- #
-nvimWithChezmoiFilter() { 
+nvim-chazmoi() { 
   chezmoi edit --apply "$@" 2>/dev/null
   [ "$?" -eq 1 ] && nvim "$@" || chs
 }
-alias ea="$HOME/.config/aliases && . $HOME/.config/aliases && echo .aliases sourced"
-
 alias ch='chezmoi'
 alias chls='chezmoi managed'
 alias che='chezmoi edit '
@@ -38,6 +26,29 @@ alias chd='chezmoi diff'
 alias chap='chezmoi -v apply'
 alias chcd='chezmoi cd'
 # ch() { chezmoi edit "$@" ; }
+
+# --- Vim --- #
+# alias v='nvim'
+alias v='nvim-chazmoi'
+alias vis='nvim "+set si"'
+alias fvf='v $(fzf)'
+f() { fzf --query="$@" ; }
+
+
+
+# --- Edit files --- #
+alias ea="v $HOME/.config/aliases && . $HOME/.config/aliases && echo .aliases sourced"
+alias eb="$EDITOR ~/.bashrc; . ~/.bashrc; echo .bashrc sourced"
+alias ebp="$EDITOR ~/.bash_profile"
+alias ei="$EDITOR ~/.inputrc"
+alias ef="$EDITOR ~/.bash_functions; . ~/.bash_functions; echo .bash_functions sourced"
+alias est="$EDITOR ~/.config/starship.toml"
+alias plan="$EDITOR ~/documents/bootstrap.md"
+alias .b='. ~/.bashrc && echo .bashrc sourced'
+alias .a='. ~/.config/aliases && echo .config/aliases sourced'
+
+
+
 
 # --- Dotfiles git bare repo --- #
 alias g='lazygit'
@@ -165,12 +176,6 @@ alias fd='fdfind'
 alias da='date "+%Y-%m-%d %A %T %Z"'
 
 
-
-# --- Vim --- #
-alias v='nvim'
-alias vis='nvim "+set si"'
-alias fvf='v $(fzf)'
-f() { fzf --query="$@" ; }
 
 # --- Logs --- #
 ## Show all logs in /var/log
