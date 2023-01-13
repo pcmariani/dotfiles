@@ -155,9 +155,14 @@ cdls() {
   local dir="$1"
   local dir="${dir:=$HOME}"
   if [[ -d "$dir" ]]; then
-    \cd "$dir" >/dev/null; ls
+    \cd "$dir" >/dev/null
+    if which exa >/dev/null; then
+      exa -a --color=always --group-directories-first --git --git-ignore
+    else
+      ls -a --color=always
+    fi 
   else
-    echo "bash: cdls: $dir: Directory not found"
+    echo "$dir: Directory not found"
   fi
 }
 alias cd='cdls'
