@@ -12,6 +12,7 @@ alias v.todos='$EDITOR /mnt/c/Users/peter_mariani/Dropbox/todo.txt/todo.txt'
 alias yt='youtube-dl'
 
 # --- chezmoi --- #
+#
 nvim-chazmoi() { 
   chezmoi edit --apply "$@" 2>/dev/null
   [ "$?" -eq 1 ] && nvim "$@" || chs
