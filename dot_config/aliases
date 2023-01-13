@@ -123,14 +123,6 @@ alias env-unset='environment-unset'
 # --- 256 colors script ---
 alias 256="$HOME/scripts/256-colors.sh"
 
-# --- cd --- #
-alias ..='cd ..'
-alias ...='cd ../../../'
-alias ....='cd ../../../../'
-alias .....='cd ../../../../'
-alias ~='cd ~;l'
-alias home='cd ~;l'
-
 
 # --- Color ls & exa --- #
 if which exa >/dev/null; then
@@ -153,10 +145,12 @@ if which exa >/dev/null; then
 
 else
   alias l="ls -1"
-	alias ls="ls --color=always"
-	alias ll="ls -l"
-	alias la="ls -lA"
+  alias ls="ls --color=always"
+  alias ll="ls -l"
+  alias la="ls -lA"
 fi
+
+  # --- cd --- #
 cdls() {
   local dir="$1"
   local dir="${dir:=$HOME}"
@@ -166,6 +160,12 @@ cdls() {
     echo "bash: cdls: $dir: Directory not found"
   fi
 }
+alias cd='cdls'
+alias ..='cd ..'
+alias ...='cd ../../'
+alias ~='cd ~;l'
+alias home='cd ~;l'
+
 
 #alias zls='z \!*;ls;cd -'
 #zz() { z $@; la ;}
