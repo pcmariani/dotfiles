@@ -12,30 +12,26 @@ alias v.todos='$EDITOR /mnt/c/Users/peter_mariani/Dropbox/todo.txt/todo.txt'
 alias yt='youtube-dl'
 
 # --- chezmoi --- #
-#
-nvim-chazmoi() { 
-  chezmoi edit --apply "$@" 2>/dev/null
-  [ "$?" -eq 1 ] && nvim "$@" || chs
-}
 alias ch='chezmoi'
 alias chls='chezmoi managed'
-alias che='chezmoi edit '
 alias cha='chezmoi add '
-alias cheap='chezmoi edit --apply '
 alias chs='chezmoi status'
 alias chd='chezmoi diff'
 alias chap='chezmoi -v apply'
 alias chcd='chezmoi cd'
-# ch() { chezmoi edit "$@" ; }
+alias chu='chezmoi update'
+alias che='chezmoi edit '
+alias cheap='chezmoi edit --apply '
+edit-chezmoi() { 
+  chezmoi edit --apply "$@" 2>/dev/null
+  [ "$?" -eq 1 ] && $EDITOR "$@" || chs
+}
 
 # --- Vim --- #
-# alias v='nvim'
-alias v='nvim-chazmoi'
+alias v='EDITOR=nvim edit-chezmoi'
 alias vis='nvim "+set si"'
 alias fvf='v $(fzf)'
 f() { fzf --query="$@" ; }
-
-
 
 # --- Edit files --- #
 alias eb="v ~/.bashrc"
@@ -47,9 +43,6 @@ alias .f='. ~/.config/bash_functions && echo .config/bash_functions sourced'
 alias ei="v ~/.inputrc"
 alias ebp="v ~/.bash_profile"
 alias est="v ~/.config/starship.toml"
-
-
-
 
 # --- Dotfiles git bare repo --- #
 alias g='lazygit'
