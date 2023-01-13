@@ -181,6 +181,7 @@ alias cls='clear'
 mkdircd () { \mkdir -p -- "$1" && \cd -P -- "$1" ;}
 alias mkdir='mkdircd'
 alias ps='ps axf'
+alias pst='pstree -p'
 alias ping='ping -c 10'
 alias less='less -R'
 alias grep="grep --color=always --exclude-dir={.git}"
