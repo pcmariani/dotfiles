@@ -34,23 +34,28 @@ alias fvf='v $(fzf)'
 f() { fzf --query="$@" ; }
 
 # --- Edit files --- #
-alias ea="v ~/.config/aliases"
-alias eb="v ~/.bashrc"
-alias ef="v ~/.config/bash_functions"
-alias eg="v ~/.gitconfig"
-alias ei="v ~/.inputrc"
-alias ev="v ~/.config/nvim/init.vim"
-alias ebp="v ~/.bash_profile"
-alias est="v ~/.config/starship.toml"
-alias etx="v ~/.tmux.conf"
+alias ea='v ~/.config/aliases'
+alias eb='v ~/.bashrc'
+alias ef='v ~/.config/bash_functions'
+alias eg='v ~/.gitconfig'
+alias ei='v ~/.inputrc'
+alias ev='v ~/.config/nvim/init.vim'
+alias ebp='v ~/.bash_profile'
+alias est='v ~/.config/starship.toml'
+alias etx='v ~/.tmux.conf'
+alias ez='v ~/.config/zsh/.zshrc'
+alias eza='v ~/.config/zsh/zsh-aliases'
+alias eze='v ~/.zshenv'
+alias ezf='v ~/.config/zsh/zsh-functions'
 alias .a='. ~/.config/aliases && echo .config/aliases sourced'
 if [ -n "$ZSH_VERSION" ]; then
-  alias ez="v $ZDOTDIR/.zshrc"
-  alias eze="v $ZDOTDIR/.zshenv"
-  alias ezp="v $HOME/.zprofile"
+  alias .z='source ~/.config/zsh/.zshrc'
+  alias .za='source ~/.config/zsh/zsh-aliases'
+  alias .zf='source ~/.config/zsh/zsh-functions'
+  alias .ze='source ~/.zshenv'
 else
   alias .b='. ~/.bashrc && echo .bashrc sourced'
-  alias .bf='. ~/.config/bash_functions && echo .config/bash_functions sourced'
+  alias .bf='. ~/.config/bash_functions'
 fi
 # alias cfh="$EDITOR $HISTFILE"
 # alias et="$EDITOR $HOME/todo.txt"
