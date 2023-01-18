@@ -54,7 +54,7 @@ if [ -n "$ZSH_VERSION" ]; then
   alias .ze='source ~/.zshenv && echo .zshenv sourced'
   alias .zf='source ~/.config/zsh/zsh-functions && echo zsh-functions sourced'
 else
-  alias .b='. ~/.bashrc && echo .bashrc sourced'
+  alias .b='. ~/.bashrc && clear'
   alias .bf='. ~/.config/bash_functions && echo bash_functions sourced'
 fi
 # alias cfh="$EDITOR $HISTFILE"
