@@ -70,7 +70,7 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 -- [[ neodev ]] --
 -- TODO: turn on neodev for nvim config files only ??
 -- Setup neovim lua configuration
-require('neodev').setup()
+-- require('neodev').setup()
 
 -- [[ fidget ]] --
 -- Turn on lsp status information
