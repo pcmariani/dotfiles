@@ -94,8 +94,24 @@ fix_wsl2_interop() {
 eval "$(starship init bash)"
 # unset PROMPT_COMMAND
 
-# bling
-curl wttr.in?0
+# some bling
+# curl wttr.in?0
+# echo '                                                                   '
+# echo '                          - -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -'
+# echo '                                                                   '
+# echo '                             ___   LASCIATE OGNI SPERANZE   ___    '
+# echo '                                      VOI CHE ENTRATE              '
+# echo '                                                                   '
+# echo '                          - -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -'
+# echo '                                                                   '
+echo '                                                                      '
+echo '                       - -- -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -- -'
+echo '                                                                      '
+echo '                           ___   ἐμοὶ γὰρ τὸ ζῆν Χριστὸς καὶ   ___    '
+echo '                                     τὸ ἀποθανεῖν κέρδος              '
+echo '                                                                      '
+echo '                       - -- -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -- -'
+echo '                                                                      '
 
 # SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
