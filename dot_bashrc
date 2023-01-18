@@ -96,6 +96,7 @@ eval "$(starship init bash)"
 
 # some bling
 # curl wttr.in?0
+[ -f ~/scripts/bash-startup.sh ] && ~/scripts/bash-startup.sh
 # echo '                                                                   '
 # echo '                          - -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -'
 # echo '                                                                   '
@@ -104,14 +105,15 @@ eval "$(starship init bash)"
 # echo '                                                                   '
 # echo '                          - -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -'
 # echo '                                                                   '
-echo '                                                                      '
-echo '                       - -- -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -- -'
-echo '                                                                      '
-echo '                           ___   ἐμοὶ γὰρ τὸ ζῆν Χριστὸς καὶ   ___    '
-echo '                                     τὸ ἀποθανεῖν κέρδος              '
-echo '                                                                      '
-echo '                       - -- -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -- -'
-echo '                                                                      '
+#
+# echo '                                                                      '
+# echo '                       - -- -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -- -'
+# echo '                                                                      '
+# echo '                           ___   ἐμοὶ γὰρ τὸ ζῆν Χριστὸς καὶ   ___    '
+# echo '                                     τὸ ἀποθανεῖν κέρδος              '
+# echo '                                                                      '
+# echo '                       - -- -~- --~<>~---~=<< ♰ >>=~---~<>~-- -~- -- -'
+# echo '                                                                      '
 
 # SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
