@@ -20,9 +20,9 @@ alias bw='NODE_OPTIONS="--no-deprecation" bw'
 
 # --- yadm --- #
 yadm-lazygit() {
-	pushd ~
+	pushd "$HOME"
 	yadm enter lazygit
-	popd
+	echo "$(pwd)"
 }
 alias gy='yadm-lazygit'
 
