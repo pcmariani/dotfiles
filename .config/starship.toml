@@ -87,10 +87,6 @@ format = "[$all_status$ahead_behind]($style) "
 # style = "bold dimmed white"
 # disabled = true
 
-# [julia]
-# format = "[$symbol$version]($style) "
-# symbol = "ஃ "
-# style = "bold green"
 
 # [memory_usage]
 # format = "$symbol[${ram}( | ${swap})]($style) "
