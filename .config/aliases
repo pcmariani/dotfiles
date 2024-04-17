@@ -1,3 +1,5 @@
+# vim: set ft=sh
+
 ## Source .bashrc
 
 ## fzf aliases
@@ -15,6 +17,14 @@ alias v.todos='$EDITOR /mnt/c/Users/peter_mariani/Dropbox/todo.txt/todo.txt'
 alias yt='youtube-dl'
 alias puml='java -jar ~/.local/lib/plantuml-1.2023.4.jar'
 alias bw='NODE_OPTIONS="--no-deprecation" bw'
+
+# --- yadm --- #
+yadm-lazygit() {
+	cd ~
+	yadm enter lazygit
+	cd -
+}
+alias gy='yadm-lazygit'
 
 # --- chezmoi --- #
 alias ch='chezmoi'
@@ -325,5 +335,3 @@ alias zs='source $ZDOTDIR/.zshrc'
 alias ddg='ddgr'
 # alias sn='sncli'
 alias pse='ps -e'
-
-# vim: set ft=sh
