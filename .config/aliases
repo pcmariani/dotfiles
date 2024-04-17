@@ -27,11 +27,12 @@ yadm-lazygit() {
 alias gy='yadm-lazygit'
 alias yg='yadm-lazygit'
 alias ys='yadm status'
+alias yd='yadm diff'
 alias yl='yadm list'
 alias yla='yadm list -a'
 alias ya='yadm add -u'
 alias yc='yadm commit -m'
-alias yd='yadm diff'
+alias yp='yadm push origin master'
 
 # --- Emacs --- #
 # alias e='emacsclient --alternate-editor="" --no-wait'
