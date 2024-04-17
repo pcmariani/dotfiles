@@ -1,0 +1,89 @@
+# vim ft=sh
+
+# ahk() {
+#   # file=$1
+#   # file="${file//\//\\}"
+#   # file="${file/\\mnt\\c/C:}"
+#   autohotkey "$1" &
+#   while [ true ] ; do
+#     sleep 2
+#     pid="$(\ps | grep autohotkey | awk '{print $1}')"
+#     kill "$pid"
+#     return
+#   done
+# }
+
+
+# Extracts any archive(s) (if unp isn't installed)
+extract () {
+	for archive in $*; do
+		if [ -f $archive ] ; then
+			case $archive in
+				*.tar.bz2)   tar xvjf $archive    ;;
+				*.tar.gz)    tar xvzf $archive    ;;
+				*.bz2)       bunzip2 $archive     ;;
+				*.rar)       rar x $archive       ;;
+				*.gz)        gunzip $archive      ;;
+				*.tar)       tar xvf $archive     ;;
+				*.tbz2)      tar xvjf $archive    ;;
+				*.tgz)       tar xvzf $archive    ;;
+				*.zip)       unzip $archive       ;;
+				*.Z)         uncompress $archive  ;;
+				*.7z)        7z x $archive        ;;
+				*)           echo "don't know how to extract '$archive'..." ;;
+			esac
+		else
+			echo "'$archive' is not a valid file!"
+		fi
+	done
+}
+
+
+# Trim leading and trailing spaces (for scripts)
+trim()
+{
+	local var=$@
+	var="${var#"${var%%[![:space:]]*}"}"  # remove leading whitespace characters
+	var="${var%"${var##*[![:space:]]}"}"  # remove trailing whitespace characters
+	echo -n "$var"
+}
+
+
+
+# Show current network information
+netinfo ()
+{
+	echo "--------------- Network Information ---------------"
+	/sbin/ifconfig | awk /'inet addr/ {print $2}'
+	echo ""
+	/sbin/ifconfig | awk /'Bcast/ {print $3}'
+	echo ""
+	/sbin/ifconfig | awk /'inet addr/ {print $4}'
+
+	/sbin/ifconfig | awk /'HWaddr/ {print $4,$5}'
+	echo "---------------------------------------------------"
+}
+
+
+#Automatically do an ls after each cd
+#cd ()
+#{
+#	if [ -n "$1" ]; then
+#		builtin cd "$@" && ls
+#	else
+#		builtin cd ~ && ls
+#	fi
+#}
+
+
+# Create and go to the directory
+mkdirg ()
+{
+	mkdir -p $1
+	cd $1
+}
+
+catlog() {
+    cat "$@" | grep -v '^$' | sed ':a;N;/\n[^0-9:0-9]/s/\n/ /;ta;P;D'
+}
+

@@ -1,0 +1,9 @@
+[user]
+	name = Pete Mariani
+	email = pcmariani@gmail.com
+[core]
+	editor = nvim
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[init]
+	defaultBranch = master

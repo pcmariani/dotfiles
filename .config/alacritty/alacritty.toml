@@ -1,0 +1,11 @@
+[window]
+
+# decorations = "Full" | "None" | "Transparent" | "Buttonless"
+decorations = "None"
+opacity = 0.9
+# startup_mode = "Windowed" | "Maximized" | "Fullscreen" | "SimpleFullscreen"
+startup_mode = "Fullscreen"
+
+[font]
+normal = { family = "Iosevka Nerd Font Mono", style = "Regular" }
+size = 12.00

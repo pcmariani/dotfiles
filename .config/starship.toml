@@ -1,0 +1,120 @@
+# /.config/starship.toml
+
+add_newline = false
+
+format = """
+$battery\
+$directory\
+$username\
+$hostname\
+$shlvl\
+$git_branch\
+$git_status\
+$memory_usage\
+$env_var\
+$custom\
+$sudo\
+$jobs\
+$status\
+$shell\
+$character
+"""
+# $git_metrics\
+# $git_state\
+# $git_commit\
+# $time\
+# $aws\
+# $gcloud\
+# $openstack\
+# $azure\
+# $crystal\
+# $cmd_duration\
+# $singularity$kubernetes$vcsh\
+# $hg_branch$docker_context$package$cmake$cobol$dart$deno$dotnet$elixir$elm$erlang$golang$helm$java$julia$kotlin$lua$nim$nodejs$ocaml$perl$php$pulumi$purescript$python$rlang$red$ruby$rust$scala$swift$terraform$vlang$vagrant$zig$nix_shell$conda\
+
+[character]
+success_symbol="[❯](green)" #契⦒›▷▶⼺▹♘➤⟩⟫⦊⦒⼊
+
+# [cmd_duration]
+# min_time = 100_000
+# format = "[$duration]($style) "
+
+[directory]
+format = "[$path]($style)[$lock_symbol]($lock_style) "
+truncation_length = 3
+truncation_symbol = "…/"
+truncate_to_repo = false
+style = "green"
+repo_root_style = "bright-green"
+
+# [jobs]
+# symbol = ""
+# style = "bold white dimmed"
+
+[git_branch]
+format = "[$symbol$branch]($style) "
+style = "bold yellow dimmed"
+
+[git_status]
+up_to_date = "✓" #✓
+style = "bold yellow dimmed"
+format = "[$all_status$ahead_behind]($style) "
+
+# [status]
+# disabled = false
+# style = "red"
+
+# [battery]
+# full_symbol = "🔋"
+# charging_symbol = "🔌"
+# discharging_symbol = "⚡"
+
+# [[battery.display]]
+# threshold = 30
+# style = "bold red"
+
+# [git_commit]
+# commit_hash_length = 8
+# style = "bold white"
+
+# [git_state]
+# format = '[\($state( $progress_current of $progress_total)\)]($style) '
+
+# [hostname]
+# ssh_only = false
+# format = "<[$hostname]($style)>"
+# trim_at = "-"
+# style = "bold dimmed white"
+# disabled = true
+
+# [julia]
+# format = "[$symbol$version]($style) "
+# symbol = "ஃ "
+# style = "bold green"
+
+# [memory_usage]
+# format = "$symbol[${ram}( | ${swap})]($style) "
+# threshold = 70
+# style = "bold dimmed white"
+# disabled = false
+
+# [package]
+# disabled = true
+
+# [python]
+# format = "[$symbol$version]($style) "
+# style = "bold green"
+
+# [rust]
+# format = "[$symbol$version]($style) "
+# style = "bold green"
+
+# [time]
+# time_format = "%T"
+# format = "🕙 $time($style) "
+# style = "bright-white"
+# disabled = false
+
+# [username]
+# style_user = "bold dimmed blue"
+# show_always = false

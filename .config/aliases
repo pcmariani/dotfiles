@@ -1,0 +1,329 @@
+## Source .bashrc
+
+## fzf aliases
+#alias fa='eval "$(alias | sed -e 's/alias //' -e 's/=/`/' | column -t -s'`' | fzf | awk '{print $1}')"'
+#alias alien='alias | sed -e "s/alias //" -e "s/=/#/"'
+#alias fa='eval "$(alias | fzf | awk '"'"'{print $1}'"'"')"'
+#alias fa='grep -F "$(awk -f list_alias2.awk .bash_aliases | column -t -s'"'"'##'"'"' | fzf | sed '"'"'s/ \{2,\}.*//'"'"')=" .bash_aliases'
+
+alias serve="browser-sync start -s -f . --no-notify --host $(ipconfig getifaddr en0) --port 9000"
+alias bt="$HOME/projects/boomi-groovy-2/boomitest.sh"
+alias b="$HOME/projects/boomi-groovy-2/boomi.sh"
+alias c='cd $(tree ~ -dfi | perl -pe "s/^.*?\///" | perl -pe "s/ (\[|->).*$//" | fzf --ansi --height 5 --layout=reverse --no-info --color="bg+:0") && l'
+alias t='/home/linuxbrew/.linuxbrew/bin/todo.sh'
+alias v.todos='$EDITOR /mnt/c/Users/peter_mariani/Dropbox/todo.txt/todo.txt'
+alias yt='youtube-dl'
+alias puml='java -jar ~/.local/lib/plantuml-1.2023.4.jar'
+alias bw='NODE_OPTIONS="--no-deprecation" bw'
+
+# --- chezmoi --- #
+alias ch='chezmoi'
+alias chls='chezmoi managed'
+alias cha='chezmoi add '
+alias chs='chezmoi status'
+alias chd='chezmoi diff'
+alias chap='chezmoi -v apply'
+alias chcd='chezmoi cd'
+alias chu='chezmoi update'
+alias che='chezmoi edit '
+alias cheap='chezmoi edit --apply '
+edit-chezmoi() {
+	chezmoi edit --apply "$@" 2>/dev/null
+	[ "$?" -eq 1 ] && $EDITOR "$@" || chs
+}
+
+# --- Emacs --- #
+alias e='emacsclient --alternate-editor="" --no-wait'
+alias e='nvim -O'
+alias doom='~/.emacs.d/bin/doom'
+
+# --- Vim --- #
+alias v='EDITOR=nvim edit-chezmoi'
+alias vis='nvim "+set si"'
+alias fvf='v $(fzf)'
+f() { fzf --query="$@"; }
+
+# --- Edit files --- #
+alias edit='e'
+alias ea='edit ~/.config/aliases'
+alias eb='edit ~/.bashrc'
+alias ef='edit ~/.config/bash_functions'
+alias eg='edit ~/.gitconfig'
+alias ei='edit ~/.inputrc'
+alias ev='edit ~/.config/nvim/init.lua ~/.config/nvim/lua/pete/* ~/.config/nvim/after/plugin/*'
+# alias evl='edit ~/.config/nvim/lua/pete/*'
+# alias evp='edit ~/.config/nvim/after/plugin/*'
+alias ebp='edit ~/.bash_profile'
+alias est='edit ~/.config/starship.toml'
+alias etx='edit ~/.tmux.conf'
+alias ez=' edit ~/.config/zsh/.zshrc'
+alias eza='edit ~/.config/zsh/zsh-aliases'
+alias eze='edit ~/.zshenv'
+alias ezf='edit ~/.config/zsh/zsh-functions'
+alias .a='. ~/.config/aliases && echo aliases sourced'
+if [ -n "$ZSH_VERSION" ]; then
+	alias .z='source ~/.config/zsh/.zshrc && echo .zshrc sourced'
+	alias .za='source ~/.config/zsh/zsh-aliases && echo zsh-aliases sourced'
+	alias .ze='source ~/.zshenv && echo .zshenv sourced'
+	alias .zf='source ~/.config/zsh/zsh-functions && echo zsh-functions sourced'
+else
+	alias .b='clear; . ~/.bashrc'
+	alias .bf='. ~/.config/bash_functions && echo bash_functions sourced'
+fi
+# alias cfh="$EDITOR $HISTFILE"
+# alias et="$EDITOR $HOME/todo.txt"
+# alias cft="$EDITOR $HOME/.todotxt/todo.txt_cli*/todo.cfg"
+
+# --- Dotfiles git bare repo --- #
+alias g='lazygit'
+alias gs='git status'
+alias gls='git ls-tree --full-tree -r --name-only HEAD'
+alias gh.create='git init && git add . && git commit -m "initial commit" && gh repo create $(pwd | sed "s/.*\///") --private --source=. --remote=origin --push'
+# https://www.atlassian.com/git/tutorials/dotfiles
+# alias dotrepo='--git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
+# alias dot='git --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
+# alias dg='lazygit --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
+# alias ds='dot status'
+# alias da='dot add '
+# alias dac='dot commit -am '
+# alias dc='dot commit -m '
+# alias dls='git ls-tree --git-dir=$HOME/.dotrepo/ --work-tree=$HOME'
+
+# file shorcuts
+# TODO cd also ls
+# TODO mkdir also cd
+
+# --- textql --- #
+# alias csvheaders='textql -header -output-header -sql "* limit 0"'
+# textql_with_headers() {
+# 	local file=$1; shift
+# 	local query=$@
+# 	textql -header -output-header -sql "$query" $file
+# }
+# alias csvq=textql_with_headers
+
+# --- directories --- #
+alias cmd='/mnt/c/Windows/System32/cmd.exe /c '
+alias cd.win.c='cd /mnt/c && l'
+alias cd.win.home='cd /mnt/c/Users/peter_mariani && l'
+alias cd.win.documents='cd /mnt/c/Users/peter_mariani/Documents && l'
+alias cd.win.downloads='cd /mnt/c/Users/peter_mariani/Downloads && l'
+alias cd.win.dropbox='cd /mnt/c/Users/peter_mariani/Dropbox/ && l'
+alias cd.win.todo='cd /mnt/c/Users/peter_mariani/Dropbox/todo.txt/ && l'
+alias cd.win.scripts='cd /mnt/c/Users/peter_mariani/Documents/scripts-win && l'
+alias cd.win.projects='cd /mnt/c/Users/peter_mariani/Documents/projects-win && l'
+alias cd.win.boomi-keyboard-shortcuts='cd /mnt/c/Users/peter_mariani/Documents/projects-win/boomi-keyboard-shortcuts && l'
+alias cd.win.wsl-nvim='cd /mnt/c/Users/peter_mariani/Documents/projects-win/wsl-nvim && l'
+alias cd.scripts='cd $HOME/scripts && l'
+alias cd.projects='cd $HOME/projects && l'
+alias cd.win.extensions="cd '/mnt/c/Users/peter_mariani/AppData/Local/Google/Chrome/User Data/Default/Extensions'"
+
+# --- Aptitude --- #
+alias apt.install='sudo apt install -y'
+alias apt.update='sudo apt update'
+alias apt.upgrade='sudo apt upgrade'
+alias apt.remove='sudo apt remove'
+alias apt.purge='sudo apt purge'
+alias apt.installed='apt list --installed'
+alias apt.search='apt search'
+alias apt.autoremove='sudo apt autoremove'
+#alias searchdp='apt-cache search'
+
+# Environment
+alias env-export='environment-export'
+alias env-unset='environment-unset'
+
+# --- 256 colors script ---
+alias 256="$HOME/scripts/256-colors.sh"
+
+# --- Color ls & exa --- #
+if which exa >/dev/null; then
+	## ls --all-files
+	alias l="exa -a --color=always --group-directories-first --git"
+	## ls with columns
+	alias ls="exa --color=always --group-directories-first --git"
+	## list directories only
+	alias lsd="exa -ad --color=always --group-directories-first --git */"
+	## ls --long --all-files with columns
+	alias la="exa -la --color=always --group-directories-first --git"
+	## list directories only
+	alias lad="exa -lad --color=always --group-directories-first --git */"
+	## tree listing
+	alias lt='exa -aT -L3 --color=always --group-directories-first -git -git-ignore' # tree listing
+	## ls --long --all-files with columns
+	# alias lgitignore="exa -1a --color=always --group-directories-first --git"
+	## ls --all-files with columns
+	# alias la="exa -1a --color=always --group-directories-first --git --git-ignore"
+
+else
+	alias l="ls -1"
+	alias ls="ls --color=always"
+	alias ll="ls -l"
+	alias la="ls -lA"
+fi
+
+# --- cd --- #
+cdls() {
+	local dir="$1"
+	local dir="${dir:=$HOME}"
+	if [[ -d "$dir" ]]; then
+		\cd "$dir" >/dev/null
+		if which exa >/dev/null; then
+			exa -a --color=always --group-directories-first --git --git-ignore
+		else
+			ls -a --color=always
+		fi
+	else
+		echo "$dir: Directory not found"
+	fi
+}
+alias cd='cdls'
+alias ..='cd ..'
+alias ...='cd ../../'
+alias ~='cd ~'
+alias j='\cd - && l'
+alias home='cd ~'
+
+#alias zls='z \!*;ls;cd -'
+#zz() { z $@; la ;}
+
+# --- Commands --- #
+alias cls='clear'
+mkdircd() { \mkdir -p -- "$1" && \cd -P -- "$1"; }
+# alias mkdir='mkdircd'
+alias ps='ps axf'
+alias pst='pstree -p'
+alias ping='ping -c 10'
+alias less='less -R'
+alias grep="grep --color=always --exclude-dir={.git}"
+alias tree='tree -L5 -aCA --filelimit 15 --noreport'
+#alias tree="find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'"
+alias ma='tldr'
+#alias ccat='pygmentize -P tabsize=2 -O style=monokai -f console256 -g'
+alias fd='fdfind'
+alias da='date "+%Y-%m-%d %A %T %Z"'
+
+# --- Logs --- #
+## Show all logs in /var/log
+alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
+
+# --- Archives --- #
+alias mktar='tar -cvf'
+alias mkbz2='tar -cvjf'
+alias mkgz='tar -cvzf'
+alias untar='tar -xvf'
+alias unbz2='tar -xvjf'
+alias ungz='tar -xvzf'
+
+# --- Network --- #
+
+## Show open ports
+alias openports='netstat -nape --inet'
+
+## Show current network connections to the server
+alias ipview="netstat -anpl | grep :80 | awk {'print \$5'} | cut -d\":\" -f1 | sort | uniq -c | sort -n | sed -e 's/^ *//' -e 's/ *\$//'"
+
+# --- chmod --- #
+alias ch+x='chmod +x'
+alias ch-x='chmod -x'
+alias 000='chmod -R 000'
+alias 644='chmod -R 644'
+alias 666='chmod -R 666'
+alias 755='chmod -R 755'
+alias 777='chmod -R 777'
+
+# --- tmux --- #
+alias ta='tmux attach'
+# alias txn="tmux new -s"
+# alias txa="tmux a -t"
+
+#alias d='dirs -v | head -10 | sed -e "1s/.*//" -e "s/^\([0-9]\)\s*/    \1)  /"'
+#alias pushdd="pushd \$PWD > /dev/null"
+#alias cd='pushdd;cd;l'
+#alias 1='pushd +1 > /dev/null;l'
+#alias 2='pushd +2 > /dev/null;l'
+#alias 3='pushd +3 > /dev/null;l'
+#alias 4='pushd +4 > /dev/null;l'
+
+##below to go back to a previous directory (or more)
+#alias popdd='popd >/dev/null'
+#alias cd.='popdd'
+#alias cd..='popdd;popdd'
+#alias cd...='popdd;popdd;popdd'
+#alias cd....='popdd;popdd;popdd;popdd'
+#alias 1='pushdd;'
+#alias 2='pushdd;cd ..'
+#alias 3='pushdd;cd...'
+#alias 4='pushdd;cd....'
+
+# ssh
+alias sshls="ls -al ~/.ssh"
+alias sshkg="ssh-keygen -t rsa -b 4096 -C" # enter email address
+alias ssheval="eval $(ssh-agent -s)"
+alias sshadd="ssh-add ~/.ssh/id_rsa"
+alias sshkill="ssh-agent -k" # kill agent server
+alias sshprocs="ps -e | grep ssh-agent"
+# Kill all stray ssh-agent procs:
+function func_sshkillall() {
+	for i in $(\ps -e | grep ssh-agent | sed 's/^ *//' | cut -d' ' -f1 | sort -u); do
+		echo -n killing PID "$i"
+		kill "$i"
+		echo
+	done
+}
+alias sshkillall=func_sshkillall
+
+# gpg
+alias gpgls="gpg --list-secret-keys --keyid-format LONG"
+alias gpggen="gpg --full-generate-key"
+alias gpge="gpg -r pcmariani@gmail.com -e" # enter filename
+alias gpgd="gpg -d"                        # enter filename
+
+# --- zsh only --- #
+if [ -n "$ZSH_VERSION" ]; then
+
+	# Global aliases
+	alias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
+	alias -g A="| awk"
+	alias -g A1="| awk '{print \$1}'"
+	alias -g v='nvim'
+	alias -g vt='nvim -p'
+	alias -g L='| less'
+	alias -g G='| grep'
+	alias -g H='| head'
+	alias -g T='| tail'
+	alias -g W='| wc -l'
+
+	# directory navigation
+	# alias d='dirs -v | head -10 | sed -e "1s/0\s*\(.*\)/\1/" -e "s/^\([0-9]\)\s*/    \1)  /"'
+	alias d='dirs -v | head -10 | sed -e "1d" -e "s/^\([0-9]\)\s*/[\1] /"'
+	alias 0='cd ~'
+	alias 1='cd ~1'
+	alias 2='cd ~2'
+	alias 3='cd ~3'
+	alias 4='cd ~4'
+	alias 5='cd ~5'
+	alias 6='cd ~6'
+	alias 7='cd ~7'
+	alias 8='cd ~8'
+	alias 9='cd ~9'
+fi
+
+# command aliases
+alias h='history'
+alias hgrep="fc -El 0 | grep"
+alias dud='du -d 1 -h'
+alias duf='du -sh *'
+alias fd='find . -type d -name'
+alias ff='find . -type f -name'
+alias curl='curl --silent --show-error'
+alias clh='curl localhost:'
+alias diff='diff --color=auto'
+alias ccat='highlight --out-format=ansi'
+alias al='alias | sort | less'
+alias zs='source $ZDOTDIR/.zshrc'
+alias ddg='ddgr'
+# alias sn='sncli'
+alias pse='ps -e'
+
+# vim: set ft=sh
