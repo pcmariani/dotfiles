@@ -1,4 +1,4 @@
-# vim: set ft=sh
+# vim: set ft=sh:
 
 ## Source .bashrc
 
@@ -20,35 +20,19 @@ alias bw='NODE_OPTIONS="--no-deprecation" bw'
 
 # --- yadm --- #
 yadm-lazygit() {
-	cd ~
+	pushd ~
 	yadm enter lazygit
-	cd -
+	popd
 }
 alias gy='yadm-lazygit'
 
-# --- chezmoi --- #
-alias ch='chezmoi'
-alias chls='chezmoi managed'
-alias cha='chezmoi add '
-alias chs='chezmoi status'
-alias chd='chezmoi diff'
-alias chap='chezmoi -v apply'
-alias chcd='chezmoi cd'
-alias chu='chezmoi update'
-alias che='chezmoi edit '
-alias cheap='chezmoi edit --apply '
-edit-chezmoi() {
-	chezmoi edit --apply "$@" 2>/dev/null
-	[ "$?" -eq 1 ] && $EDITOR "$@" || chs
-}
-
 # --- Emacs --- #
-alias e='emacsclient --alternate-editor="" --no-wait'
+# alias e='emacsclient --alternate-editor="" --no-wait'
 alias e='nvim -O'
 alias doom='~/.emacs.d/bin/doom'
 
 # --- Vim --- #
-alias v='EDITOR=nvim edit-chezmoi'
+alias v='nvim -O'
 alias vis='nvim "+set si"'
 alias fvf='v $(fzf)'
 f() { fzf --query="$@"; }
