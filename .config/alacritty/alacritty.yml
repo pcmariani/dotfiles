@@ -2,6 +2,9 @@
 import:
   - ~/.config/alacritty/themes/themes/campbell.yaml
 
+# crips fonts
+# https://petar.dev/notes/crisp-fonts-alacritty/
+
 # Setup term for programs to be able to use it
 env:
   TERM: alacritty
@@ -22,7 +25,7 @@ font:
   # UI for powerline & tmux bottom bar.
   normal:
     family: Iosevka Nerd Font Mono
-    style: Regular
+    style: Medium
 
   # Bold font face
   bold:
