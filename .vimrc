@@ -26,7 +26,7 @@ set undofile
 set backspace=indent,eol,start " Allow backspacing over everything in INSERT mode
 set noruler
 set noshowmode
-" set showcmd
+set showcmd
 set incsearch
 set hlsearch
 set ignorecase
@@ -776,7 +776,7 @@ nnoremap <silent> <leader>gs :Commits<CR> " FZF @Git Commits
 nnoremap <silent> <leader>gb :BCommits<CR> " FZF @Git Commits Buffer
 " b - buffer
 nnoremap <silent> <leader>bb :Buffers<CR>
-nnoremap <silent> <Leader>bl :Filetypes<CR>
+nnoremap <silent> <Leader>bf :Filetypes<CR>
 " f - files
 nnoremap <silent> <leader><leader> :Files<CR>
 nnoremap <silent> <leader>fF :Files<CR>
