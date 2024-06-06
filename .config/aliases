@@ -33,6 +33,7 @@ alias ya='yadm add'
 alias yau='yadm add -u'
 alias yc='yadm commit -m'
 alias yp='yadm push origin master'
+alias yac='$HOME/scripts/yadm-commit-daily.sh'
 
 # --- Emacs --- #
 # alias e='emacsclient --alternate-editor="" --no-wait'
