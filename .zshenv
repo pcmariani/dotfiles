@@ -6,9 +6,20 @@ if [ "$(uname)" != 'Darwin' ]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi
 
+eval "$(pyenv init -)"
+
 # Path
 typeset -U path
-path=("$HOME/.local/bin" "$HOME/scripts" "$HOME/.cargo/bin" "$HOME/projects/boomi-groovy-2" "$path[@]")
+path=(
+  "$HOME/.local/bin"
+  "$HOME/scripts"
+  "$HOME/.cargo/bin"
+  "$HOME/projects/boomi-groovy-2"
+  "/usr/local/opt/flex/bin"
+  "/usr/local/opt/bison/bin"
+  "$path[@]"
+)
+
 if [ "$(uname)" = 'Darwin' ]; then
   path=("/opt/homebrew/bin" "/opt/homebrew/sbin" "$path[@]")
 fi

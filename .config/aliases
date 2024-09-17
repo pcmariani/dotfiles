@@ -7,6 +7,15 @@
 #alias fa='eval "$(alias | fzf | awk '"'"'{print $1}'"'"')"'
 #alias fa='grep -F "$(awk -f list_alias2.awk .bash_aliases | column -t -s'"'"'##'"'"' | fzf | sed '"'"'s/ \{2,\}.*//'"'"')=" .bash_aliases'
 
+youtube-download-transcript() {
+	yt-dlp --skip-download --write-subs --write-auto-subs --sub-lang en --sub-format vtt --output "$2.transcript.%(ext)s" $1
+	sed -i '' -e "1,4d" -e "/^$/d" -e "/^[0-9]\{2\}.*/d" -e "s/\(&nbsp;\)\{1,\}$//" "$2.transcript.en.vtt"
+	# on mac you need '' after -i
+}
+alias yt-ts='youtube-download-transcript'
+
+# alias yt-ts='tail -n+4 transcript.en.vtt | sed -e "/^$/d" -e "/^[0-9]\{2\}.*/d" -e "s/\(&nbsp;\)\{1,\}$//" > transcript.txt'
+alias yt='yt-dlp'
 alias serve="browser-sync start -s -f . --no-notify --host $(ipconfig getifaddr en0) --port 9000"
 alias bt="$HOME/projects/boomi-groovy-2/boomitest.sh"
 alias b="$HOME/projects/boomi-groovy-2/boomi.sh"
@@ -197,7 +206,8 @@ mkdircd() { \mkdir -p -- "$1" && \cd -P -- "$1"; }
 alias ps='ps axf'
 alias pst='pstree -p'
 alias ping='ping -c 10'
-alias less='less -R'
+# alias less='less -R'
+# alias less='/opt/homebrew/bin/less'
 alias grep="grep --color=always --exclude-dir={.git}"
 alias tree='tree -L5 -aCA --filelimit 15 --noreport'
 #alias tree="find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'"

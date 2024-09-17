@@ -1,13 +1,14 @@
 # Configuration for Alacritty, the GPU enhanced terminal emulator.
 import:
-  - ~/.config/alacritty/themes/themes/campbell.yaml
+  - ~/.config/alacritty/themes/themes/iterm.yaml
 
 # crips fonts
 # https://petar.dev/notes/crisp-fonts-alacritty/
 
 # Setup term for programs to be able to use it
 env:
-  TERM: alacritty
+  # TERM: alacritty
+  TERM: xterm-256color
 
 window:
   # Spread additional padding evenly around the terminal content.

@@ -4,6 +4,7 @@ add_newline = false
 
 format = """
 $battery\
+$python\
 $directory\
 $username\
 $hostname\
@@ -30,7 +31,42 @@ $character
 # $crystal\
 # $cmd_duration\
 # $singularity$kubernetes$vcsh\
-# $hg_branch$docker_context$package$cmake$cobol$dart$deno$dotnet$elixir$elm$erlang$golang$helm$java$julia$kotlin$lua$nim$nodejs$ocaml$perl$php$pulumi$purescript$python$rlang$red$ruby$rust$scala$swift$terraform$vlang$vagrant$zig$nix_shell$conda\
+# $hg_branch\
+# $docker_context\
+# $package\
+# $cmake\
+# $cobol\
+# $dart\
+# $deno\
+# $dotnet\
+# $elixir\
+# $elm\
+# $erlang\
+# $golang\
+# $helm\
+# $java\
+# $julia\
+# $kotlin\
+# $lua\
+# $nim\
+# $nodejs\
+# $ocaml\
+# $perl\
+# $php\
+# $pulumi\
+# $purescript\
+# $rlang\
+# $red\
+# $ruby\
+# $rust\
+# $scala\
+# $swift\
+# $terraform\
+# $vlang\
+# $vagrant\
+# $zig\
+# $nix_shell\
+# $conda\
 
 [character]
 success_symbol="[❯](green)" #契⦒›▷▶⼺▹♘➤⟩⟫⦊⦒⼊
@@ -97,8 +133,8 @@ format = "[$all_status$ahead_behind]($style) "
 # [package]
 # disabled = true
 
-# [python]
-# format = "[$symbol$version]($style) "
+[python]
+format = '[Python ${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
 # style = "bold green"
 
 # [rust]

@@ -1,5 +1,9 @@
 # vim ft=sh
 
+function mods() { 
+	llm models | fzf | sed -e 's/.* //' -e 's/)//' 
+}
+
 # ahk() {
 #   # file=$1
 #   # file="${file//\//\\}"
