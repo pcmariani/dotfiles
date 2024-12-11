@@ -69,7 +69,7 @@ alias ebp='edit ~/.bash_profile'
 alias est='edit ~/.config/starship.toml'
 alias etx='edit ~/.tmux.conf'
 alias ez=' edit ~/.config/zsh/.zshrc'
-alias eza='edit ~/.config/zsh/zsh-aliases'
+alias ezal='edit ~/.config/zsh/zsh-aliases'
 alias eze='edit ~/.zshenv'
 alias ezf='edit ~/.config/zsh/zsh-functions'
 alias .a='. ~/.config/aliases && echo aliases sourced'
@@ -149,19 +149,19 @@ alias env-unset='environment-unset'
 alias 256="$HOME/scripts/256-colors.sh"
 
 # --- Color ls & exa --- #
-if which exa >/dev/null; then
-	## ls --all-files
-	alias l="exa -a --color=always --group-directories-first --git"
-	## ls with columns
-	alias ls="exa --color=always --group-directories-first --git"
+if which eza >/dev/null; then
+	## all-files
+	alias l="eza -a --icons --group-directories-first"
+	## with columns
+	alias ls="eza --icons --group-directories-first"
 	## list directories only
-	alias lsd="exa -ad --color=always --group-directories-first --git */"
+	alias lsd="eza -ad --icons --group-directories-first --no-user --git */"
 	## ls --long --all-files with columns
-	alias la="exa -la --color=always --group-directories-first --git"
+	alias la="eza -la --icons --group-directories-first --no-user --git"
 	## list directories only
-	alias lad="exa -lad --color=always --group-directories-first --git */"
+	alias lad="eza -lad --icons --group-directories-first --no-user --git */"
 	## tree listing
-	alias lt='exa -aT -L3 --color=always --group-directories-first -git -git-ignore' # tree listing
+	alias lt='eza -aT -L3 --icons --group-directories-first -git -git-ignore' # tree listing
 	## ls --long --all-files with columns
 	# alias lgitignore="exa -1a --color=always --group-directories-first --git"
 	## ls --all-files with columns
@@ -180,8 +180,8 @@ cdls() {
 	local dir="${dir:=$HOME}"
 	if [[ -d "$dir" ]]; then
 		\cd "$dir" >/dev/null
-		if which exa >/dev/null; then
-			exa -a --color=always --group-directories-first --git --git-ignore
+		if which eza >/dev/null; then
+			eza -a --icons --group-directories-first
 		else
 			ls -a --color=always
 		fi

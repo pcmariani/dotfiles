@@ -147,7 +147,10 @@ zle -N zle-line-init
 # echo -ne '\e[5 q' # Use beam shape cursor on startup.
 # preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 
-# Starship
+# fzf
+source <(fzf --zsh)
+
+# starship
 eval "$(starship init zsh)"
 
 # SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
