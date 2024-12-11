@@ -1,0 +1,176 @@
+; https://github.com/gabriel-gardner/modtap-karabiner/blob/main/modtap_example.edn
+; https://github.com/gabriel-gardner/modtap-karabiner/blob/main/another_example_karabiner.edn
+; https://github.com/yqrashawn/GokuRakuJoudo/blob/master/resources/configurations/edn/example.edn
+; https://gist.github.com/gsinclair/f4ab34da53034374eb6164698a0a8ace
+
+{
+
+ :profiles {
+            :Default {
+                      :default true
+
+                      ; simultaneous_threshold_milliseconds (def: 50)
+                      ; different from simlayers, this is for cases like [:a :b]
+                      :sim     50
+
+                      ; to_delayed_action_delay_milliseconds (def: 500)
+                      ; note: this should be equal to :held for mod-tap layers
+                      :delay   150
+
+                      ; to_if_held_down_threshold_milliseconds (def: 500)
+                      ; note: this should be equal to :delay for mod-tap layers
+                      :held    150
+
+                      ; to_if_alone_timeout_milliseconds (def: 1000)
+                      ; note: (i think) this must be just less than the delay / held value to avoid bug where mod-tap layer stays 1
+                      :alone   149
+
+                      ; you can set these delays individually in mod-tap layer definitions if you want separate default values here 
+                      }
+            }
+
+ :templates {
+             :open "open -a \"%s\""
+             :openg "open -g \"%s\""
+             :link "osascript -e 'do shell script \"open %s\"'"
+             }
+
+ :main [
+
+        {
+         :des "CAPSLOCK is CTRL if pressed in combination, otherwise ESC"
+         :rules  [[:##caps_lock :left_control nil {:alone :escape}]]
+         }
+
+        ; note: When adding a new layer, if you want it to be able to cross with an old one, you must add the name negated (:!new_name) to all other mod-tap layer conditions
+        {
+         :des "mod-tap layers"
+         :rules [
+                 ;applications-mode
+                 [:a nil [:!d-mode :!s-mode :!v-mode :!space-mode]
+                  {:alone {:key :a :halt true} :delayed {:canceled {:key :a}} :held {:set ["a-mode" 1] :repeat false} :afterup {:set ["a-mode" 0]}
+                   ;:params {:alone 199 :held 200 :delay 200} 
+                   }]
+
+                 ;special-characters-mode
+                 [:s nil [:!a-mode :!d-mode :!v-mode :!space-mode]
+                  {:alone {:key :s :halt true} :delayed {:canceled {:key :s}} :held {:set ["s-mode" 1] :repeat false} :afterup {:set ["s-mode" 0]}}]
+
+                 ;digits-mode
+                 [:d nil [:!a-mode :!s-mode :!v-mode :!space-mode]
+                  {:alone {:key :d :halt true} :delayed {:canceled {:key :d}} :held {:set ["d-mode" 1] :repeat false} :afterup {:set ["d-mode" 0]}}]
+
+                 ;vim-mode
+                 [:v nil [:!a-mode :!d-mode :!s-mode :!space-mode]
+                  {:alone {:key :v :halt true} :delayed {:canceled {:key :v}} :held {:set ["v-mode" 1] :repeat false} :afterup {:set ["v-mode" 0]}}]
+
+                 ;space-mode
+                 [:spacebar nil [:!a-mode :!d-mode :!s-mode :!space-mode]
+                  {:alone {:key :spacebar :halt true} :delayed {:canceled {:key :spacebar}} :held {:set ["space-mode" 1] :repeat false} :afterup {:set ["space-mode" 0]}}]
+
+                 ]
+         }
+
+        {
+         :des "a-mode"
+         :rules [
+                 :a-mode
+                 [:l :!Ctab]
+                 [:h :!CStab]
+                 [:semicolon [:openg "rectangle://execute-action?name=maximize"]]
+                 [:quote :!CTf] ;; full screen
+                 [:j [:openg "rectangle://execute-action?name=left-half"]]
+                 [:k [:openg "rectangle://execute-action?name=right-half"]]
+                 [:f [:open "finder"]]
+                 [:t [:open "Alacritty"]]
+                 [:b [:open "Arc"]]
+                 [:c [:open "Slack"]]
+                 [:s [:open "Spotify"]]
+                 [:m [:open "Messages"]]
+                 [:n [:open "Neovide"]]
+                 [:v [:open "Visual Studio Code"]]
+                 ]
+         }
+
+        {
+         :des "d-mode"
+         :rules [
+                 :d-mode
+                 [:m :1]
+                 [:comma, :2]
+                 [:period, :3]
+                 [:j :4]
+                 [:k :5]
+                 [:l :6]
+                 [:u :7]
+                 [:i :8]
+                 [:o :9]
+                 [:right_command :0]
+                 ]
+         }
+
+        {
+         :des "s-mode"
+         :rules [
+                 :s-mode
+                 [:##u :!Sopen_bracket]
+                 [:##i :!Sclose_bracket]
+                 [:##o :!S1]
+
+                 [:##j :!S9]
+                 [:##k :!S0]
+                 [:##l :!Sslash]
+
+                 [:##m :open_bracket]
+                 [:##comma :close_bracket]
+                 [:##period :!S4]
+
+                 ; [:j :!Sopen_bracket]
+                 ; [:k :!Sclose_bracket]
+                 ; [:h :open_bracket]
+                 ; [:l :close_bracket]
+                 ; [:u :!S9]
+                 ; [:i :!S0]
+                 ]
+         }
+
+        {
+         :des "space-mode"
+         :rules [
+                 :space-mode
+                 [:h :left_arrow]
+                 [:j :down_arrow]
+                 [:k :up_arrow]
+                 [:l :right_arrow]
+                 ]
+         }
+
+        ]
+ }
+
+
+; TOs
+;; !  | means mandatory
+;; #  | means optional
+;; C  | left_command
+;; T  | left_control
+;; O  | left_option
+;; S  | left_shift
+;; F  | fn
+;; Q  | right_command
+;; W  | right_control
+;; E  | right_option
+;; R  | right_shift
+;; P  | caps_lock
+;; !! | mandatory command + control + optional + shift (hyper)
+;; ## | optional any
+
+; RULES
+;; [<from> <to>] or
+;; [<from> <to> <conditions>] or
+;; [<from> <to> <conditions> <other options>]
+;; <from> can be keywords defined in froms or keycodes without `{:not-from true}`
+;; <to> can be keywords defined in tos, keycodes without `{:not-to true}`, string (shell script)
+;; <conditions> can be keywords defined in layers, devices, applications
+;; <other options> {:other {:parameters {:to_delayed_action_delay_milliseconds 100 :basic.to_if_alone_timeout_milliseconds 500 :basic.to_if_held_down_threshold_milliseconds 250}} }
+
