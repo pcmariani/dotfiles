@@ -7,6 +7,10 @@
 #alias fa='eval "$(alias | fzf | awk '"'"'{print $1}'"'"')"'
 #alias fa='grep -F "$(awk -f list_alias2.awk .bash_aliases | column -t -s'"'"'##'"'"' | fzf | sed '"'"'s/ \{2,\}.*//'"'"')=" .bash_aliases'
 
+alias a='OUTPUT_FORMAT=json arc-cli'
+alias alw='OUTPUT_FORMAT=json arc-cli list windows'
+alias alt='OUTPUT_FORMAT=json arc-cli list tabs'
+
 youtube-download-transcript() {
 	yt-dlp --skip-download --write-subs --write-auto-subs --sub-lang en --sub-format vtt --output "$2.transcript.%(ext)s" $1
 	sed -i '' -e "1,4d" -e "/^$/d" -e "/^[0-9]\{2\}.*/d" -e "s/\(&nbsp;\)\{1,\}$//" "$2.transcript.en.vtt"
@@ -115,35 +119,35 @@ alias gh.create='git init && git add . && git commit -m "initial commit" && gh r
 # alias csvq=textql_with_headers
 
 # --- directories --- #
-alias cmd='/mnt/c/Windows/System32/cmd.exe /c '
-alias cd.win.c='cd /mnt/c && l'
-alias cd.win.home='cd /mnt/c/Users/peter_mariani && l'
-alias cd.win.documents='cd /mnt/c/Users/peter_mariani/Documents && l'
-alias cd.win.downloads='cd /mnt/c/Users/peter_mariani/Downloads && l'
-alias cd.win.dropbox='cd /mnt/c/Users/peter_mariani/Dropbox/ && l'
-alias cd.win.todo='cd /mnt/c/Users/peter_mariani/Dropbox/todo.txt/ && l'
-alias cd.win.scripts='cd /mnt/c/Users/peter_mariani/Documents/scripts-win && l'
-alias cd.win.projects='cd /mnt/c/Users/peter_mariani/Documents/projects-win && l'
-alias cd.win.boomi-keyboard-shortcuts='cd /mnt/c/Users/peter_mariani/Documents/projects-win/boomi-keyboard-shortcuts && l'
-alias cd.win.wsl-nvim='cd /mnt/c/Users/peter_mariani/Documents/projects-win/wsl-nvim && l'
-alias cd.scripts='cd $HOME/scripts && l'
-alias cd.projects='cd $HOME/projects && l'
-alias cd.win.extensions="cd '/mnt/c/Users/peter_mariani/AppData/Local/Google/Chrome/User Data/Default/Extensions'"
+# alias cmd='/mnt/c/Windows/System32/cmd.exe /c '
+# alias cd.win.c='cd /mnt/c && l'
+# alias cd.win.home='cd /mnt/c/Users/peter_mariani && l'
+# alias cd.win.documents='cd /mnt/c/Users/peter_mariani/Documents && l'
+# alias cd.win.downloads='cd /mnt/c/Users/peter_mariani/Downloads && l'
+# alias cd.win.dropbox='cd /mnt/c/Users/peter_mariani/Dropbox/ && l'
+# alias cd.win.todo='cd /mnt/c/Users/peter_mariani/Dropbox/todo.txt/ && l'
+# alias cd.win.scripts='cd /mnt/c/Users/peter_mariani/Documents/scripts-win && l'
+# alias cd.win.projects='cd /mnt/c/Users/peter_mariani/Documents/projects-win && l'
+# alias cd.win.boomi-keyboard-shortcuts='cd /mnt/c/Users/peter_mariani/Documents/projects-win/boomi-keyboard-shortcuts && l'
+# alias cd.win.wsl-nvim='cd /mnt/c/Users/peter_mariani/Documents/projects-win/wsl-nvim && l'
+# alias cd.scripts='cd $HOME/scripts && l'
+# alias cd.projects='cd $HOME/projects && l'
+# alias cd.win.extensions="cd '/mnt/c/Users/peter_mariani/AppData/Local/Google/Chrome/User Data/Default/Extensions'"
 
 # --- Aptitude --- #
-alias apt.install='sudo apt install -y'
-alias apt.update='sudo apt update'
-alias apt.upgrade='sudo apt upgrade'
-alias apt.remove='sudo apt remove'
-alias apt.purge='sudo apt purge'
-alias apt.installed='apt list --installed'
-alias apt.search='apt search'
-alias apt.autoremove='sudo apt autoremove'
+# alias apt.install='sudo apt install -y'
+# alias apt.update='sudo apt update'
+# alias apt.upgrade='sudo apt upgrade'
+# alias apt.remove='sudo apt remove'
+# alias apt.purge='sudo apt purge'
+# alias apt.installed='apt list --installed'
+# alias apt.search='apt search'
+# alias apt.autoremove='sudo apt autoremove'
 #alias searchdp='apt-cache search'
 
 # Environment
-alias env-export='environment-export'
-alias env-unset='environment-unset'
+# alias env-export='environment-export'
+# alias env-unset='environment-unset'
 
 # --- 256 colors script ---
 alias 256="$HOME/scripts/256-colors.sh"
@@ -175,26 +179,26 @@ else
 fi
 
 # --- cd --- #
-cdls() {
-	local dir="$1"
-	local dir="${dir:=$HOME}"
-	if [[ -d "$dir" ]]; then
-		\cd "$dir" >/dev/null
-		if which eza >/dev/null; then
-			eza -a --icons --group-directories-first
-		else
-			ls -a --color=always
-		fi
-	else
-		echo "$dir: Directory not found"
-	fi
-}
-alias cd='cdls'
-alias ..='cd ..'
-alias ...='cd ../../'
-alias ~='cd ~'
-alias j='\cd - && l'
-alias home='cd ~'
+# cdls() {
+# 	local dir="$1"
+# 	local dir="${dir:=$HOME}"
+# 	if [[ -d "$dir" ]]; then
+# 		\cd "$dir" >/dev/null
+# 		if which eza >/dev/null; then
+# 			eza -a --icons --group-directories-first
+# 		else
+# 			ls -a --color=always
+# 		fi
+# 	else
+# 		echo "$dir: Directory not found"
+# 	fi
+# }
+# alias cd='cdls'
+# alias ..='cd ..'
+# alias ...='cd ../../'
+# alias ~='cd ~'
+# alias j='\cd - && l'
+# alias home='cd ~'
 
 #alias zls='z \!*;ls;cd -'
 #zz() { z $@; la ;}
@@ -213,7 +217,7 @@ alias tree='tree -L5 -aCA --filelimit 15 --noreport'
 #alias tree="find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'"
 alias ma='tldr'
 #alias ccat='pygmentize -P tabsize=2 -O style=monokai -f console256 -g'
-alias fd='fdfind'
+# alias fd='fdfind'
 alias da='date "+%Y-%m-%d %A %T %Z"'
 
 # --- Logs --- #
@@ -327,9 +331,9 @@ alias h='history'
 alias hgrep="fc -El 0 | grep"
 alias dud='du -d 1 -h'
 alias duf='du -sh *'
-alias fd='find . -type d -name'
-alias ff='find . -type f -name'
-alias curl='curl --silent --show-error'
+# alias fd='find . -type d -name'
+# alias ff='find . -type f -name'
+# alias curl='curl --silent --show-error'
 alias clh='curl localhost:'
 alias diff='diff --color=auto'
 alias ccat='highlight --out-format=ansi'
