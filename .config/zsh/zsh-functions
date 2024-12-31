@@ -14,124 +14,130 @@ browser-lynx() {
     export BROWSER='lynx'
 }
 
-boomi_processlog() {
-    curl --location --request POST 'https://api.boomi.com/api/rest/v2/aofoundation-W1GLSD/ProcessLog' \
-        --header 'Content-Type: application/json' \
-        --header 'Accept: application/json' \
-        --header 'Authorization: Basic Qk10PTUlfVE9LRU4ucGV0ZXJfbWFyaWFuaUBkZWxsLmNvbToyNWY4YjZjYi05NWI5LTRjYTktOTk2Yy1lZDU5YzgzNjAxM2Q=' \
-        --data-raw '{"executionId" : "execution-7e9bda43-f3f3-496c-8ab7-b16abeafa203-2020.12.11","logLevel" : "INFO"}' | jq .url | sed 's/"//g'
+function rgfzf {
+ command rg --color=always --line-number --no-heading --smart-case -g '!Library' -g '!site-packages' -g'!raycast' "${*:-}" \
+     | command fzf -d':' --ansi --preview "command bat -p --color=always {1} --highlight-line {2}" --preview-window ~8,+{2}-5 \
+     | awk -F':' '{print $1}'
 }
 
-environment-export() {
-    envsArray=()
-    for filename in "$@" ; do
-        if [ "${filename##*.}" = "gpg" ] ; then
-            gpg -o "$filename.tmp" -d "$filename"
-            filename="$filename.tmp"
-        fi
-        while IFS="=" read -r key value ; do
-            if [ ! -z "$value" ] && [ "${key:0:1}" != '#' ] ; then
-                valueTrimmed="$(echo $value | sed 's/\s*#.*$//')"
-                export "$key"="$(eval echo $valueTrimmed)"
-            fi
-        done < "$ENVDIR/$filename"
-        envsArray+="$filename"
-    done
-    export ACTIVE_ENVS="$(echo ${envsArray[*]})"
-}
+# boomi_processlog() {
+#     curl --location --request POST 'https://api.boomi.com/api/rest/v2/aofoundation-W1GLSD/ProcessLog' \
+#         --header 'Content-Type: application/json' \
+#         --header 'Accept: application/json' \
+#         --header 'Authorization: Basic Qk10PTUlfVE9LRU4ucGV0ZXJfbWFyaWFuaUBkZWxsLmNvbToyNWY4YjZjYi05NWI5LTRjYTktOTk2Yy1lZDU5YzgzNjAxM2Q=' \
+#         --data-raw '{"executionId" : "execution-7e9bda43-f3f3-496c-8ab7-b16abeafa203-2020.12.11","logLevel" : "INFO"}' | jq .url | sed 's/"//g'
+# }
 
-environment-unset() {
-    # IFS=' ' read -r -a ACTIVE_ENVS <<< "$string"
-    envsArray=("${(@s/ /)ACTIVE_ENVS}")
-    for filename in "${envsArray[@]}" ; do
-        # echo "$filename"
-        while IFS="=" read -r key value ; do
-            if [ ! -z "$value" ] && [ "${key:0:1}" != '#' ] ; then
-                unset "$key"
-            fi
-        done < "$ENVDIR/$filename"
-        if [ "${filename##*.}" = "tmp" ] ; then
-            rm $ENVDIR/$filename
-        fi
-    done
-    unset ACTIVE_ENVS
-}
+# environment-export() {
+#     envsArray=()
+#     for filename in "$@" ; do
+#         if [ "${filename##*.}" = "gpg" ] ; then
+#             gpg -o "$filename.tmp" -d "$filename"
+#             filename="$filename.tmp"
+#         fi
+#         while IFS="=" read -r key value ; do
+#             if [ ! -z "$value" ] && [ "${key:0:1}" != '#' ] ; then
+#                 valueTrimmed="$(echo $value | sed 's/\s*#.*$//')"
+#                 export "$key"="$(eval echo $valueTrimmed)"
+#             fi
+#         done < "$ENVDIR/$filename"
+#         envsArray+="$filename"
+#     done
+#     export ACTIVE_ENVS="$(echo ${envsArray[*]})"
+# }
+#
+# environment-unset() {
+#     # IFS=' ' read -r -a ACTIVE_ENVS <<< "$string"
+#     envsArray=("${(@s/ /)ACTIVE_ENVS}")
+#     for filename in "${envsArray[@]}" ; do
+#         # echo "$filename"
+#         while IFS="=" read -r key value ; do
+#             if [ ! -z "$value" ] && [ "${key:0:1}" != '#' ] ; then
+#                 unset "$key"
+#             fi
+#         done < "$ENVDIR/$filename"
+#         if [ "${filename##*.}" = "tmp" ] ; then
+#             rm $ENVDIR/$filename
+#         fi
+#     done
+#     unset ACTIVE_ENVS
+# }
 
 # History wrapper
-hh() {
-  local clear list
-  zparseopts -E c=clear l=list
+# hh() {
+#   local clear list
+#   zparseopts -E c=clear l=list
+#
+#   if [[ -n "$clear" ]]; then
+#     # if -c provided, clobber the history file
+#     echo -n >| "$HISTFILE"
+#     echo >&2 History file deleted. Reload the session to see its effects.
+#   elif [[ -n "$list" ]]; then
+#     # if -l provided, run as if calling `fc' directly
+#     builtin fc "$@"
+#   else
+#     # unless a number is provided, show all history events (starting from 1)
+#     [[ ${@[-1]-} = *[0-9]* ]] && builtin fc -l "$@" || builtin fc -l "$@" 1
+#   fi
+# }
 
-  if [[ -n "$clear" ]]; then
-    # if -c provided, clobber the history file
-    echo -n >| "$HISTFILE"
-    echo >&2 History file deleted. Reload the session to see its effects.
-  elif [[ -n "$list" ]]; then
-    # if -l provided, run as if calling `fc' directly
-    builtin fc "$@"
-  else
-    # unless a number is provided, show all history events (starting from 1)
-    [[ ${@[-1]-} = *[0-9]* ]] && builtin fc -l "$@" || builtin fc -l "$@" 1
-  fi
-}
+# todo-list() {
+#   clear 
+#   echo "\x1b[0;36mTodos:\x1b[0m"
+#
+#   # echo ' _           _     '
+#   # echo '| |_ ___  __| |___ '
+#   # echo '|  _/ _ \/ _` / _ \'
+#   # echo ' \__\___/\__,_\___/'
+#
+#   echo 
+#   todo.sh ls "$*" \
+#     | sed -e 's/^\(.*m[0-9]\+\)/    \1./' \
+#           -e 's/\(\....m\)\( [^(]\)/\1    \2/' \
+#           -e's/\(\....m.*\)(\([A-B]\))/\1 \2 /' \
+#           -e 's/[@\+]/^   &/g' \
+#     | column -t -s'^' \
+#     | head -n-2 
+#   echo
+# }
 
-todo-list() {
-  clear 
-  echo "\x1b[0;36mTodos:\x1b[0m"
-
-  # echo ' _           _     '
-  # echo '| |_ ___  __| |___ '
-  # echo '|  _/ _ \/ _` / _ \'
-  # echo ' \__\___/\__,_\___/'
-                   
-  echo 
-  todo.sh ls "$*" \
-    | sed -e 's/^\(.*m[0-9]\+\)/    \1./' \
-          -e 's/\(\....m\)\( [^(]\)/\1    \2/' \
-          -e's/\(\....m.*\)(\([A-B]\))/\1 \2 /' \
-          -e 's/[@\+]/^   &/g' \
-    | column -t -s'^' \
-    | head -n-2 
-  echo
-}
-
-todo-add() {
-  todo.sh add "$*"
-  todo-list
-}
+# todo-add() {
+#   todo.sh add "$*"
+#   todo-list
+# }
 
 #-----------------------------------------------------------------------------
 # From ChristianChiarulli Machfiles
 
 # Function to source files if they exist
-function zsh_add_file() {
-    [ -f "$ZDOTDIR/$1" ] && source "$ZDOTDIR/$1"
-}
+# function zsh_add_file() {
+#     [ -f "$ZDOTDIR/$1" ] && source "$ZDOTDIR/$1"
+# }
 
-function zsh_add_plugin() {
-    PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
-    if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then 
-        # For plugins
-        zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh" || \
-        zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.zsh"
-    else
-        git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
-    fi
-}
+# function zsh_add_plugin() {
+#     PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
+#     if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then 
+#         # For plugins
+#         zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh" || \
+#         zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.zsh"
+#     else
+#         git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
+#     fi
+# }
 
-function zsh_add_completion() {
-    PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
-    if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then 
-        # For completions
-		completion_file_path=$(ls $ZDOTDIR/plugins/$PLUGIN_NAME/_*)
-		fpath+="$(dirname "${completion_file_path}")"
-        zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh"
-    else
-        git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
-		fpath+=$(ls $ZDOTDIR/plugins/$PLUGIN_NAME/_*)
-        [ -f $ZDOTDIR/.zccompdump ] && $ZDOTDIR/.zccompdump
-    fi
-	completion_file="$(basename "${completion_file_path}")"
-	if [ "$2" = true ] && compinit "${completion_file:1}"
-}
+# function zsh_add_completion() {
+#     PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
+#     if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then 
+#         # For completions
+# 		completion_file_path=$(ls $ZDOTDIR/plugins/$PLUGIN_NAME/_*)
+# 		fpath+="$(dirname "${completion_file_path}")"
+#         zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh"
+#     else
+#         git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
+# 		fpath+=$(ls $ZDOTDIR/plugins/$PLUGIN_NAME/_*)
+#         [ -f $ZDOTDIR/.zccompdump ] && $ZDOTDIR/.zccompdump
+#     fi
+# 	completion_file="$(basename "${completion_file_path}")"
+# 	if [ "$2" = true ] && compinit "${completion_file:1}"
+# }
 

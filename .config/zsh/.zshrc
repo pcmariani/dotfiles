@@ -1,165 +1,188 @@
-# umask 022 # sets default permissions: folders 755, files 644
-setopt noautoremoveslash
+# some opts
+setopt menucomplete
+setopt interactivecomments # Comments in the interactive shell
+unsetopt listtypes # removes / from directories
 
-#-----------------------------------------------------------------------------
-# some useful options (man zshoptions)
-setopt autocd auto_pushd pushd_ignore_dups pushd_silent
-setopt extendedglob nomatch menucomplete
-setopt interactive_comments
-stty stop undef		# Disable ctrl-s to freeze terminal.
-zle_highlight=('paste:none')
+# Changing directories
+setopt autocd
+setopt globdots
+setopt auto_pushd
+setopt pushd_ignore_dups
+setopt pushd_silent
 
-# beeping is annoying
-unsetopt BEEP
-
-# completions
-autoload -Uz compinit
-zstyle ':completion:*' menu select
-# zstyle ':completion::complete:lsof:*' menu yes select
-zmodload zsh/complist
-# compinit
-_comp_options+=(globdots)		# Include hidden files.
-
-autoload -U up-line-or-beginning-search
-autoload -U down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
-
-# Colors
-autoload -Uz colors && colors
+# History
+export HISTFILE="$ZDOTDIR/.zhistory"
+export HISTSIZE=1000000
+export SAVEHIST=1000000
+setopt inc_append_history # add commands to HISTFILE in order of execution
+setopt share_history # share command history data
+setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt hist_find_no_dups # don't display duplicates in reverse search
+setopt hist_reduce_blanks # remove superfluous blanks
+setopt hist_ignore_space # ignore commands that start with space
+setopt hist_ignore_dups # Don't add duplicate entries
+setopt hist_verify # show command with history expansion to user before running it
 
 # Sources
-source "$ZDOTDIR/zsh-aliases"
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $(brew --prefix)/share/zsh-vi-mode/zsh-vi-mode.zsh
+source $(brew --prefix)/share/zsh-autopair/autopair.zsh
 source "$ZDOTDIR/zsh-functions"
-# source "$ZDOTDIR/zsh-exports"
+source "$ZDOTDIR/zsh-aliases"
 
-# Plugins
-zsh_add_plugin "zsh-users/zsh-autosuggestions"
-zsh_add_plugin "zsh-users/zsh-syntax-highlighting"
-zsh_add_plugin "hlissner/zsh-autopair"
-# zsh_add_plugin "Aloxaf/fzf-tab"
-# source ./plugins/fzf-tab/fzf-tab.plugin.zsh
-# zsh_add_plugin "lincheney/fzf-tab-completion"
-# zsh_add_completion "esc/conda-zsh-completion" false
-# For more plugins: https://github.com/unixorn/awesome-zsh-plugins
-# More completions https://github.com/zsh-users/zsh-completions
-
-# Key-bindings
-# bindkey -s '^o' 'ranger^M'
-# bindkey -s '^f' 'zi^M'
-# bindkey -s '^s' 'ncdu^M'
-# bindkey -s '^n' 'nvim $(fzf)^M'
-# bindkey -s '^v' 'nvim\n'
-# bindkey -s '^z' 'zi^M'
-# bindkey '^[[P' delete-char
-# bindkey "^p" up-line-or-beginning-search # Up
-# bindkey "^n" down-line-or-beginning-search # Down
-# bindkey "^k" up-line-or-beginning-search # Up
-# bindkey "^j" down-line-or-beginning-search # Down
-# bindkey -r "^u"
-# bindkey -r "^d"
-# bindkey '^I' fzf_completion
-
-# FZF 
-[ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
-[ -f /usr/share/fzf/key-bindings.zsh ] && source /usr/share/fzf/key-bindings.zsh
-[ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh
-[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-[ -f $ZDOTDIR/completion/_fnm ] && fpath+="$ZDOTDIR/completion/"
-# export FZF_DEFAULT_COMMAND='rg --hidden -l ""'
+# Completion
+autoload -Uz compinit
+zmodload zsh/complist
 compinit
-
-# Edit line in vim with ctrl-e:
-autoload edit-command-line; zle -N edit-command-line
-bindkey '^e' edit-command-line
-
-#-----------------------------------------------------------------------------
-
-## History ##
-# HISTFILE=~/.config/history
-HISTORY_IGNORE="(ls|l|la|jobs|d|dirs|fg|cd|pwd|exit)"
-
-# History search
-autoload -U history-search-end
-zle -N history-beginning-search-backward-end history-search-end
-zle -N history-beginning-search-forward-end history-search-end
-bindkey "^[[A" history-beginning-search-backward-end  # Up arrow
-bindkey "^[[B" history-beginning-search-forward-end   # Down arrow
-bindkey "^p" history-beginning-search-backward-end    # Ctl-p
-bindkey "^n" history-beginning-search-forward-end     # Ctl-n
-
-# History options
-# setopt EXTENDED_HISTORY          # Write the history file in the ':start:elapsed;command' format.
-setopt INC_APPEND_HISTORY        # save the command to history when running
-setopt SHARE_HISTORY             # Share history between all sessions.
-setopt HIST_EXPIRE_DUPS_FIRST    # Expire a duplicate event first when trimming history.
-setopt HIST_IGNORE_DUPS          # Do not record an event that was just recorded again.
-setopt HIST_IGNORE_ALL_DUPS      # Delete an old recorded event if a new event is a duplicate.
-setopt HIST_FIND_NO_DUPS         # Do not display a previously found event.
-setopt HIST_IGNORE_SPACE         # Do not record an event starting with a space.
-setopt HIST_SAVE_NO_DUPS         # Do not write a duplicate event to the history file.
-setopt HIST_VERIFY               # Do not execute immediately upon history expansion.
-
-# Auto complete with case insenstivity
+zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-
-# Use vim keys in tab complete menu:
+export LS_COLORS='no=00;37:fi=00:di=00;33:ln=04;36:pi=40;33:so=01;35:bd=40;33;01:'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+bindkey -M menuselect '\e' send-break
 bindkey -M menuselect 'h' vi-backward-char
 bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect 'j' vi-down-line-or-history
-bindkey -M menuselect 'left' vi-backward-char
-bindkey -M menuselect 'down' vi-down-line-or-history
-bindkey -M menuselect 'up' vi-up-line-or-history
-bindkey -M menuselect 'right' vi-forward-char
+
+# do ls after cd
+function chpwd() {
+    emulate -L zsh
+    ls -a
+}
+
+# Edit line in vim with ctrl-e:
+autoload edit-command-line
+zle -N edit-command-line
+bindkey '^e' edit-command-line
 
 # eliminates duplicates in *paths
 typeset -gU cdpath fpath path
 
-# --- VIM Mode ---
-# bindkey -e will be emacs mode
-bindkey -v
-export KEYTIMEOUT=1
 
-# Use vim keys in tab complete menu:
-# bindkey -M menuselect '^h' vi-backward-char
-# bindkey -M menuselect '^k' vi-up-line-or-history
-# bindkey -M menuselect '^l' vi-forward-char
-# bindkey -M menuselect '^j' vi-down-line-or-history
-# bindkey -M menuselect '^[[Z' vi-up-line-or-history
-# bindkey -v '^?' backward-delete-char
+# ---- FZF -----
 
-# Change cursor shape for different vi modes.
-function zle-keymap-select () {
-    case $KEYMAP in
-        vicmd) echo -ne '\e[1 q';;      # block
-        viins|main) echo -ne '\e[5 q';; # beam
-    esac
+# Set up fzf key bindings and fuzzy completion
+eval "$(fzf --zsh)"
+
+# -- setup fzf theme --
+# fg="#CBE0F0"
+# bg="#011628"
+# bg_highlight="#143652"
+# purple="#B388FF"
+# blue="#06BCE4"
+# cyan="#2CF9ED"
+
+# export FZF_DEFAULT_OPTS="--color=fg:${fg},bg:${bg},hl:${purple},fg+:${fg},bg+:${bg_highlight},hl+:${purple},info:${blue},prompt:${cyan},pointer:${cyan},marker:${cyan},spinner:${cyan},header:${cyan}"
+
+# -- Use fd instead of fzf --
+
+export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
+
+# Use fd (https://github.com/sharkdp/fd) for listing path candidates.
+# - The first argument to the function ($1) is the base path to start traversal
+# - See the source code (completion.{bash,zsh}) for the details.
+_fzf_compgen_path() {
+  fd --hidden --exclude .git . "$1"
 }
-zle -N zle-keymap-select
-zle-line-init() {
-    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
-    # echo -ne "\e[5 q"
-    echo -ne "\e[1 q"
+
+# Use fd to generate the list for directory completion
+_fzf_compgen_dir() {
+  fd --type=d --hidden --exclude .git . "$1"
 }
-zle -N zle-line-init
-# echo -ne '\e[5 q' # Use beam shape cursor on startup.
-# preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 
-# fzf
-source <(fzf --zsh)
+# untangle fzf with zsh-vi-mode
+zvm_after_init_commands+=('[ -f $HOME/.fzf.zsh ] && source $HOME/.fzf.zsh')
+# source ~/fzf-git.sh/fzf-git.sh
 
-# starship
+
+show_file_or_dir_preview="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
+
+export FZF_CTRL_T_OPTS="--preview '$show_file_or_dir_preview'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
+
+# Advanced customization of fzf options via _fzf_comprun function
+# - The first argument to the function is the name of the command.
+# - You should make sure to pass the rest of the arguments to fzf.
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf --preview 'eza --tree --color=always {} | head -200' "$@" ;;
+    export|unset) fzf --preview "eval 'echo \${}'"         "$@" ;;
+    ssh)          fzf --preview 'dig {}'                   "$@" ;;
+    *)            fzf --preview "$show_file_or_dir_preview" "$@" ;;
+  esac
+}
+
+# ---- Bat (better cat) ----
+
+# export BAT_THEME=tokyonight_night
+
+# ---- Eza (better ls) -----
+
+# alias ls="eza --icons=always"
+
+# # ---- Zoxide (better cd) ----
+
+eval "$(zoxide init zsh)"
+alias cd="z"
+
+# ---- Yazi ----
+
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+
+
+# ---- Starship ----
 eval "$(starship init zsh)"
 
-# SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+# ---- SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!! ----
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
-# Make zsh know about hosts already accessed by SSH
-# zstyle -e ':completion:*:(ssh|scp|sftp|rsh|rsync):hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~/.ssh/known_}hosts(|2)(N) /dev/null)"}%%[# ]*}//,/ })'
 
-# zsh_add_file "zsh-prompt"
-# Enable searching through history
-# bindkey '^R' history-incremental-pattern-search-backward
+
+
+
+
+
+# ---- VIM MODE (OLD) ----
+
+# # Edit line in vim with ctrl-e:
+# autoload edit-command-line
+# zle -N edit-command-line
+# bindkey '^e' edit-command-line
+#
+# bindkey -v # vim mode
+# export KEYTIMEOUT=1 # Reduces delay when entering vi-mode
+#
+# # Change cursor shape for different vi modes.
+# function zle-keymap-select () {
+#     case $KEYMAP in
+#         vicmd) echo -ne '\e[1 q';;      # block
+#         viins|main) echo -ne '\e[5 q';; # beam
+#     esac
+# }
+# zle -N zle-keymap-select
+# zle-line-init() {
+#     zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+#     # echo -ne "\e[5 q"
+#     echo -ne "\e[1 q"
+# }
+# zle -N zle-line-init
+# # echo -ne '\e[5 q' # Use beam shape cursor on startup.
+# # preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+
+
+# vim: ft=zsh
+

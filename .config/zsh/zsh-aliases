@@ -37,7 +37,7 @@
 # zle -N expand-alias-space
 #
 # bindkey " " expand-alias-space
-bindkey -M isearch " " magic-space
+# bindkey -M isearch " " magic-space
 source $HOME/.config/aliases
 
 
@@ -230,12 +230,12 @@ alias ntitles="for i in \$(nactive); do jq -r '.content' \$i | head -n1; done | 
 # alias 9='cd ~9'
 # alias tree="tree -d -L 4"
 #
-TODO="todo.sh"
-alias t="$TODO"
-alias ta="$TODO add "
-alias tls="todo-list "
-alias tlsh="todo-list @home"
-alias te="nvim /mnt/c/Users/PeterMariani/Dropbox/todo.txt/todo.txt"
+# TODO="todo.sh"
+# alias t="$TODO"
+# alias ta="$TODO add "
+# alias tls="todo-list "
+# alias tlsh="todo-list @home"
+# alias te="nvim /mnt/c/Users/PeterMariani/Dropbox/todo.txt/todo.txt"
 # ialias tls="echo && cat \
 #     <($TODO ls | head -n-2 | sed \
 #             -e 's/[+@]/\t&/g' \
