@@ -31,9 +31,18 @@
 
  :templates {
              :open "open -a \"%s\""
+             :open-args "open -a \"%s\""
              :openg "open -g \"%s\""
              :link "osascript -e 'do shell script \"open %s\"'"
+             :shell "osascript -e 'do shell script \"%s\"'"
              }
+
+ ;; define application identifiers
+ :applications {
+                :chrome ["^com\\.google\\.Chrome$"]
+                :chrome-canary [ "^com\\.google\\.Chrome\\.canary$"]
+                :chromes ["^com\\.google\\.Chrome$" "^com\\.google\\.Chrome\\.canary$"]
+                }
 
  :main [
 
@@ -46,7 +55,7 @@
         {
          :des "mod-tap layers"
          :rules [
-                 ;applications-mode
+                 ;chrome mode
                  [:a nil [:!d-mode :!s-mode :!v-mode :!space-mode]
                   {:alone {:key :a :halt true} :delayed {:canceled {:key :a}} :held {:set ["a-mode" 1] :repeat false} :afterup {:set ["a-mode" 0]}
                    ;:params {:alone 199 :held 200 :delay 200} 
@@ -72,26 +81,57 @@
          }
 
         {
-         :des "a-mode"
+         :des "space-mode: application switching, window management, vim navigation"
          :rules [
-                 :a-mode
-                 [:l :!Ctab]
-                 [:h :!CStab]
-                 [:semicolon [:openg "rectangle://execute-action?name=maximize"]]
+                 :space-mode
+                 ;; window management - left side
+                 ; number row
+                 [:tab :!Ctab] ; same as Command Tab
+                 [:!Stab :!CStab] ; same as Command Tab
+                 [:grave_accent_and_tilde [[:openg "rectangle://execute-action?name=maximize"] [:openg "rectangle://execute-action?name=larger"]]]
                  [:quote :!CTf] ;; full screen
-                 [:j [:openg "rectangle://execute-action?name=left-half"]]
-                 [:k [:openg "rectangle://execute-action?name=right-half"]]
-                 [:f [:open "finder"]]
-                 [:t [:open "Alacritty"]]
-                 [:b [:open "Arc"]]
-                 [:c [:open "Slack"]]
-                 [:s [:open "Spotify"]]
-                 [:m [:open "Messages"]]
-                 [:n [:open "Neovide"]]
-                 [:v [:open "Visual Studio Code"]]
+                 [:1 [:openg "rectangle://execute-action?name=first-third"]]
+                 [:2 [:openg "rectangle://execute-action?name=left-half"]]
+                 [:3 [:openg "rectangle://execute-action?name=right-half"]]
+                 [:4 [:openg "rectangle://execute-action?name=last-third"]]
+                 [:5 [:openg "rectangle://execute-action?name=next-display"]]
+
+                 ;; application switching - left side
+                 ; top row
+                 [:q [:open "finder"]]
+                 [:w [:open "Messages"]]
+                 [:e [:open "Spotify"]]
+                 [:r [:open "Postman"]]
+                 ; middle row
+                 [:a :!CTO1] ; Control Command Option 1 - switch to first workspace
+                 [:s [:open "Ghostty"]]
+                 [:!Ss [:open "Alacritty"]]
+                 [:d [:open "Google Chrome"]]
+                 [:!Sd [:open "Arc"]]
+                 [:f [:open "Slack"]]
+                 ; bottom row
+                 [:z [:open "Zscaler"]]
+                 [:c [:open "Neovide"]]
+                 [:v [:open "MacVim"]]
+
+                 ;; vim navigation - right side
+                 [:k :!Sopen_bracket]
+                 [:j :!Sclose_bracket]
+
                  ]
          }
 
+        {
+         :des "chrome-mode"
+         :rules [
+                 :a-mode
+                 [:m "open -a arc-alert.sh.app --args '(function () { alert(\"hello\"); }())'"]
+                 [:n "open -a arc-focus-tab.sh.app --args 'Gmail'"]
+                 [:l "pbpaste | tr '[:upper:]' '[:lower:]' | pbcopy"]
+                 ]
+         }
+
+        ; AAAAA paaaaa
         {
          :des "d-mode"
          :rules [
@@ -113,12 +153,12 @@
          :des "s-mode"
          :rules [
                  :s-mode
-                 [:##u :!Sopen_bracket]
-                 [:##i :!Sclose_bracket]
+                 [:##u :!S9]
+                 [:##i :!S0]
                  [:##o :!S1]
 
-                 [:##j :!S9]
-                 [:##k :!S0]
+                 [:##j :!Sopen_bracket]
+                 [:##k :!Sclose_bracket]
                  [:##l :!Sslash]
 
                  [:##m :open_bracket]
@@ -135,9 +175,9 @@
          }
 
         {
-         :des "space-mode"
+         :des "vim-mode"
          :rules [
-                 :space-mode
+                 :v-mode
                  [:h :left_arrow]
                  [:j :down_arrow]
                  [:k :up_arrow]
