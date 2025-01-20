@@ -1,3 +1,4 @@
+
 "  __ _(_)_ __  _ _ __ 
 "  \ V / | '  \| '_/ _|
 " (_)_/|_|_|_|_|_| \__|
@@ -22,12 +23,41 @@ Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-commentary'
 Plug 'romainl/vim-cool'
 Plug 'scrooloose/nerdtree'
-Plug 'jiangmiao/auto-pairs'
+Plug 'LunarWatcher/auto-pairs'
+Plug 'xolox/vim-session'
+Plug 'xolox/vim-misc'
+" Plug 'Raimondi/delimitMate'
 Plug 'airblade/vim-gitgutter'
 Plug 'mechatroner/rainbow_csv'
+Plug 'machakann/vim-highlightedyank'
 Plug 'w0rp/ale'
+" Dark Themes
+Plug 'twerth/ir_black'
+Plug 'romainl/Apprentice'
+Plug 'joshdick/onedark.vim'
+Plug 'ghifarit53/tokyonight-vim'
+"Light Themes
+Plug 'altercation/vim-colors-solarized'
+Plug 'freeo/vim-kalisi'
+Plug 'NLKNguyen/papercolor-theme'
 
 call plug#end()
+
+" }}}
+
+" --- plugin options --- {{{
+
+let g:highlightedyank_highlight_duration = 120
+let g:highlightedyank_highlight_in_visual = 1
+
+" let delimitMate_expand_cr = 1
+" let delimitMate_jump_expansion = 1
+" let delimitMate_expand_space = 1
+" let delimitMate_balance_matchpairs = 1
+
+let g:AutoPairsCompatibleMaps = 0
+let g:AutoPairsCarefulStringExpansion = 1
+" let g:AutoPairsCompleteOnlyOnSpace = 1
 
 " }}}
 
@@ -79,14 +109,20 @@ set expandtab "need toggle
 set termguicolors
 set formatoptions-=cr
 set showtabline=1
+set linebreak
+"https://stackoverflow.com/questions/36950231/auto-wrap-lines-in-vim-without-inserting-newlines
+
 
 set wildmenu
 set wildoptions=pum
 set wildcharm=<Tab>	" Needed to open the wildmenu from shortcuts
 set wildignore=*.swp,*.bak,*.pyc,*.class,*.o
 
+set sessionoptions=folds,globals,localoptions,resize,terminal
+
 if has("gui_running")
-    set guifont=MonacoNerdFontCompleteM-:h14
+
+    set guifont=MonacoNerdFontCompleteM-:h13
     " set guifont=IosevkaNFM:h15
     if (&guifont =~ 'Iosevka')
         set columnspace=-1
@@ -98,6 +134,13 @@ if has("gui_running")
     set guioptions-=L
     set guioptions+=k
     set guioptions-=e
+
+    " set titlestring=
+    " augroup Gui
+    "   autocmd!
+      " autocmd TabEnter * let &titlestring = t:last_cwd
+    " augroup END
+
 endif
 
 " Disable 'command' and 'option' navigation bindings
@@ -106,10 +149,11 @@ if has("gui_macvim")
 endif
 
 set highlight=M-
-set fillchars+=vert:\ 
+set fillchars=vert:\ ,eob:~,lastline:@,fold:\ ,foldopen:⌵,foldclose:›,foldsep:\ 
+
+
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[2 q"
-
 
 " }}}
 
@@ -119,11 +163,13 @@ let mapleader = " "
 
 " t - toggle
 nnoremap <expr> <Leader>tl (&number == 1 ? ':set nonumber<cr>' : ':set number<cr>')| " toggle linenumbers
-nnoremap <Leader>tt :call NextColor()<cr>| "toggle theme
+" nnoremap <Leader>tt :call NextColor()<cr>| "toggle theme
 nnoremap <Leader>tw :set wrap!<cr>| "toggle wrap
+nnoremap <Leader>tf :set foldcolumn=2<cr>| " toggle spell
+nnoremap <expr> <Leader>tf (&foldcolumn == 0 ? ':set foldcolumn=2' : ':set foldcolumn=0') . '<cr>'| " toggle tabs (2/4)
 nnoremap <Leader>ts :set spell!<cr>| " toggle spell
 nnoremap <Leader>tz :call ToggleMaximize()<cr>| "toggle maximize
-nnoremap <expr> <Leader>ts 'mm' . (&tabstop == 2 ? ':set tabstop=4' : ':set tabstop=2') . '<cr>ggvG==<Esc>`mzz'| " toggle tabs (2/4)
+nnoremap <expr> <Leader>tt 'mm' . (&tabstop == 2 ? ':set tabstop=4' : ':set tabstop=2') . '<cr>ggvG==<Esc>`mzz'| " toggle tabs (2/4)
 " show invisible chars
 " zen mode or something
 " toggle tabs vs spaces
@@ -146,21 +192,45 @@ function! ToggleMaximize()
 endfunction
 
 " g - git
-nnoremap <Leader>gg :tab term ++close lazygit<cr>| " lazygit
+" nnoremap <expr> <Leader>gg call IsTrackedByYadm() == 1 ? ':' : ':tab term ++close lazygit<cr>'| " lazygit
+nnoremap <expr> <leader>gg (IsTrackedByYadm() ? ':tabedit<bar>lcd $HOME<bar>term ++curwin ++close yadm enter lazygit<CR>' : ':tab term ++close lazygit<CR>')
 " see fzf
 
+function! IsTrackedByYadm()
+    " Get the list of files from yadm
+    let l:cmd_output = system('yadm list -a')
+    if v:shell_error
+        echo "Failed to execute 'yadm list -a'"
+        return 0
+    endif
+    " Split the output into a list, removing empty lines
+    let l:dotfiles = filter(split(l:cmd_output, '\n'), '!empty(v:val)')
+    " Get the current buffer's file path relative to home directory
+    let l:current_file = expand('%:p')
+    let l:home_dir = expand('$HOME')
+    " Convert file path to be relative to home directory
+    if l:current_file =~ '^' . l:home_dir
+        let l:relative_path = strpart(l:current_file, len(l:home_dir) + 1)
+    else
+        return 0
+    endif
+    " Check if the relative path matches any file in the list
+    return index(l:dotfiles, l:relative_path) != -1 
+endfunction
+
+
 " o - open
-nnoremap <Leader>ot :vertical terminal ++close<cr>
-":setlocal winfixheight<cr>| " open terminal
-nnoremap <Leader>oT :terminal ++close<cr>:setlocal winfixheight<cr>| " open terminal
+nnoremap <Leader>ot :vertical terminal ++kill=term ++close<cr><C-\><C-n>:setlocal nobuflisted winfixwidth<cr>i| " open terminal
+nnoremap <Leader>oT :terminal ++kill=term ++close<cr><C-\><C-n>:resize 12<bar>setlocal nobuflisted winfixheight<cr>i| " open terminal
 
 " b - buffer
 nnoremap <leader>bs :w<cr>| " save buffer
 nnoremap <leader>bn :bnext<cr>| " next buffer
 nnoremap <leader>bp :bprev<cr>| " prev buffer
 nnoremap <leader>bN :new<cr>| " new buffer
-nnoremap <leader>bk :Bclose<cr>| " close buffer
-nnoremap <leader>bd :Bclose<cr>| " close buffer
+nnoremap <leader>bk :Bclose<cr>| " delete buffer
+nnoremap <leader>bK :Bclose!<cr>| " wipeout buffer
+nnoremap <leader>bd :bdelete<cr>| " close buffer
 nnoremap <silent> <Leader>by mtgg0vG$y`t:delmarks t<cr>| "yank buffer
 nnoremap <leader>bb :buffer <TAB>| " list buffers
 " nnoremap <leader>bb :ls t<cr>:b
@@ -168,7 +238,7 @@ nnoremap <leader>bb :buffer <TAB>| " list buffers
 " see fzf
 
 " c - code
-nnoremap <silent> <Leader>cf mmggVG=`mzz:delmarks m<cr>| " format buffer
+nnoremap <silent> <Leader>b= mmggVG=`mzz:delmarks m<cr>| " format buffer
 " jump to definition
 " compile
 " Recompile
@@ -208,9 +278,24 @@ vmap y ygv<Esc>
 nnoremap Y y$
 
 noremap <silent> <TAB> %
-nnoremap <silent> <Leader>` <C-^>| " jump last buffer
-nnoremap <silent> \ :bnext<cr>| " next buffer
-nnoremap <silent> \| :bprev<cr>| " prev buffer
+noremap <silent> ` :bnext<cr>| " next buffer
+noremap <silent> <Leader>` <C-^>| " jump last buffer
+
+noremap <silent> \ :tabnext<cr>| " next tab
+noremap <silent> \| :tabprev<cr>| " next tab
+noremap <silent> <expr> <leader>\ exists('g:altTab') ? ':'..g:altTab..'tabnext<cr>' : ''| " next buffer
+" noremap <silent> ~ :bprev<cr>| " next buffer
+" noremap <silent> ` :tabnext<cr>| " next buffer
+" nnoremap <silent> \ :bnext<cr>| " next buffer
+" nnoremap <silent> \| :bprev<cr>| " prev buffer
+
+nnoremap <leader><tab>1 :1tabnext<cr>
+nnoremap <leader><tab>2 :2tabnext<cr>
+nnoremap <leader><tab>3 :3tabnext<cr>
+nnoremap <leader><tab>4 :4tabnext<cr>
+nnoremap <leader><tab>5 :5tabnext<cr>
+nnoremap <leader><tab>6 :6tabnext<cr>
+
 
 " Remap for dealing with word wrap
 nnoremap <expr> j v:count == 0 ? 'gj' : 'j'
@@ -272,16 +357,252 @@ nnoremap <silent> > >>
 vnoremap <silent> < <gv
 vnoremap <silent> > >gv
 
-nnoremap <leader>w :w<cr>
-nnoremap <leader>qq :qa<cr>
+nnoremap <leader>w :w<cr>| " save buffer
+nnoremap <leader>qq :qa!<cr>| " quit vim!
 " nnoremap <leader>e :Lexplore<cr>
-nnoremap <leader>e :NERDTreeToggle<cr>
-nnoremap <leader>r mm:w<cr>:source $MYVIMRC<cr>:nohl<cr>:echo ".vimrc reloaded"<cr>`m
+nnoremap <leader>e :NERDTreeToggle<cr>| " toggle filetree
+nnoremap <leader>r mm:w<cr>:source $MYVIMRC<cr>:nohl<cr>:echo ".vimrc reloaded"<cr>`m| " reload vim
 nnoremap <leader>ov :tabnew ~/.vimrc<cr>| " open vimrc
 " nnoremap <leader>sc :colorscheme <TAB>
 nnoremap <leader>J ddpkJ| " reverse J
 
+" }}}
 
+" --- tabline {{{
+
+set tabline=%!MyTabLine()
+
+function MyTabLine()
+  let s = ''
+  for i in range(tabpagenr('$'))
+    " select the highlighting
+    if i + 1 == tabpagenr()
+      let s ..= '%#TabLineSel#'
+    else
+      let s ..= '%#TabLine#'
+    endif
+    " set the tab page number (for mouse clicks)
+    let s ..= '%' .. (i + 1) .. 'T'
+    " the label is made by MyTabLabel()
+    let s ..= '   %{MyTabLabel(' .. (i + 1) .. ')}   '
+  endfor
+  " after the last tab fill with TabLineFill and reset tab page nr
+  let s ..= '%#TabLineFill#%T'
+  " right-align the label to close the current tab page
+  if tabpagenr('$') > 1
+    let s ..= '%=%#TabLine#%999X[ X ]'
+  endif
+  return s
+endfunction
+
+function MyTabLabel(n)
+  " Check for a custom label in the tab-scoped variable
+  let custom_label = gettabvar(a:n, 'custom_tab_label', '')
+  if custom_label != ''
+    return custom_label
+  endif
+  " Default label if no custom label is set
+  let buflist = tabpagebuflist(a:n)
+  let winnr = tabpagewinnr(a:n)
+  let bufname = bufname(buflist[winnr - 1])
+  " Abbreviate folder names and truncate filename in the middle
+  if bufname != ''
+    let parts = split(bufname, '/')
+    let abbrev_parts = map(parts[:-2], 'v:val[0]')
+    let filename = parts[-1]
+    if strlen(filename) > 40 
+      let mid = len(filename) / 2
+      let filename = filename[:4] .. '...' .. filename[-24:]
+    endif
+    return join(abbrev_parts, '') ? join(abbrev_parts, '/') .. '/' .. filename : filename
+  endif
+  return '[No Name]'
+endfunction
+
+" }}}
+
+" --- session management --- {{{
+
+let g:session_autosave = 'no'
+let g:session_autosave_periodic = 2
+let g:session_autosave_silent = 1
+
+function! NewSession(session_name)
+  if a:session_name != ''
+    for t in range(1,tabpagenr('$'))
+      if gettabvar(t, 'session_name') == a:session_name
+        execute t .. 'tabnext'
+        return
+      endif
+    endfor
+    if bufname(bufnr()) != ""
+      tabnew
+    endif
+    execute "OpenTabSession " .. a:session_name
+    let session_name = a:session_name
+  else
+    if bufname(bufnr()) != ""
+      tabnew
+    endif
+    execute "OpenTabSession"
+    let session_full_path = gettabvar(0, 'this_session')
+    let session_file_name = split(session_full_path, '/')[-1]
+    let session_name = fnamemodify(session_file_name, ":r")
+  endif
+  call settabvar(tabpagenr(), 'session_name', session_name)
+  call SetTabLabel("## "..session_name.." ##")
+endfunction
+
+nnoremap gso :Sessions<cr>
+
+function! CloseThisSession()
+  execute "CloseTabSession"
+  tabclose
+endfunction
+
+nnoremap gsc :call CloseThisSession()<cr>
+
+nnoremap gss :SaveTabSession<cr>
+
+command! Sessions call fzf#run(fzf#wrap({
+    \ 'source': 'find ~/.vim/sessions -type f -name "*.vim" | sed -e "s|^.*\/\(.*\)\.vim|\1|"',
+    \ 'sink': {session_name -> NewSession(session_name)}
+    \ }))
+
+" augroup Sessions
+"   au!
+"   " au SessionLoadPost * let t:this_session = getcwd()
+"   au SessionLoadPost * let t:session_name = getcwd()
+" augroup END
+
+" function! CloseSesh()
+"   if gettabvar(0,'this_session') != ''
+"     if exists('t:buffers')
+"       let tabBuffers = tabpagebuflist()
+"       let allTabBuffers = copy(t:buffers)
+"       call extend(allTabBuffers, t:terminals)
+"       call extend(allTabBuffers, tabBuffers)
+"       let wipedOut = [] " to prevent dups
+"       for b in allTabBuffers
+"         if index(wipedOut, b) == -1
+"           mksession!
+"           execute("bdelete! ".. b)
+"           call add(wipedOut, b)
+"         endif
+"       endfor
+"     endif
+"   endif
+" endfunction
+
+" function! AmInSessionTab()
+  
+" endfunction
+
+" }}}
+
+" --- tab management --- {{{
+
+nnoremap <leader><tab>n :tabnew<cr>cd ~<cr>
+nnoremap <leader><tab>r :call SetTabLabel(input('Set Tab Label: ', gettabvar(tabpagenr(), 'custom_tab_label')))<cr>
+nnoremap <leader><tab>k :tabclose<cr>
+
+augroup TabJump
+  au!
+  au TabLeave * let g:altTab = tabpagenr()
+augroup END
+
+function! SetTabLabel(label)
+  call settabvar(tabpagenr(), 'custom_tab_label', a:label)
+  redrawtabline
+endfunction
+
+augroup TabBufferList
+    autocmd!
+    autocmd TerminalOpen,BufEnter,BufWinEnter * call AddBufferToTabBuffersList_SetBufferListed()
+    autocmd bufdelete * call RemoveBufferFromTabBuffersList()
+    " autocmd! TabEnter * if exists('t:buffers') | echo t:buffers | endif
+augroup END
+
+function! AddBufferToTabBuffersList_SetBufferListed()
+  " This could be broken up into two functions
+  " 1. add/remove bufnr to/from t:buffers
+  " 2. set buffer as listed/unlisted
+  " NOTE: Removing a buffer from t:buffers is done in the function Bclose
+  if !exists('t:buffers')
+    let t:buffers = []
+  endif
+  if index(t:buffers, bufnr('%')) == -1
+    let t:buffers += [bufnr('%')]
+  endif
+  if &buftype != "" "remove special buffers
+    let bufnr_to_remove = bufnr('%')
+    let t:buffers = filter(t:buffers, 'v:val != bufnr_to_remove')
+  endif
+  for buf in range(1, bufnr('$'))
+    if bufexists(buf)
+      if index(t:buffers, buf) == -1
+        call setbufvar(buf, '&buflisted', 0)
+      else
+        call setbufvar(buf, '&buflisted', 1)
+      endif
+    endif
+  endfor
+endfunction
+
+function! RemoveBufferFromTabBuffersList()
+  if exists('t:buffers')
+    let l:currentBufNum = bufnr("%")
+    let t:buffers = filter(t:buffers, 'v:val != l:currentBufNum')
+  endif
+endfunction
+
+augroup Tabs
+  autocmd!
+  autocmd VimEnter * execute 'tcd' getcwd() | call SetTitleStringToPwd()
+  autocmd TabNew,VimEnter * let t:isNewTab = 1
+  autocmd TabEnter * call SetTitleStringToPwd()
+  autocmd BufReadPost * if t:isNewTab == 1 | call SetIsNewTabFalseIfFirstBuffer() | endif
+  autocmd BufEnter * if exists('t:isNewTab') && t:isNewTab == 1 && expand('%:p') == '' | execute 'tcd' $HOME | call SetTitleStringToPwd() | endif
+  autocmd BufNew * if t:isNewTab == 1 | clearjumps | endif
+  " autocmd TabEnter * execute 'verbose pwd'
+augroup END
+
+function! SetIsNewTabFalseIfFirstBuffer()
+  if expand('%:p') == ''
+    execute 'tcd' $HOME
+  else
+    execute 'tcd' fnameescape(expand('%:p:h'))
+  endif
+  let t:isNewTab = 0
+  redrawtabline
+  call SetTitleStringToPwd()
+endfunction
+
+augroup TabTerminals
+  autocmd!
+  autocmd BufRead,BufWinLeave * call RemoveTermFromTabTermList()
+  autocmd TerminalOpen * call AddTermToTabTermList()
+augroup END
+
+function! AddTermToTabTermList()
+  if !exists('t:terminals')
+    let t:terminals = []
+  endif
+  if index(t:terminals, bufnr('%')) == -1
+    let t:terminals += [bufnr('%')]
+  endif
+endfunction
+
+function! RemoveTermFromTabTermList()
+    if &buftype == "terminal"
+      let bufnr_to_remove = bufnr('%')
+      let t:terminals = filter(t:terminals, 'v:val != bufnr_to_remove')
+    endif
+endfunction
+
+function! SetTitleStringToPwd()
+  let &titlestring = substitute(getcwd(),$HOME,'~','')
+endfunction
 
 " }}}
 
@@ -344,8 +665,9 @@ endfunction
 
 
 " Don't close window, when deleting a buffer
-command! Bclose call <SID>BufcloseCloseIt()
-function! <SID>BufcloseCloseIt()
+" command! -bang Bclose call BufcloseCloseIt(<bang>0)
+command! Bclose call BufcloseCloseIt()
+function! BufcloseCloseIt()
     let l:currentBufNum = bufnr("%")
     let l:alternateBufNum = bufnr("#")
     if buflisted(l:alternateBufNum)
@@ -354,12 +676,24 @@ function! <SID>BufcloseCloseIt()
         bnext
     endif
     if bufnr("%") == l:currentBufNum
+      if len(tabpagebuflist(0)) == 1 && tabpagenr('$') > 1
+        tabclose
+      else
         new
+      endif
     endif
     if buflisted(l:currentBufNum)
-        execute("bdelete! ".l:currentBufNum)
+      execute("bdelete ".l:currentBufNum)
     endif
 endfunction
+
+" function! CheckIfLastBufferInTab()
+
+"   " let buflist = tabpagebuflist(a:n)
+"   if len(tabpagebuflist(0)) == 1 && tabpagenr('$') > 1
+"     echo "IS LAST BUFFER"
+"   endif
+" endfunction
 
 "
 " https://www.reddit.com/r/vim/comments/ohfulq/no_plugin_vim_setups/
@@ -404,14 +738,14 @@ endfunction
 " autocmd CmdlineLeave /,\? :set nohlsearch
 " augroup END
 
-augroup autocd
-    " au VimEnter,BufEnter,BufRead * if &buftype ==# '' && expand('%:h') != '' | execute 'cd ' . expand('%:h') | endif
-    au VimEnter * if expand('%:h') != '' | execute 'cd ' . expand('%:h') | endif
-augroup END  
+" augroup autocd
+"     " au VimEnter,BufEnter,BufRead * if &buftype ==# '' && expand('%:h') != '' | execute 'cd ' . expand('%:h') | endif
+"     au VimEnter * if expand('%:h') != '' | execute 'cd ' . expand('%:h') | endif
+" augroup END  
 
 augroup filetypes
     au!
-    au BufWinEnter * if &l:buftype ==# 'help' | nnoremap <buffer> q :q<cr> | endif
+    au BufWinEnter * if &l:buftype ==# 'help' | nnoremap <buffer> q :bwipeout<cr> | endif
     " Make sure .aliases, .bash_aliases and similar files get syntax highlighting.
     au BufNewFile,BufRead *aliases* set ft=sh
     " Update a buffer's contents on focus if it changed outside of Vim.
@@ -421,6 +755,7 @@ augroup filetypes
     " Automatically cd into dir of buffer
     " au BufEnter * if expand("%:p:h") !~ '^/tmp' | silent! lcd %:p:h | endif
     au FileType vim :iabbrev fun function ()<CR>endfunction<UP><LEFT><LEFT><LEFT>
+    au BufNewFile,BufRead *.yaml setlocal winfixwidth
 augroup END
 
 " Only show the cursor line in the active buffer.
@@ -445,7 +780,7 @@ augroup END
 " au BufWinEnter * if &l:buftype ==# 'terminal' | call SetQFMaps() | endif
 " augroup END
 
-tnoremap <Esc> <C-\><C-n>
+" tnoremap <Esc> <C-\><C-n>
 tnoremap <silent> <C-h> <C-w>h
 tnoremap <silent> <C-j> <C-w>j
 tnoremap <silent> <C-k> <C-w>k
@@ -455,16 +790,18 @@ nnoremap <leader>X :SendToTerm| " SendToTerm new command
 
 command! -complete=file -nargs=* SendToTerm call SendToTerm(<f-args>)
 function! SendToTerm(...)
+    write "save buffer 
     if a:0 > 0
-        let g:termCommand = join(a:000, " ")
+        let t:termCommand = join(a:000, " ")
     endif
-    if exists("g:termCommand")
-        if !len(term_list())
-            execute "vertical terminal ++close"
+    if exists("t:termCommand")
+        if !len(t:terminals)
+            " execute "vertical terminal"
+            execute "vertical terminal ++close ++kill=term"
+            execute "setlocal nobuflisted winfixwidth"
         endif
-        write "save buffer
-        call term_sendkeys(term_list()[0], g:termCommand )
-        call term_sendkeys(term_list()[0], "\<CR>" )
+        call term_sendkeys(t:terminals[0], t:termCommand )
+        call term_sendkeys(t:terminals[0], "\<CR>" )
     else
         call feedkeys(":SendToTerm ", "nt")
     endif
@@ -504,41 +841,78 @@ augroup END
 
 " --- colorscheme --- {{{
 
-function! CustomHighlights()
-    if g:colors_name=="habamax"
-        hi CursorLine ctermbg=235 guibg=#212434
-        hi StatusLineNC ctermbg=0 ctermfg=8 guibg=black guifg=#555555
-        hi StatusLine ctermbg=0 ctermfg=247 guibg=black guifg=#999999
-        hi VertSplit ctermbg=0 guibg=black
-        hi CursorLineNr term=bold cterm=bold ctermfg=130 gui=bold guifg=#bb7911
-        hi QuickFixLine guibg=#444444 guifg=NONE
-        " hi Search guibg=#5f875f
-        hi Search guibg=#aa88cc
-        hi CurSearch guibg=#ffaf5f
-        hi Normal guibg=#111424
-        hi TabLineFill guibg=#010414
-        hi TabLine guibg=#010414 guifg=darkgreen
-        hi TabLineSel guibg=#212434 guifg=green
-        hi Comment guifg=#555570
-    endif
-endfunction
+" colorscheme habamax
 
 augroup highlights
     au!
     au Colorscheme * call CustomHighlights()
 augroup END
 
-colorscheme habamax
+function! CustomHighlights()
 
-" Spelling mistakes will be colored up red.
-hi SpellBad cterm=underline ctermfg=203 guifg=#ff5f5f
-hi SpellLocal cterm=underline ctermfg=203 guifg=#ff5f5f
-hi SpellRare cterm=underline ctermfg=203 guifg=#ff5f5f
-hi SpellCap cterm=underline ctermfg=203 guifg=#ff5f5f
-hi Folded guifg=darkyellow
+    " Spelling mistakes will be colored up red.
+    hi SpellBad cterm=underline ctermfg=203 guifg=#ff5f5f
+    hi SpellLocal cterm=underline ctermfg=203 guifg=#ff5f5f
+    hi SpellRare cterm=underline ctermfg=203 guifg=#ff5f5f
+    hi SpellCap cterm=underline ctermfg=203 guifg=#ff5f5f
+    hi Folded guifg=darkyellow
 
-hi User1 guifg=green guibg=black
-" hi User2 ctermbg=0 ctermfg=247 guibg=black guifg=#999999
+    hi User1 guifg=green guibg=black
+    " hi User2 ctermbg=0 ctermfg=247 guibg=black guifg=#999999
+
+    let dark_themes = [ 'habamax', 'apprentice', 'onedark', 'ir_black', 'ir_dark', 'ir_blue', 'codedark', 'tokyonight', 'sorbet' ]
+    let light_themes = [ 'pyte', 'solarized', 'solarized8_high', 'papercolor' ]
+
+    if index(dark_themes, g:colors_name) != -1
+        set background=dark
+        hi CursorLine ctermbg=235 guibg=#212434
+        hi StatusLineNC ctermbg=0 ctermfg=8 guibg=#090914 guifg=#555555
+        hi StatusLine ctermbg=0 ctermfg=247 guibg=#090914 guifg=#999999
+        hi VertSplit ctermbg=0 guibg=black
+        hi CursorLineNr term=bold cterm=bold ctermfg=130 gui=bold guifg=#bb7911
+        hi QuickFixLine guibg=#444444 guifg=NONE
+        " hi Search guibg=#5f875f
+        hi Search guibg=#aa88cc
+        hi CurSearch guibg=#ffaf5f
+        " hi Normal guibg=#141928
+        hi Normal guibg=#131523 guifg=#cccccc
+        " hi Normal guibg=#111424
+        hi TabLineFill guibg=#090914 gui=none
+        hi TabLine guibg=#090914 guifg=darkgreen
+        hi TabLineSel guibg=#212434 guifg=green
+        hi Comment guifg=#5a5f74
+        " hi Terminal guibg=#0c0f17
+        hi Terminal guibg=#0f0f1a
+        " hi StatusLineTerm guibg=#0c0f17
+        hi StatusLineTerm guibg=#090914
+        hi VertSplit guibg=#090914
+    elseif index(light_themes, g:colors_name) != -1
+        set background=light
+        colorscheme=g:colors_name
+        echo "light theme"
+    endif
+
+
+
+    " if g:colors_name=~"ir_"
+    "     hi CursorLine ctermbg=235 guibg=#212434
+    "     hi StatusLineNC ctermbg=0 ctermfg=8 guibg=black guifg=#555555
+    "     hi StatusLine ctermbg=0 ctermfg=247 guibg=black guifg=#999999
+    "     hi VertSplit ctermbg=0 guibg=black
+    "     hi CursorLineNr term=bold cterm=bold ctermfg=130 gui=bold guifg=#bb7911
+    "     hi QuickFixLine guibg=#444444 guifg=NONE
+    "     " hi Search guibg=#5f875f
+    "     hi Search guibg=#aa88cc
+    "     hi CurSearch guibg=#ffaf5f
+    "     " hi Normal guibg=#141928
+    "     " hi Normal guibg=#131523
+    "     " hi Normal guibg=#111424
+    "     hi TabLineFill guibg=#010414 gui=none
+    "     hi TabLine guibg=#010414 guifg=darkgreen
+    "     hi TabLineSel guibg=#212434 guifg=green
+    "     " hi Comment guifg=#555570
+    " endif
+endfunction
 
 function! NextColor()
     let l:mycolors = ['habamax', 'darkblue', 'delek', 'retrobox', 'sorbet' ]  " colorscheme names that we use to set color
@@ -569,6 +943,8 @@ endfunction
 " yellow
 " orange
 " green
+
+colorscheme habamax
 
 " }}}
 
@@ -604,12 +980,14 @@ function! HighlightQuickfixEntry() abort
 endfunction
 
 " https://vim.fandom.com/wiki/Search_and_replace_in_multiple_buffers
-function! QuickFixSearch(multiFile, mode)
-    let l:target = getcwd() == $HOME || !a:multiFile ? "%" : "**/*"
+function! QuickFixSearch(isMultiFile, mode)
+    let l:target = getcwd() == $HOME || !a:isMultiFile ? "%" : "**/*"
     if a:mode == "n"
-        call setreg("h", expand('<cword>'))
+      " call setreg("h", expand('<cword>'))
+      let search = getreg("/")
+    elseif a:mode == 'v'
+      let search = getreg("h")
     endif
-    let search = getreg("h")
     silent execute "silent vimgrep! /\\C" . escape(search, '.*$^~[') . "/jg " . l:target
     call HighlightQuickfixEntry()
 endfunction
@@ -625,15 +1003,15 @@ function! QuickFixReplace(replacement)
     else
         let search = getreg("h")
         execute 'cdo s/' . escape(search, '.*$^~[') . '/' . a:replacement . '/cIge'
-        " update
+        cfdo update
         cclose
     endif
 endfunction
 
 nnoremap <Leader>cr :call QuickFixReplace(input('(QuickFix) Replace "'.getreg("h").'" : '))<CR>| " search & replace
 
-function! QuickFixSearchReplace(multiFile, mode, replacement)
-    call QuickFixSearch(a:multiFile, a:mode)
+function! QuickFixSearchReplace(isMultiFile, mode, replacement)
+    call QuickFixSearch(a:isMultiFile, a:mode)
     call QuickFixReplace(a:replacement)
 endfunction
 
@@ -644,6 +1022,10 @@ vnoremap <Leader>sR "hy:call QuickFixSearchReplace(1, "v", input('Multi-file Sea
 
 " local search for visual selection
 vnoremap <silent> / "hy/<C-r>h<CR><S-n>
+
+nnoremap <C-i> <C-i>
+nnoremap [q :colder<cr>:copen<cr>
+nnoremap ]q :cnewer<cr>:copen<cr>
 
 " local search/replace word under cursor
 " - set mark; from line to bottom do cWord substitution | repeat from top to line
@@ -876,13 +1258,13 @@ augroup END
 " --- Rainbow CSV --- {{{
 
 function! ToggleRainbow()
-    let g:rainbow_aligned = get(g:, 'rainbow_aligned', 0)
-    if g:rainbow_aligned == 0
+    let b:rainbow_aligned = get(b:, 'rainbow_aligned', 0)
+    if b:rainbow_aligned == 0
         execute "RainbowAlign"
-        let g:rainbow_aligned = 1
+        let b:rainbow_aligned = 1
     else
         execute "RainbowShrink"
-        let g:rainbow_aligned = 0
+        let b:rainbow_aligned = 0
     endif
 endfunction
 
@@ -897,12 +1279,29 @@ augroup END
 
 " https://www.reddit.com/r/vim/comments/cas2ic/how_to_ripgrep_from_project_root_with_fzfvim/
 
+" An action can be a reference to a function that processes selected lines
+function! s:build_quickfix_list(lines)
+  call setqflist(map(copy(a:lines), '{ "filename": v:val, "lnum": 1 }'))
+  copen
+  cc
+endfunction
+
+let g:fzf_action = {
+      \ 'ctrl-q': function('s:build_quickfix_list'),
+      \ 'ctrl-t': 'tab split',
+      \ 'ctrl-x': 'split',
+      \ 'ctrl-v': 'vsplit' }
+
+
 set rtp^=/opt/homebrew/opt/fzf " If installed using Homebrew on Apple Silicon
 set rtp^=~/.vim/bundle/fzf.vim " git clone git@github.com:junegunn/fzf.vim.git ~/.vim/bundle/fzf.vim
 let g:fzf_vim = {}
 " let g:fzf_vim.preview_window = ['right,50%,<100(up,40%)', 'ctrl-/']
 " let g:fzf_vim.preview_window = ['down,50%', 'ctrl-/']
-let g:fzf_layout = { 'down': '38%' }
+let g:fzf_layout = { 'down': '40%' }
+let g:fzf_vim.grep_multi_line = 1
+let g:fzf_vim.commands_expect = 'alt-enter,ctrl-x' " [Commands] --expect expression for directly executing the command
+
 let $FZF_DEFAULT_COMMAND="rg --files --hidden -g '!Library/' -g '!Applications' -g '!Desktop' -g '!.git'"
 "let g:fzf_vim = {}
 "" [Buffers] Jump to the existing window if possible
@@ -928,6 +1327,7 @@ nnoremap <silent> <leader><leader> :Files<CR>| " FZF Files
 nnoremap <silent> <leader>fF :Files<CR>| " FZF Files
 nnoremap <silent> <expr> <leader>ff b:in_git_repo ? ":GFiles<CR>" : ":Files<CR>"| " FZF Git Files
 nnoremap <silent> <leader>fr :History<CR>| " FZF Recent Files
+nnoremap <leader>fR :Rename | " Rename File
 " s - search
 nnoremap <silent> <leader>sb :BLines<CR>| " FZF Search Buffer
 nnoremap <silent> <leader>st :Colors<CR>| " FZF Themes
@@ -1162,6 +1562,21 @@ augroup END
 "  " endif
 "endfun
 " }}}
+
+set foldtext=MyFoldText()
+
+function MyFoldText()
+  let line = getline(v:foldstart)
+  let sub = substitute(line, '/\*\|\*/\|{{{\d\=', '', 'g') "}}}
+  let comment = substitute(&commentstring, '%s', "", 'g')
+  let sub = substitute(sub, '^'..comment, repeat(' ', len(comment)), 'g')
+  return sub .. " ~"
+endfunction
+
+" hi Folded guibg=NONE guifg=#767390
+hi Folded guibg=NONE guifg=darkyellow
+hi FoldColumn guibg=NONE guifg=darkyellow
+
 
 " vim: fdm=marker
 
