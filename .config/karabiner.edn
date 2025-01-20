@@ -15,15 +15,15 @@
 
                       ; to_delayed_action_delay_milliseconds (def: 500)
                       ; note: this should be equal to :held for mod-tap layers
-                      :delay   150
+                      :delay   210
 
                       ; to_if_held_down_threshold_milliseconds (def: 500)
                       ; note: this should be equal to :delay for mod-tap layers
-                      :held    150
+                      :held    210
 
                       ; to_if_alone_timeout_milliseconds (def: 1000)
                       ; note: (i think) this must be just less than the delay / held value to avoid bug where mod-tap layer stays 1
-                      :alone   149
+                      :alone   209
 
                       ; you can set these delays individually in mod-tap layer definitions if you want separate default values here 
                       }
@@ -88,8 +88,11 @@
                  ; number row
                  [:tab :!Ctab] ; same as Command Tab
                  [:!Stab :!CStab] ; same as Command Tab
-                 [:grave_accent_and_tilde [[:openg "rectangle://execute-action?name=maximize"] [:openg "rectangle://execute-action?name=larger"]]]
-                 [:quote :!CTf] ;; full screen
+                 ; [:P :!Cgrave_accent_and_tilde]
+                 [:grave_accent_and_tilde [:openg "rectangle://execute-action?name=maximize"]]
+                 ; [:grave_accent_and_tilde "osacript ~/scripts/switch-fullscreen-app-windows.scpt"]
+                 ; [:t [:openg "rectangle://execute-action?name=larger"]]
+                 ; [:quote :!CTf] ;; full screen
                  [:1 [:openg "rectangle://execute-action?name=first-third"]]
                  [:2 [:openg "rectangle://execute-action?name=left-half"]]
                  [:3 [:openg "rectangle://execute-action?name=right-half"]]
@@ -102,6 +105,7 @@
                  [:w [:open "Messages"]]
                  [:e [:open "Spotify"]]
                  [:r [:open "Postman"]]
+                 [:t [:!!t]] ; ghostty dropdown terminal
                  ; middle row
                  [:a :!CTO1] ; Control Command Option 1 - switch to first workspace
                  [:s [:open "Ghostty"]]
