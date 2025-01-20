@@ -3,7 +3,7 @@
 theme = "light:coffee-theme,dark:MaterialOcean"
 background = 111424
 
-font-size = 15
+font-size = 13
 font-family = "Monaco Nerd Font Mono"
 # font-family = "Iosevka Nerd Font Mono"
 # font-family = "MesloLGL Nerd Font Mono"
@@ -12,14 +12,15 @@ font-family = "Monaco Nerd Font Mono"
 # background-blur-radius = 20
 
 mouse-hide-while-typing = true
-# window-decoration = false
-keybind = cmd+s=toggle_quick_terminal
+keybind = global:shift+cmd+ctrl+alt+t=toggle_quick_terminal
 
 # macOS specific features
 # macos-titlebar-style = hidden
 
 # macos-titlebar-style = hidden
+# window-decoration = false
 # macos-non-native-fullscreen = true
+macos-non-native-fullscreen = visible-menu
 # macos-option-as-alt = true 
 window-save-state = always
 # window-vsync = true
