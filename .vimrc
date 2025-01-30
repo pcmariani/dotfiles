@@ -59,6 +59,12 @@ let g:AutoPairsCompatibleMaps = 0
 let g:AutoPairsCarefulStringExpansion = 1
 " let g:AutoPairsCompleteOnlyOnSpace = 1
 
+" augroup NERDTree
+"   au!
+"   au BufWinEnter * if bufname(bufnr()) =~ 'NERD' | hi Normal guibg=black | endif
+" augroup END
+
+
 " }}}
 
 " --- options --- {{{
@@ -112,6 +118,7 @@ set showtabline=1
 set linebreak
 "https://stackoverflow.com/questions/36950231/auto-wrap-lines-in-vim-without-inserting-newlines
 
+set shortmess-=S
 
 set wildmenu
 set wildoptions=pum
@@ -122,8 +129,8 @@ set sessionoptions=folds,globals,localoptions,resize,terminal
 
 if has("gui_running")
 
-    set guifont=MonacoNerdFontCompleteM-:h13
-    " set guifont=IosevkaNFM:h15
+    " set guifont=MonacoNerdFontCompleteM-:h13
+    set guifont=IosevkaNFM:h15
     if (&guifont =~ 'Iosevka')
         set columnspace=-1
     else
@@ -135,12 +142,6 @@ if has("gui_running")
     set guioptions+=k
     set guioptions-=e
 
-    " set titlestring=
-    " augroup Gui
-    "   autocmd!
-      " autocmd TabEnter * let &titlestring = t:last_cwd
-    " augroup END
-
 endif
 
 " Disable 'command' and 'option' navigation bindings
@@ -149,7 +150,9 @@ if has("gui_macvim")
 endif
 
 set highlight=M-
-set fillchars=vert:\ ,eob:~,lastline:@,fold:\ ,foldopen:⌵,foldclose:›,foldsep:\ 
+" set fillchars=vert:\ ,eob:~,lastline:@,fold:\ ,foldopen:⌵,foldclose:›,foldsep:\ 
+set fillchars=vert:│,eob:~,lastline:@,fold:\ ,foldopen:⌵,foldclose:›,foldsep:\ 
+" vert:│
 
 
 let &t_SI = "\e[6 q"
@@ -192,32 +195,80 @@ function! ToggleMaximize()
 endfunction
 
 " g - git
-" nnoremap <expr> <Leader>gg call IsTrackedByYadm() == 1 ? ':' : ':tab term ++close lazygit<cr>'| " lazygit
-nnoremap <expr> <leader>gg (IsTrackedByYadm() ? ':tabedit<bar>lcd $HOME<bar>term ++curwin ++close yadm enter lazygit<CR>' : ':tab term ++close lazygit<CR>')
-" see fzf
+" nnoremap <expr> <leader>gg (IsTrackedByYadm() ? ':tabedit<bar>lcd $HOME<bar>term ++curwin ++close yadm enter lazygit<CR>' : ':tab term ++close lazygit<CR>')
+" nnoremap <leader>gg :call Lazygit()<cr>
 
-function! IsTrackedByYadm()
-    " Get the list of files from yadm
-    let l:cmd_output = system('yadm list -a')
-    if v:shell_error
-        echo "Failed to execute 'yadm list -a'"
-        return 0
-    endif
-    " Split the output into a list, removing empty lines
-    let l:dotfiles = filter(split(l:cmd_output, '\n'), '!empty(v:val)')
-    " Get the current buffer's file path relative to home directory
-    let l:current_file = expand('%:p')
-    let l:home_dir = expand('$HOME')
-    " Convert file path to be relative to home directory
-    if l:current_file =~ '^' . l:home_dir
-        let l:relative_path = strpart(l:current_file, len(l:home_dir) + 1)
-    else
-        return 0
-    endif
-    " Check if the relative path matches any file in the list
-    return index(l:dotfiles, l:relative_path) != -1 
-endfunction
+" function! Lazygit()
+"   tabedit
 
+"   " if IsTrackedByYadm()
+"     lcd $HOME
+"     call termopen('lazygit', {'on_exit': {job_id, exit_status -> execute('tabclose')}})
+"     " exe 'term ++curwin ++close yadm enter lazygit'
+"   " else
+"   "   exe 'term ++curwin ++close lazygit'
+"   " endif
+" endfunction
+
+" " augroup lazygit
+" "   au!
+" "   au Bufdelete * if &buftype == 'terminal' && bufname(bufnr()) =~ 'lazygit' | echom "Lazygit" | endif
+" " augroup END
+
+" augroup lazygit
+"     au!
+"     au FileType * if bufname(bufnr()) =~ 'lazygit' | au BufEnter <buffer> tabclose | endif
+" augroup END
+
+" function! OpenLazyGit()
+"   if IsTrackedByYadm()
+"     tabedit
+"     lcd $HOME
+"     call term_start('yadm enter lazygit', {'curwin': 1, 'exit_cb': 'CloseTabOnExit'})
+"   else
+"     let curDir = getcwd()
+"     tabedit
+"     execute 'lcd'..curDir
+"     call term_start('lazygit', {'curwin': 1, 'exit_cb': 'CloseTabOnExit'})
+"   endif
+" endfunction
+
+" function! CloseTabOnExit(...)
+"   execute 'tabclose'
+" endfunction
+
+" nnoremap <leader>gg :call OpenLazyGit()<CR>
+
+
+
+" function! IsTrackedByYadm()
+"     " Get the list of files from yadm
+"     let l:cmd_output = system('yadm list -a')
+"     if v:shell_error
+"         echo "Failed to execute 'yadm list -a'"
+"         return 0
+"     endif
+"     " Split the output into a list, removing empty lines
+"     let l:dotfiles = filter(split(l:cmd_output, '\n'), '!empty(v:val)')
+"     " Get the current buffer's file path relative to home directory
+"     let l:current_file = expand('%:p')
+"     let l:home_dir = expand('$HOME')
+"     " Convert file path to be relative to home directory
+"     if l:current_file =~ '^' . l:home_dir
+"         let l:relative_path = strpart(l:current_file, len(l:home_dir) + 1)
+"     else
+"         return 0
+"     endif
+"     " Check if the relative path matches any file in the list
+"     return index(l:dotfiles, l:relative_path) != -1 
+" endfunction
+
+" " Function to close the tab after lazygit exits
+" function! OnLazygitExit(job_id, code, event)
+"     " Close the buffer AND the tab
+"     bdelete!
+"     tabclose
+" endfunction
 
 " o - open
 nnoremap <Leader>ot :vertical terminal ++kill=term ++close<cr><C-\><C-n>:setlocal nobuflisted winfixwidth<cr>i| " open terminal
@@ -362,7 +413,7 @@ nnoremap <leader>qq :qa!<cr>| " quit vim!
 " nnoremap <leader>e :Lexplore<cr>
 nnoremap <leader>e :NERDTreeToggle<cr>| " toggle filetree
 nnoremap <leader>r mm:w<cr>:source $MYVIMRC<cr>:nohl<cr>:echo ".vimrc reloaded"<cr>`m| " reload vim
-nnoremap <leader>ov :tabnew ~/.vimrc<cr>| " open vimrc
+nnoremap <leader>ov :tabnew ~/.vimrc<cr>tcd ~<cr>| " open vimrc
 " nnoremap <leader>sc :colorscheme <TAB>
 nnoremap <leader>J ddpkJ| " reverse J
 
@@ -421,6 +472,13 @@ endfunction
 
 " }}}
 
+" --- abbreviations --- {{{
+
+cnoreabbrev cd tcd
+cnoreabbrev pwd verbose pwd
+
+" }}}
+
 " --- session management --- {{{
 
 let g:session_autosave = 'no'
@@ -449,8 +507,10 @@ function! NewSession(session_name)
     let session_file_name = split(session_full_path, '/')[-1]
     let session_name = fnamemodify(session_file_name, ":r")
   endif
+  execute 'tcd' fnameescape(expand('%:p:h'))
+  call SetTitleStringToPwd()
   call settabvar(tabpagenr(), 'session_name', session_name)
-  call SetTabLabel("## "..session_name.." ##")
+  call SetTabLabel("~ "..session_name.." ~")
 endfunction
 
 nnoremap gso :Sessions<cr>
@@ -502,7 +562,7 @@ command! Sessions call fzf#run(fzf#wrap({
 
 " --- tab management --- {{{
 
-nnoremap <leader><tab>n :tabnew<cr>cd ~<cr>
+nnoremap <leader><tab>n :tabnew<cr>tcd ~<cr>
 nnoremap <leader><tab>r :call SetTabLabel(input('Set Tab Label: ', gettabvar(tabpagenr(), 'custom_tab_label')))<cr>
 nnoremap <leader><tab>k :tabclose<cr>
 
@@ -527,7 +587,6 @@ function! AddBufferToTabBuffersList_SetBufferListed()
   " This could be broken up into two functions
   " 1. add/remove bufnr to/from t:buffers
   " 2. set buffer as listed/unlisted
-  " NOTE: Removing a buffer from t:buffers is done in the function Bclose
   if !exists('t:buffers')
     let t:buffers = []
   endif
@@ -562,7 +621,7 @@ augroup Tabs
   autocmd TabNew,VimEnter * let t:isNewTab = 1
   autocmd TabEnter * call SetTitleStringToPwd()
   autocmd BufReadPost * if t:isNewTab == 1 | call SetIsNewTabFalseIfFirstBuffer() | endif
-  autocmd BufEnter * if exists('t:isNewTab') && t:isNewTab == 1 && expand('%:p') == '' | execute 'tcd' $HOME | call SetTitleStringToPwd() | endif
+  " autocmd BufEnter * if exists('t:isNewTab') && t:isNewTab == 1 && expand('%:p') == '' | execute 'tcd' $HOME | call SetTitleStringToPwd() | endif
   autocmd BufNew * if t:isNewTab == 1 | clearjumps | endif
   " autocmd TabEnter * execute 'verbose pwd'
 augroup END
@@ -665,25 +724,34 @@ endfunction
 
 
 " Don't close window, when deleting a buffer
-" command! -bang Bclose call BufcloseCloseIt(<bang>0)
-command! Bclose call BufcloseCloseIt()
-function! BufcloseCloseIt()
+command! -bang Bclose call BufcloseCloseIt(<bang>0)
+" command! Bclose call BufcloseCloseIt()
+function! BufcloseCloseIt(wipeout)
     let l:currentBufNum = bufnr("%")
     let l:alternateBufNum = bufnr("#")
     if buflisted(l:alternateBufNum)
         buffer #
+        echo "buffer #: switched to alternate buffer"
     else
         bnext
+        echo "bnext: switched to next buffer"
     endif
     if bufnr("%") == l:currentBufNum
       if len(tabpagebuflist(0)) == 1 && tabpagenr('$') > 1
         tabclose
       else
         new
+        echo "new: new buffer"
       endif
     endif
     if buflisted(l:currentBufNum)
-      execute("bdelete ".l:currentBufNum)
+      if a:wipeout
+        execute("bwipeout ".l:currentBufNum)
+        echo "bwipeout: buffer wiped out"
+      else
+        exCute("bdelete ".l:currentBufNum)
+        echo "bdelete: buffer deleted"
+      endif
     endif
 endfunction
 
@@ -860,32 +928,58 @@ function! CustomHighlights()
     hi User1 guifg=green guibg=black
     " hi User2 ctermbg=0 ctermfg=247 guibg=black guifg=#999999
 
-    let dark_themes = [ 'habamax', 'apprentice', 'onedark', 'ir_black', 'ir_dark', 'ir_blue', 'codedark', 'tokyonight', 'sorbet' ]
+    let dark_themes = [ 'ayu', 'habamax', 'apprentice', 'onedark', 'ir_black', 'ir_dark', 'ir_blue', 'codedark', 'tokyonight', 'sorbet' ]
+    " let dark_themes = [ 'habamax', 'apprentice', 'onedark', 'codedark', 'tokyonight', 'sorbet' ]
     let light_themes = [ 'pyte', 'solarized', 'solarized8_high', 'papercolor' ]
 
     if index(dark_themes, g:colors_name) != -1
         set background=dark
-        hi CursorLine ctermbg=235 guibg=#212434
-        hi StatusLineNC ctermbg=0 ctermfg=8 guibg=#090914 guifg=#555555
-        hi StatusLine ctermbg=0 ctermfg=247 guibg=#090914 guifg=#999999
-        hi VertSplit ctermbg=0 guibg=black
-        hi CursorLineNr term=bold cterm=bold ctermfg=130 gui=bold guifg=#bb7911
+
+        " hi StatusLineNC guibg=#090914 guifg=#555555
+        " hi StatusLine   guibg=#090914 guifg=#999999
+
+        " Black and Yellow
+        hi StatusLine       guibg=#1d1d12 guifg=#999999
+        hi StatusLineNC     guibg=#15152f guifg=#555555
+        hi StatusLineTerm   guibg=#0a0a08 guifg=#0a0a08
+        hi StatusLineTermNC guibg=#0a0a08 guifg=#0a0a08
+        hi VertSplit        guifg=#3a3a2a guibg=NONE gui=NONE
+        hi Normal           guibg=#080808
+        hi Terminal         guibg=#0a0a08
+        hi Comment          guifg=#505060
+        hi LineNr           guifg=#404050
+        hi CursorLineNr     guifg=#8a8a5a gui=bold
+        " hi CursorLine       guibg=#15152f
+        " hi CursorLine       guibg=#230808
+        hi CursorLine       guibg=#191919
+        "
+        " hi StatusLineNC guibg=#202030 guifg=#555555 "gui=underline
+        " hi StatusLine   guibg=#202030 guifg=#bbbbbb "gui=underline
+        " hi VertSplit    guifg=#202030 guibg=NONE gui=reverse
+        " hi VertSplit    guifg=#303040 guibg=NONE gui=NONE
+        " hi VertSplit guibg=bl1a1f30ack
+        " hi CursorLineNr term=bold cterm=bold ctermfg=130 gui=bold guifg=#bb7911
         hi QuickFixLine guibg=#444444 guifg=NONE
         " hi Search guibg=#5f875f
         hi Search guibg=#aa88cc
         hi CurSearch guibg=#ffaf5f
-        " hi Normal guibg=#141928
-        hi Normal guibg=#131523 guifg=#cccccc
+        " hi Normal guibg=#030404 guifg=#cccccc
+        " hi Normal guibg=#050508 guifg=#cccccc
+        " hi Normal guibg=#0a0c17 guifg=#cccccc
+        " hi Normal guibg=#0e0e0e guifg=#cccccc
+        " hi Normal guibg=#000a12 guifg=#cccccc
+        " hi Normal guibg=#131523 guifg=#cccccc
         " hi Normal guibg=#111424
+
         hi TabLineFill guibg=#090914 gui=none
         hi TabLine guibg=#090914 guifg=darkgreen
         hi TabLineSel guibg=#212434 guifg=green
-        hi Comment guifg=#5a5f74
         " hi Terminal guibg=#0c0f17
-        hi Terminal guibg=#0f0f1a
+        " hi Terminal guibg=#0a1020
+        " hi Terminal guibg=#090914
         " hi StatusLineTerm guibg=#0c0f17
-        hi StatusLineTerm guibg=#090914
-        hi VertSplit guibg=#090914
+        " hi StatusLineTerm guibg=#090914
+        " hi VertSplit guibg=#090914
     elseif index(light_themes, g:colors_name) != -1
         set background=light
         colorscheme=g:colors_name
@@ -944,7 +1038,8 @@ endfunction
 " orange
 " green
 
-colorscheme habamax
+" colorscheme habamax
+colorscheme onedark
 
 " }}}
 
@@ -1195,7 +1290,7 @@ augroup end
 
 " Heavily inspired by: https://github.com/junegunn/dotfiles/blob/master/vimrc
 function! s:statusline_expr()
-    let mode = " %#User1#%{mode()}%* "
+    let mode = " %#User1#%{toupper(' '..mode()..' ')}%* "
     let mod = "%{&modified && &buftype != 'terminal' ? '+' : ''}"
     let mol = "%{!&modifiable ? '[x] ' : ''}"
     let ro  = "%{&readonly ? 'Read Only ' : ''}"
@@ -1232,23 +1327,24 @@ augroup end
 
 function! InsertStatuslineColor(mode)
     if a:mode == 'i'
-        hi User1 guifg=orange guibg=black
+        hi User1 guifg=orange guibg=#202013 gui=bold,reverse
     elseif a:mode == 'r'
-        hi User1 guifg=magenta guibg=black
+        hi User1 guifg=magenta guibg=#202013 gui=bold,reverse
     else
-        hi User1 guifg=darkgreen guibg=black
+        asdfasf
+        hi User1 guifg=darkgreen guibg=#202013 gui=bold,reverse
     endif
 endfunction
 
 augroup ModeEvents
     au!
-    au InsertEnter *  call InsertStatuslineColor(v:insertmode)
-    au InsertChange * call InsertStatuslineColor(v:insertmode)
-    au InsertLeave *            hi User1 guifg=green  guibg=black
-    au Modechanged [vV\x16]*:*  hi User1 guifg=green  guibg=black " leave visual
-    au ModeChanged *:[vV\x16]*  hi User1 guifg=magenta guibg=black " enter visual
-    au Modechanged *c:*         hi User1 guifg=green  guibg=black " leave command
-    au Modechanged *:c*         hi User1 guifg=brown guibg=black " enter command
+    au InsertEnter  *            call InsertStatuslineColor(v:insertmode)
+    au InsertChange *            call InsertStatuslineColor(v:insertmode)
+    au InsertLeave  *            hi User1 guifg=darkyellow   guibg=#1a1a00 gui=bold,reverse
+    au Modechanged  [vV\x16]*:*  hi User1 guifg=darkyellow   guibg=#1a1a00 gui=bold,reverse " leave visual
+    au ModeChanged  *:[vV\x16]*  hi User1 guifg=magenta      guibg=#1a1a00 gui=bold,reverse " enter visual
+    au Modechanged  *c:*         hi User1 guifg=darkyellow   guibg=#1a1a00 gui=bold,reverse " leave command
+    au Modechanged  *:c*         hi User1 guifg=brown        guibg=#1a1a00 gui=bold,reverse " enter command
     " au TextChanged,TextChangedI  User2 guifg=#bb7911
     " au BufWritePost *            hi User2 guifg=#999999
 augroup END
@@ -1475,6 +1571,24 @@ augroup END
 
 " }}}
 
+" --- foldtext --- {{{
+
+set foldtext=MyFoldText()
+
+function MyFoldText()
+  let line = getline(v:foldstart)
+  let sub = substitute(line, '/\*\|\*/\|{{{\d\=', '', 'g') "}}}
+  let comment = substitute(&commentstring, '%s', "", 'g')
+  let sub = substitute(sub, '^'..comment, repeat(' ', len(comment)), 'g')
+  return sub .. " ~"
+endfunction
+
+" hi Folded guibg=NONE guifg=#767390
+hi Folded guibg=NONE guifg=darkyellow
+hi FoldColumn guibg=NONE guifg=darkyellow
+
+" }}}
+
 " --- BONEYARD --- {{{
 
 
@@ -1563,23 +1677,9 @@ augroup END
 "endfun
 " }}}
 
-set foldtext=MyFoldText()
-
-function MyFoldText()
-  let line = getline(v:foldstart)
-  let sub = substitute(line, '/\*\|\*/\|{{{\d\=', '', 'g') "}}}
-  let comment = substitute(&commentstring, '%s', "", 'g')
-  let sub = substitute(sub, '^'..comment, repeat(' ', len(comment)), 'g')
-  return sub .. " ~"
-endfunction
-
-" hi Folded guibg=NONE guifg=#767390
-hi Folded guibg=NONE guifg=darkyellow
-hi FoldColumn guibg=NONE guifg=darkyellow
-
 
 " vim: fdm=marker
-
 " https://discourse.doomemacs.org/t/keybind-reference-sheet/49
 " https://dev.to/braydentw/what-s-the-coolest-vim-plugin-40i5
+
 
