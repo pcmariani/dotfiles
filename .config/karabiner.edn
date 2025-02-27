@@ -15,15 +15,15 @@
 
                       ; to_delayed_action_delay_milliseconds (def: 500)
                       ; note: this should be equal to :held for mod-tap layers
-                      :delay   210
+                      :delay   160
 
                       ; to_if_held_down_threshold_milliseconds (def: 500)
                       ; note: this should be equal to :delay for mod-tap layers
-                      :held    210
+                      :held    160
 
                       ; to_if_alone_timeout_milliseconds (def: 1000)
                       ; note: (i think) this must be just less than the delay / held value to avoid bug where mod-tap layer stays 1
-                      :alone   209
+                      :alone   159
 
                       ; you can set these delays individually in mod-tap layer definitions if you want separate default values here 
                       }
