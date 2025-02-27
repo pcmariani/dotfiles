@@ -939,20 +939,28 @@ function! CustomHighlights()
         " hi StatusLine   guibg=#090914 guifg=#999999
 
         " Black and Yellow
-        hi StatusLine       guibg=#1d1d12 guifg=#999999
+        hi StatusLine       guibg=#1d1d12 guifg=#bbbbbb
         hi StatusLineNC     guibg=#15152f guifg=#555555
         hi StatusLineTerm   guibg=#0a0a08 guifg=#0a0a08
         hi StatusLineTermNC guibg=#0a0a08 guifg=#0a0a08
         hi VertSplit        guifg=#3a3a2a guibg=NONE gui=NONE
-        hi Normal           guibg=#080808
-        hi Terminal         guibg=#0a0a08
+        hi Normal           guibg=#0a0a00
+        hi Terminal         guibg=#000a0a
         hi Comment          guifg=#505060
         hi LineNr           guifg=#404050
         hi CursorLineNr     guifg=#8a8a5a gui=bold
         " hi CursorLine       guibg=#15152f
         " hi CursorLine       guibg=#230808
         hi CursorLine       guibg=#191919
-        "
+
+        " hi TabLineFill      guibg=#080808 gui=none
+        hi TabLineFill      guibg=#15152f gui=none
+
+        " hi TabLine          guibg=#1d1d12 guifg=#888888
+        hi TabLine          guibg=#15152f guifg=#888888
+        " hi TabLineSel       guibg=#303020 guifg=#98c379
+        hi TabLineSel       guibg=#35354f guifg=lightcyan
+
         " hi StatusLineNC guibg=#202030 guifg=#555555 "gui=underline
         " hi StatusLine   guibg=#202030 guifg=#bbbbbb "gui=underline
         " hi VertSplit    guifg=#202030 guibg=NONE gui=reverse
@@ -971,9 +979,9 @@ function! CustomHighlights()
         " hi Normal guibg=#131523 guifg=#cccccc
         " hi Normal guibg=#111424
 
-        hi TabLineFill guibg=#090914 gui=none
-        hi TabLine guibg=#090914 guifg=darkgreen
-        hi TabLineSel guibg=#212434 guifg=green
+        " hi TabLineFill guibg=#090914 gui=none
+        " hi TabLine guibg=#090914 guifg=darkgreen
+        " hi TabLineSel guibg=#212434 guifg=green
         " hi Terminal guibg=#0c0f17
         " hi Terminal guibg=#0a1020
         " hi Terminal guibg=#090914
@@ -985,8 +993,6 @@ function! CustomHighlights()
         colorscheme=g:colors_name
         echo "light theme"
     endif
-
-
 
     " if g:colors_name=~"ir_"
     "     hi CursorLine ctermbg=235 guibg=#212434
@@ -1006,6 +1012,12 @@ function! CustomHighlights()
     "     hi TabLineSel guibg=#212434 guifg=green
     "     " hi Comment guifg=#555570
     " endif
+endfunction
+
+function! ViewHighlights()
+  for id in synstack(line("."), col("."))
+    echo synIDattr(id, "name")
+  endfor
 endfunction
 
 function! NextColor()
@@ -1290,7 +1302,7 @@ augroup end
 
 " Heavily inspired by: https://github.com/junegunn/dotfiles/blob/master/vimrc
 function! s:statusline_expr()
-    let mode = " %#User1#%{toupper(' '..mode()..' ')}%* "
+    let mode = " %#User1#%{&buftype != 'terminal' ? toupper(' '..mode()..' ') : ''}%* "
     let mod = "%{&modified && &buftype != 'terminal' ? '+' : ''}"
     let mol = "%{!&modifiable ? '[x] ' : ''}"
     let ro  = "%{&readonly ? 'Read Only ' : ''}"
@@ -1331,7 +1343,6 @@ function! InsertStatuslineColor(mode)
     elseif a:mode == 'r'
         hi User1 guifg=magenta guibg=#202013 gui=bold,reverse
     else
-        asdfasf
         hi User1 guifg=darkgreen guibg=#202013 gui=bold,reverse
     endif
 endfunction
@@ -1584,7 +1595,7 @@ function MyFoldText()
 endfunction
 
 " hi Folded guibg=NONE guifg=#767390
-hi Folded guibg=NONE guifg=darkyellow
+hi Folded guibg=NONE guifg=cyan
 hi FoldColumn guibg=NONE guifg=darkyellow
 
 " }}}
