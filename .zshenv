@@ -6,7 +6,7 @@ path=(
   "$HOME/.local/bin"
   "$HOME/scripts"
   "$HOME/.cargo/bin"
-  "$HOME/projects/boomi-groovy-2"
+  "$HOME/projects/best"
   "$path[@]"
 )
 
