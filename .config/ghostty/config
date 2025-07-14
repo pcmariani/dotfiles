@@ -1,11 +1,12 @@
 # ghostty +list-fonts
 
 theme = "light:coffee-theme,dark:MaterialOcean"
-background = 111424
+# background = 111424
+background = 030303
 
 font-size = 13
-font-family = "Monaco Nerd Font Mono"
-# font-family = "Iosevka Nerd Font Mono"
+# font-family = "Monaco Nerd Font Mono"
+font-family = "Iosevka Nerd Font Mono"
 # font-family = "MesloLGL Nerd Font Mono"
 
 # background-opacity = 1.0
