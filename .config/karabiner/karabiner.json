@@ -1,14 +1,14 @@
 {
   "global" : {
-    "show_profile_name_in_menu_bar" : true
+    "show_in_menu_bar" : false
   },
   "profiles" : [ {
     "complex_modifications" : {
       "parameters" : {
         "basic.simultaneous_threshold_milliseconds" : 50,
-        "basic.to_delayed_action_delay_milliseconds" : 150,
-        "basic.to_if_alone_timeout_milliseconds" : 149,
-        "basic.to_if_held_down_threshold_milliseconds" : 150
+        "basic.to_delayed_action_delay_milliseconds" : 160,
+        "basic.to_if_alone_timeout_milliseconds" : 159,
+        "basic.to_if_held_down_threshold_milliseconds" : 160
       },
       "rules" : [ {
         "description" : "CAPSLOCK is CTRL if pressed in combination, otherwise ESC",
@@ -289,22 +289,6 @@
           },
           "to" : [ {
             "shell_command" : "open -g \"rectangle://execute-action?name=maximize\""
-          }, {
-            "shell_command" : "open -g \"rectangle://execute-action?name=larger\""
-          } ],
-          "conditions" : [ {
-            "name" : "space-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "quote"
-          },
-          "to" : [ {
-            "key_code" : "f",
-            "modifiers" : [ "left_command", "left_control" ]
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -422,6 +406,20 @@
           },
           "to" : [ {
             "shell_command" : "open -a \"Postman\""
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "t"
+          },
+          "to" : [ {
+            "key_code" : "t",
+            "modifiers" : [ "left_command", "left_control", "left_option", "left_shift" ]
           } ],
           "conditions" : [ {
             "name" : "space-mode",
