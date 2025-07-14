@@ -691,11 +691,11 @@ function! EscapeKey()
         " execute("bdelete " . l:bnum)
         " return
         " endif
-        if getbufvar(l:bnum, '&buftype') == 'quickfix'
-            cclose
-            " execute ":normal! 10<C-e>"
-            return
-        endif
+        " if getbufvar(l:bnum, '&buftype') == 'quickfix'
+        "     cclose
+        "     " execute ":normal! 10<C-e>"
+        "     return
+        " endif
     endfor
 endfunction
 
@@ -854,7 +854,9 @@ tnoremap <silent> <C-j> <C-w>j
 tnoremap <silent> <C-k> <C-w>k
 tnoremap <silent> <C-l> <C-w>l
 nnoremap <leader>x :SendToTerm<CR>| " SendToTerm
-nnoremap <leader>X :SendToTerm| " SendToTerm new command
+" nnoremap <leader>X :SendToTerm | " SendToTerm new command
+" nnoremap <leader>X :execute 'SendToTerm ' . t:termCommand | " SendToTerm new command
+execute 'nnoremap <leader>X :SendToTerm ' . t:termCommand
 
 command! -complete=file -nargs=* SendToTerm call SendToTerm(<f-args>)
 function! SendToTerm(...)
@@ -874,6 +876,18 @@ function! SendToTerm(...)
         call feedkeys(":SendToTerm ", "nt")
     endif
 endfunction
+
+" for C programming
+augroup clang
+au!
+au filetype c set makeprg=cc\ %\ &&\ ./a.out
+au filetype c let b:ale_c_cc_options='-std=c89 -Wall'
+" au filetype c let t:termCommand='clear && gcc -ansi -Wall ' . expand('%') .' && ./a.out'
+au BufEnter *.c let t:termCommand = 'clear && gcc -Wall "' . expand('%') . '" && ./a.out'
+" au filetype c nnoremap <buffer> <silent> <leader>x :copen<cr><C-w><C-w>:w<cr>:silent make<cr>
+augroup END
+
+
 
 " }}}
 
