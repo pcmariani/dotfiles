@@ -1,8 +1,7 @@
-# /.config/starship.toml
-
 add_newline = false
 
 format = """
+${custom.tmux_session}\
 $battery\
 $python\
 $directory\
@@ -13,67 +12,25 @@ $git_branch\
 $git_status\
 $memory_usage\
 $env_var\
-$custom\
 $sudo\
 $jobs\
 $status\
 $shell\
 $character
 """
-# $git_metrics\
-# $git_state\
-# $git_commit\
-# $time\
-# $aws\
-# $gcloud\
-# $openstack\
-# $azure\
-# $crystal\
-# $cmd_duration\
-# $singularity$kubernetes$vcsh\
-# $hg_branch\
-# $docker_context\
-# $package\
-# $cmake\
-# $cobol\
-# $dart\
-# $deno\
-# $dotnet\
-# $elixir\
-# $elm\
-# $erlang\
-# $golang\
-# $helm\
-# $java\
-# $julia\
-# $kotlin\
-# $lua\
-# $nim\
-# $nodejs\
-# $ocaml\
-# $perl\
-# $php\
-# $pulumi\
-# $purescript\
-# $rlang\
-# $red\
-# $ruby\
-# $rust\
-# $scala\
-# $swift\
-# $terraform\
-# $vlang\
-# $vagrant\
-# $zig\
-# $nix_shell\
-# $conda\
+
+# right_format = "${custom.tmux_session}"
+
+[custom.tmux_session]
+# command = "tmux display-message -p '#S' 2>/dev/null"
+# command = "tmux display-message -p '#S' | sed 's|'$(basename \"$PWD\" | tr '.' '_')'||'"
+when = "test $(tmux list-sessions | wc -l) -gt 0"
+style = "bold grey"
+symbol = " "
+format = "[$symbol]($style)"
 
 [character]
 success_symbol="[❯](green)" #契⦒›▷▶⼺▹♘➤⟩⟫⦊⦒⼊
-
-# [cmd_duration]
-# min_time = 100_000
-# format = "[$duration]($style) "
 
 [directory]
 format = "[$path]($style)[$lock_symbol]($lock_style) "
@@ -83,10 +40,6 @@ truncate_to_repo = false
 style = "green"
 repo_root_style = "bright-green"
 
-# [jobs]
-# symbol = ""
-# style = "bold white dimmed"
-
 [git_branch]
 format = "[$symbol$branch]($style) "
 style = "bold yellow dimmed"
@@ -95,6 +48,14 @@ style = "bold yellow dimmed"
 up_to_date = "✓" #✓
 style = "bold yellow dimmed"
 format = "[$all_status$ahead_behind]($style) "
+
+[python]
+format = '[Python ${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+# style = "bold green"
+
+# [jobs]
+# symbol = ""
+# style = "bold white dimmed"
 
 # [status]
 # disabled = false
@@ -132,10 +93,6 @@ format = "[$all_status$ahead_behind]($style) "
 
 # [package]
 # disabled = true
-
-[python]
-format = '[Python ${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
-# style = "bold green"
 
 # [rust]
 # format = "[$symbol$version]($style) "

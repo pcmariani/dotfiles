@@ -7,14 +7,16 @@
 #alias fa='eval "$(alias | fzf | awk '"'"'{print $1}'"'"')"'
 #alias fa='grep -F "$(awk -f list_alias2.awk .bash_aliases | column -t -s'"'"'##'"'"' | fzf | sed '"'"'s/ \{2,\}.*//'"'"')=" .bash_aliases'
 
+alias bu='export BW_SESSION=$(bw unlock --raw)'
+
 alias a='OUTPUT_FORMAT=json arc-cli'
 alias alw='OUTPUT_FORMAT=json arc-cli list windows'
 alias alt='OUTPUT_FORMAT=json arc-cli list tabs'
 
 youtube-download-transcript() {
-	yt-dlp --skip-download --write-subs --write-auto-subs --sub-lang en --sub-format vtt --output "$2.transcript.%(ext)s" $1
-	sed -i '' -e "1,4d" -e "/^$/d" -e "/^[0-9]\{2\}.*/d" -e "s/\(&nbsp;\)\{1,\}$//" "$2.transcript.en.vtt"
-	# on mac you need '' after -i
+  yt-dlp --skip-download --write-subs --write-auto-subs --sub-lang en --sub-format vtt --output "$2.transcript.%(ext)s" $1
+  sed -i '' -e "1,4d" -e "/^$/d" -e "/^[0-9]\{2\}.*/d" -e "s/\(&nbsp;\)\{1,\}$//" "$2.transcript.en.vtt"
+  # on mac you need '' after -i
 }
 alias yt-ts='youtube-download-transcript'
 
@@ -32,9 +34,9 @@ alias bw='NODE_OPTIONS="--no-deprecation" bw'
 
 # --- yadm --- #
 yadm-lazygit() {
-	pushd "$HOME"
-	yadm enter lazygit
-	popd
+  pushd "$HOME"
+  yadm enter lazygit
+  popd
 }
 alias gy='yadm-lazygit'
 alias yg='yadm-lazygit'
@@ -78,13 +80,13 @@ alias eze='edit ~/.zshenv'
 alias ezf='edit ~/.config/zsh/zsh-functions'
 alias .a='. ~/.config/aliases && echo aliases sourced'
 if [ -n "$ZSH_VERSION" ]; then
-	alias .z='source ~/.config/zsh/.zshrc && echo .zshrc sourced'
-	alias .za='source ~/.config/zsh/zsh-aliases && echo zsh-aliases sourced'
-	alias .ze='source ~/.zshenv && echo .zshenv sourced'
-	alias .zf='source ~/.config/zsh/zsh-functions && echo zsh-functions sourced'
+  alias .z='source ~/.config/zsh/.zshrc && echo .zshrc sourced'
+  alias .za='source ~/.config/zsh/zsh-aliases && echo zsh-aliases sourced'
+  alias .ze='source ~/.zshenv && echo .zshenv sourced'
+  alias .zf='source ~/.config/zsh/zsh-functions && echo zsh-functions sourced'
 else
-	alias .b='clear; . ~/.bashrc'
-	alias .bf='. ~/.config/bash_functions && echo bash_functions sourced'
+  alias .b='clear; . ~/.bashrc'
+  alias .bf='. ~/.config/bash_functions && echo bash_functions sourced'
 fi
 # alias cfh="$EDITOR $HISTFILE"
 # alias et="$EDITOR $HOME/todo.txt"
@@ -154,28 +156,28 @@ alias 256="$HOME/scripts/256-colors.sh"
 
 # --- Color ls & exa --- #
 if which eza >/dev/null; then
-	## all-files
-	alias l="eza -a --icons --group-directories-first"
-	## with columns
-	alias ls="eza --icons --group-directories-first"
-	## list directories only
-	alias lsd="eza -ad --icons --group-directories-first --no-user --git */"
-	## ls --long --all-files with columns
-	alias la="eza -la --icons --group-directories-first --no-user --git"
-	## list directories only
-	alias lad="eza -lad --icons --group-directories-first --no-user --git */"
-	## tree listing
-	alias lt='eza -aT -L3 --icons --group-directories-first -git -git-ignore' # tree listing
-	## ls --long --all-files with columns
-	# alias lgitignore="exa -1a --color=always --group-directories-first --git"
-	## ls --all-files with columns
-	# alias la="exa -1a --color=always --group-directories-first --git --git-ignore"
+  ## all-files
+  alias l="eza -a --icons --group-directories-first"
+  ## with columns
+  alias ls="eza --icons --group-directories-first"
+  ## list directories only
+  alias lsd="eza -ad --icons --group-directories-first --no-user --git */"
+  ## ls --long --all-files with columns
+  alias la="eza -la --icons --group-directories-first --no-user --git"
+  ## list directories only
+  alias lad="eza -lad --icons --group-directories-first --no-user --git */"
+  ## tree listing
+  alias lt='eza -aT -L3 --icons --group-directories-first -git -git-ignore' # tree listing
+  ## ls --long --all-files with columns
+  # alias lgitignore="exa -1a --color=always --group-directories-first --git"
+  ## ls --all-files with columns
+  # alias la="exa -1a --color=always --group-directories-first --git --git-ignore"
 
 else
-	alias l="ls -1"
-	alias ls="ls --color=always"
-	alias ll="ls -l"
-	alias la="ls -lA"
+  alias l="ls -1"
+  alias ls="ls --color=always"
+  alias ll="ls -l"
+  alias la="ls -lA"
 fi
 
 # --- cd --- #
@@ -282,11 +284,11 @@ alias sshkill="ssh-agent -k" # kill agent server
 alias sshprocs="ps -e | grep ssh-agent"
 # Kill all stray ssh-agent procs:
 function func_sshkillall() {
-	for i in $(\ps -e | grep ssh-agent | sed 's/^ *//' | cut -d' ' -f1 | sort -u); do
-		echo -n killing PID "$i"
-		kill "$i"
-		echo
-	done
+  for i in $(\ps -e | grep ssh-agent | sed 's/^ *//' | cut -d' ' -f1 | sort -u); do
+    echo -n killing PID "$i"
+    kill "$i"
+    echo
+  done
 }
 alias sshkillall=func_sshkillall
 
@@ -299,31 +301,31 @@ alias gpgd="gpg -d"                        # enter filename
 # --- zsh only --- #
 if [ -n "$ZSH_VERSION" ]; then
 
-	# Global aliases
-	alias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
-	alias -g A="| awk"
-	alias -g A1="| awk '{print \$1}'"
-	alias -g v='nvim'
-	alias -g vt='nvim -p'
-	alias -g L='| less'
-	alias -g G='| grep'
-	alias -g H='| head'
-	alias -g T='| tail'
-	alias -g W='| wc -l'
+  # Global aliases
+  alias -g grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
+  alias -g A="| awk"
+  alias -g A1="| awk '{print \$1}'"
+  alias -g v='nvim'
+  alias -g vt='nvim -p'
+  alias -g L='| less'
+  alias -g G='| grep'
+  alias -g H='| head'
+  alias -g T='| tail'
+  alias -g W='| wc -l'
 
-	# directory navigation
-	# alias d='dirs -v | head -10 | sed -e "1s/0\s*\(.*\)/\1/" -e "s/^\([0-9]\)\s*/    \1)  /"'
-	alias d='dirs -v | head -10 | sed -e "1d" -e "s/^\([0-9]\)\s*/[\1] /"'
-	alias 0='cd ~'
-	alias 1='cd ~1'
-	alias 2='cd ~2'
-	alias 3='cd ~3'
-	alias 4='cd ~4'
-	alias 5='cd ~5'
-	alias 6='cd ~6'
-	alias 7='cd ~7'
-	alias 8='cd ~8'
-	alias 9='cd ~9'
+  # directory navigation
+  # alias d='dirs -v | head -10 | sed -e "1s/0\s*\(.*\)/\1/" -e "s/^\([0-9]\)\s*/    \1)  /"'
+  alias d='dirs -v | head -10 | sed -e "1d" -e "s/^\([0-9]\)\s*/[\1] /"'
+  alias 0='cd ~'
+  alias 1='cd ~1'
+  alias 2='cd ~2'
+  alias 3='cd ~3'
+  alias 4='cd ~4'
+  alias 5='cd ~5'
+  alias 6='cd ~6'
+  alias 7='cd ~7'
+  alias 8='cd ~8'
+  alias 9='cd ~9'
 fi
 
 # command aliases

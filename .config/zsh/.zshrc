@@ -60,6 +60,7 @@ bindkey '^e' edit-command-line
 typeset -gU cdpath fpath path
 
 
+
 # ---- FZF -----
 
 # Set up fzf key bindings and fuzzy completion
@@ -118,6 +119,13 @@ _fzf_comprun() {
   esac
 }
 
+# --- Sesh ---
+zle     -N             sesh-sessions
+bindkey -M emacs '\es' sesh-sessions
+bindkey -M vicmd '\es' sesh-sessions
+bindkey -M viins '\es' sesh-sessions
+
+
 # ---- Bat (better cat) ----
 
 # export BAT_THEME=tokyonight_night
@@ -141,7 +149,6 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
-
 
 # ---- Starship ----
 eval "$(starship init zsh)"

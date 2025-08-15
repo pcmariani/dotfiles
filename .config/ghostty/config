@@ -1,28 +1,35 @@
 # ghostty +list-fonts
+#
 
-theme = "light:coffee-theme,dark:MaterialOcean"
+# theme = "light:GruvboxLightHard,dark:catppuccin-mocha"
+theme = "light:iTerm2 Tango Light, dark:MaterialOcean"
+# theme = "light:Github-Light-Default, dark:MaterialOcean"
+# theme = "light:iTerm2 Tango Light, dark:catppuccin-mocha"
+# theme = "light:Terminal Basic, dark:MaterialOcean"
 # background = 111424
 background = 030303
+# background = bbbbbb
 
-font-size = 13
+font-size = 17 
 # font-family = "Monaco Nerd Font Mono"
 font-family = "Iosevka Nerd Font Mono"
 # font-family = "MesloLGL Nerd Font Mono"
 
-# background-opacity = 1.0
-# background-blur-radius = 20
+background-opacity = 0.80
+background-blur-radius = 200
 
 mouse-hide-while-typing = true
 keybind = global:shift+cmd+ctrl+alt+t=toggle_quick_terminal
 
 # macOS specific features
-# macos-titlebar-style = hidden
+shell-integration = none
+macos-titlebar-proxy-icon = hidden
+title = ""
 
-# macos-titlebar-style = hidden
-# window-decoration = false
+window-decoration = false
 # macos-non-native-fullscreen = true
 macos-non-native-fullscreen = visible-menu
-# macos-option-as-alt = true 
+macos-option-as-alt = true 
 window-save-state = always
 # window-vsync = true
 # window-colorspace = display-p3

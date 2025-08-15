@@ -20,6 +20,18 @@ function rgfzf {
      | awk -F':' '{print $1}'
 }
 
+function sesh-sessions() {
+  {
+    exec </dev/tty
+    exec <&1
+    local session
+    session=$(sesh list -i | gum filter --limit 1 --no-sort --fuzzy --no-strip-ansi --placeholder 'Pick a sesh' --height 50 --prompt='⚡')
+    zle reset-prompt > /dev/null 2>&1 || true
+    [[ -z "$session" ]] && return
+    sesh connect $session
+  }
+}
+
 # boomi_processlog() {
 #     curl --location --request POST 'https://api.boomi.com/api/rest/v2/aofoundation-W1GLSD/ProcessLog' \
 #         --header 'Content-Type: application/json' \
