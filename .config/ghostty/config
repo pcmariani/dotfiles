@@ -14,8 +14,10 @@ font-size = 17
 # font-family = "Monaco Nerd Font Mono"
 font-family = "Iosevka Nerd Font Mono"
 # font-family = "MesloLGL Nerd Font Mono"
+font-thicken=true
+font-thicken-strength=128
 
-background-opacity = 0.80
+background-opacity = 0.78
 background-blur-radius = 200
 
 mouse-hide-while-typing = true
@@ -27,8 +29,8 @@ macos-titlebar-proxy-icon = hidden
 title = ""
 
 window-decoration = false
-# macos-non-native-fullscreen = true
-macos-non-native-fullscreen = visible-menu
+macos-non-native-fullscreen = true
+# macos-non-native-fullscreen = visible-menu
 macos-option-as-alt = true 
 window-save-state = always
 # window-vsync = true
