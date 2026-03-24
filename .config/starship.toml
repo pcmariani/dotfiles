@@ -1,7 +1,6 @@
 add_newline = false
 
 format = """
-${custom.tmux_session}\
 $battery\
 $python\
 $directory\
@@ -18,16 +17,15 @@ $status\
 $shell\
 $character
 """
+# ${custom.tmux_session}\
 
 # right_format = "${custom.tmux_session}"
 
-[custom.tmux_session]
-# command = "tmux display-message -p '#S' 2>/dev/null"
-# command = "tmux display-message -p '#S' | sed 's|'$(basename \"$PWD\" | tr '.' '_')'||'"
-when = "test $(tmux list-sessions | wc -l) -gt 0"
-style = "bold grey"
-symbol = " "
-format = "[$symbol]($style)"
+# [custom.tmux_session]
+# when = "test $(tmux list-sessions | wc -l) -gt 0"
+# style = "bold grey"
+# symbol = " "
+# format = "[$symbol]($style)"
 
 [character]
 success_symbol="[❯](green)" #契⦒›▷▶⼺▹♘➤⟩⟫⦊⦒⼊
@@ -40,17 +38,17 @@ truncate_to_repo = false
 style = "green"
 repo_root_style = "bright-green"
 
-[git_branch]
-format = "[$symbol$branch]($style) "
-style = "bold yellow dimmed"
+# [git_branch]
+# format = "[$symbol$branch]($style) "
+# style = "bold yellow dimmed"
+#
+# [git_status]
+# up_to_date = "✓" #✓
+# style = "bold yellow dimmed"
+# format = "[$all_status$ahead_behind]($style) "
 
-[git_status]
-up_to_date = "✓" #✓
-style = "bold yellow dimmed"
-format = "[$all_status$ahead_behind]($style) "
-
-[python]
-format = '[Python ${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+# [python]
+# format = '[Python ${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
 # style = "bold green"
 
 # [jobs]
