@@ -7,11 +7,24 @@
 #alias fa='eval "$(alias | fzf | awk '"'"'{print $1}'"'"')"'
 #alias fa='grep -F "$(awk -f list_alias2.awk .bash_aliases | column -t -s'"'"'##'"'"' | fzf | sed '"'"'s/ \{2,\}.*//'"'"')=" .bash_aliases'
 
+alias gg="$HOME/.config/ghostty/toggle-opacity.sh"
+alias bcom='claude --plugin-dir ~/projects/boomicompanion_plugin/0.3.7'
+alias bcom2='claude --plugin-dir ~/projects/boomicompanion_plugin/0.2.8'
+
+fopencode() {
+  fc -p
+  [[ -n "$OPENAI_API_KEY" ]] || export OPENAI_API_KEY=$(bw get notes "OpenAI API Key")
+  [[ -n "$GEMINI_API_KEY" ]] || export GEMINI_API_KEY=$(bw get notes "Gemini API Key")
+  opencode
+  fc -P
+}
+alias oc='fopencode'
+
 alias bu='export BW_SESSION=$(bw unlock --raw)'
 
-alias a='OUTPUT_FORMAT=json arc-cli'
-alias alw='OUTPUT_FORMAT=json arc-cli list windows'
-alias alt='OUTPUT_FORMAT=json arc-cli list tabs'
+# alias a='OUTPUT_FORMAT=json arc-cli'
+# alias alw='OUTPUT_FORMAT=json arc-cli list windows'
+# alias alt='OUTPUT_FORMAT=json arc-cli list tabs'
 
 youtube-download-transcript() {
   yt-dlp --skip-download --write-subs --write-auto-subs --sub-lang en --sub-format vtt --output "$2.transcript.%(ext)s" $1
