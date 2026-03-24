@@ -32,7 +32,111 @@ function sesh-sessions() {
   }
 }
 
-# boomi_processlog() {
+# Watch a directory for create/delete events, with optional exclusions
+watch_dir() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: watch_dir <directory> [--all|-a] [--level|-L <n>]"
+    return 1
+  fi
+
+  # Directories to exclude
+  local exclude_dirs=("node_modules" ".git" "tmp")
+
+  local dir="$1"
+  shift
+
+  # Defaults
+  local show_hidden=false
+  local level=3
+
+  # Parse optional flags
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -a|--all) show_hidden=true; shift ;;
+      -L|--level) level="$2"; shift 2 ;;
+      *) echo "Unknown option: $1"; return 1 ;;
+    esac
+  done
+
+  # Build fswatch exclude arguments
+  local exclude_args=()
+  for e in "${exclude_dirs[@]}"; do
+    exclude_args+=("--exclude" "$dir/$e")
+  done
+
+  # Prepare tree options
+  local tree_opts=("-L" "$level")
+  $show_hidden && tree_opts+=("-a")
+
+  # Expand directory to absolute path for display
+  local abs_dir
+  abs_dir=$(realpath "$dir")  # macOS/Linux; resolves ~ to full path
+
+  # Replace $HOME with ~
+  if [[ "$abs_dir" == "$HOME"* ]]; then
+    abs_dir="~${abs_dir#$HOME}"
+  fi
+
+  # Initial static header
+  clear
+  echo "$abs_dir"
+
+  # Save cursor position after header
+  tput sc  # save cursor
+
+  # Watch for create/delete events
+  fswatch -0 -r --event Created --event Removed "${exclude_args[@]}" "$dir" | while IFS= read -r -d '' event
+  do
+    # Restore cursor to header-bottom and clear below
+    tput rc    # restore cursor
+    tput ed    # clear to end of screen
+
+    # Print tree
+    tree "${tree_opts[@]}" "$dir"
+
+    # Move cursor back to below header for next update
+    tput rc
+  done
+}
+
+
+# Auto-login & unlock Bitwarden in tmux
+bw_auto_unlock() {
+    [[ -n "$TMUX" ]] || return  # Only run in tmux
+    [[ -n "$BW_SESSION" ]] && return # Already unlocked in this shell?
+
+    # Check tmux global env for an existing session
+    local existing=$(tmux show-environment -g BW_SESSION 2>/dev/null | cut -d= -f2)
+    if [[ -n "$existing" ]]; then
+        export BW_SESSION="$existing"
+        return
+    fi
+
+    # Check if user is logged in
+    if bw status | grep -q unauthenticated; then
+        echo "Logging in to Bitwarden..."
+        bw login >/dev/null
+        if [[ $? -ne 0 ]]; then
+            echo "Bitwarden login failed. Exiting bw_auto_unlock."
+            return
+        fi
+    fi
+
+    # Unlock vault (prompt for master password)
+    echo "Unlocking Bitwarden..."
+    export BW_SESSION=$(bw unlock --raw)
+    if [[ -z "$BW_SESSION" ]]; then
+        echo "Bitwarden unlock failed. Exiting bw_auto_unlock."
+        return
+    fi
+
+    # Save session in tmux global env for new panes
+    tmux set-environment -g BW_SESSION "$BW_SESSION"
+}
+
+ #boomi_processlog() {
+ #rt BW_SESSION=
+ #
 #     curl --location --request POST 'https://api.boomi.com/api/rest/v2/aofoundation-W1GLSD/ProcessLog' \
 #         --header 'Content-Type: application/json' \
 #         --header 'Accept: application/json' \
