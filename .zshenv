@@ -7,6 +7,8 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 export BROWSER="lynx"
 export MANPAGER='nvim +Man!'
+# export NODE_EXTRA_CA_CERTS="/opt/homebrew/etc/ca-certificates/cert.pem"
+export NODE_EXTRA_CA_CERTS="$HOME/.certs/zscaler_root.pem"
 
 path=(
   "/opt/homebrew/bin"
