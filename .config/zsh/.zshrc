@@ -22,6 +22,7 @@ setopt hist_reduce_blanks # remove superfluous blanks
 setopt hist_ignore_space # ignore commands that start with space
 setopt hist_ignore_dups # Don't add duplicate entries
 setopt hist_verify # show command with history expansion to user before running it
+setopt HIST_IGNORE_SPACE # prefix command with space to be ignored in history
 
 # Sources
 source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -152,6 +153,38 @@ function y() {
 
 # ---- Starship ----
 eval "$(starship init zsh)"
+
+# ---- OpenCode ----
+#compdef opencode
+###-begin-opencode-completions-###
+#
+# yargs command completion script
+#
+# Installation: opencode completion >> ~/.zshrc
+#    or opencode completion >> ~/.zprofile on OSX.
+#
+_opencode_yargs_completions()
+{
+  local reply
+  local si=$IFS
+  IFS=$'
+' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" opencode --get-yargs-completions "${words[@]}"))
+  IFS=$si
+  if [[ ${#reply} -gt 0 ]]; then
+    _describe 'values' reply
+  else
+    _default
+  fi
+}
+if [[ "'${zsh_eval_context[-1]}" == "loadautofunc" ]]; then
+  _opencode_yargs_completions "$@"
+else
+  compdef _opencode_yargs_completions opencode
+fi
+###-end-opencode-completions-###
+
+# --- Bitwarden ---
+bw_auto_unlock
 
 # ---- SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!! ----
 export SDKMAN_DIR="$HOME/.sdkman"
