@@ -18,7 +18,7 @@ shell-integration = none
 # title = ""
 
 macos-titlebar-proxy-icon = hidden
-macos-non-native-fullscreen = true
+# macos-non-native-fullscreen = true
 macos-titlebar-style = "hidden"
 macos-titlebar-proxy-icon = "hidden"
 macos-option-as-alt = true 

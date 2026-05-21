@@ -184,7 +184,8 @@ fi
 ###-end-opencode-completions-###
 
 # --- Bitwarden ---
-bw_auto_unlock
+# The `bw` function (in zsh-functions) manages session tokens transparently.
+# First `bw` command prompts for master password; subsequent ones reuse it.
 
 # ---- SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!! ----
 export SDKMAN_DIR="$HOME/.sdkman"

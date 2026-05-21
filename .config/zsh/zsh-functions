@@ -100,38 +100,89 @@ watch_dir() {
 }
 
 
-# Auto-login & unlock Bitwarden in tmux
-bw_auto_unlock() {
-    [[ -n "$TMUX" ]] || return  # Only run in tmux
-    [[ -n "$BW_SESSION" ]] && return # Already unlocked in this shell?
+# --- Bitwarden session management ---
+#
+# Shares a session token across all shells/panes via a file (+ tmux global env).
+# The `bw()` wrapper auto-refreshes when the session expires — prompts for your
+# master password once per session lifetime, then routes transparently.
+#
+# Session TTL defaults to 12 hours. Set BW_SESSION_TTL to change (in seconds).
 
-    # Check tmux global env for an existing session
-    local existing=$(tmux show-environment -g BW_SESSION 2>/dev/null | cut -d= -f2)
-    if [[ -n "$existing" ]]; then
-        export BW_SESSION="$existing"
-        return
+[[ -d "$HOME/.config/bw" ]] || mkdir -p "$HOME/.config/bw" 2>/dev/null
+
+export BW_SESSION_FILE="$HOME/.config/bw/session"
+: ${BW_SESSION_TTL:=43200}   # 12 hours (in seconds)
+
+# --- Shell-start: load any existing session from file or tmux global env ---
+_bw_session_age() {
+    [[ -f "$BW_SESSION_FILE" ]] || return 1
+    local saved_ts=$(tail -1 "$BW_SESSION_FILE" 2>/dev/null)
+    [[ -n "$saved_ts" ]] && echo $(( $(date +%s) - saved_ts )) || return 1
+}
+
+if [[ -z "$BW_SESSION" ]]; then
+    # Try the shared file first
+    _bw_age=$(_bw_session_age)
+    if [[ -n "$_bw_age" ]] && [[ "$_bw_age" -lt "$BW_SESSION_TTL" ]]; then
+        export BW_SESSION=$(head -1 "$BW_SESSION_FILE")
     fi
+    unset _bw_age
 
-    # Check if user is logged in
-    if bw status | grep -q unauthenticated; then
-        echo "Logging in to Bitwarden..."
-        bw login >/dev/null
-        if [[ $? -ne 0 ]]; then
-            echo "Bitwarden login failed. Exiting bw_auto_unlock."
-            return
+    # Fall back to tmux global env (which may be fresher)
+    if [[ -z "$BW_SESSION" ]] && [[ -n "$TMUX" ]]; then
+        _bw_tmux=$(tmux show-environment -g BW_SESSION 2>/dev/null | cut -d= -f2)
+        if [[ -n "$_bw_tmux" ]] && BW_SESSION="$_bw_tmux" command bw unlock --check &>/dev/null; then
+            export BW_SESSION="$_bw_tmux"
+            # Sync back to file for panes outside tmux
+            echo "$_bw_tmux" > "$BW_SESSION_FILE"
+            date +%s >> "$BW_SESSION_FILE"
+        fi
+        unset _bw_tmux
+    fi
+fi
+
+# --- bw wrapper — transparent session management ---
+bw() {
+    # Commands that manage sessions directly — pass through unchanged
+    case "$1" in
+        serve|login|logout|lock|config|--version|-h|--help)
+            command bw "$@"
+            return $?
+            ;;
+    esac
+
+    # Validate current session; refresh if expired or missing
+    if ! command bw unlock --check &>/dev/null; then
+        # Try the shared file (another pane may have refreshed it)
+        local age=$(_bw_session_age)
+        if [[ -n "$age" ]] && [[ "$age" -lt "$BW_SESSION_TTL" ]]; then
+            export BW_SESSION=$(head -1 "$BW_SESSION_FILE")
+        fi
+
+        # Try tmux global env (may have been set by another pane)
+        if ! command bw unlock --check &>/dev/null && [[ -n "$TMUX" ]]; then
+            local existing=$(tmux show-environment -g BW_SESSION 2>/dev/null | cut -d= -f2)
+            if [[ -n "$existing" ]] && BW_SESSION="$existing" command bw unlock --check &>/dev/null; then
+                export BW_SESSION="$existing"
+            fi
+        fi
+
+        # Still no valid session — prompt once
+        if ! command bw unlock --check &>/dev/null; then
+            echo "Unlocking Bitwarden (enter master password)..." >&2
+            local new_session=$(command bw unlock --raw)
+            if [[ -z "$new_session" ]]; then
+                echo "Bitwarden unlock failed." >&2
+                return 1
+            fi
+            export BW_SESSION="$new_session"
+            echo "$new_session" > "$BW_SESSION_FILE"
+            date +%s >> "$BW_SESSION_FILE"
+            [[ -n "$TMUX" ]] && tmux set-environment -g BW_SESSION "$new_session"
         fi
     fi
 
-    # Unlock vault (prompt for master password)
-    echo "Unlocking Bitwarden..."
-    export BW_SESSION=$(bw unlock --raw)
-    if [[ -z "$BW_SESSION" ]]; then
-        echo "Bitwarden unlock failed. Exiting bw_auto_unlock."
-        return
-    fi
-
-    # Save session in tmux global env for new panes
-    tmux set-environment -g BW_SESSION "$BW_SESSION"
+    command bw "$@"
 }
 
  #boomi_processlog() {

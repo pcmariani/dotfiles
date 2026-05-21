@@ -7,3 +7,16 @@
 	insteadOf = https://github.com/
 [init]
 	defaultBranch = master
+[fetch]
+	prune = true
+[pull]
+	rebase = true
+[rebase]
+	autostash = true
+[push]
+	default = current
+	autoSetupRemote = true
+[diff]
+	algorithm = histogram
+[rerere]
+	enabled = true

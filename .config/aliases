@@ -8,19 +8,21 @@
 #alias fa='grep -F "$(awk -f list_alias2.awk .bash_aliases | column -t -s'"'"'##'"'"' | fzf | sed '"'"'s/ \{2,\}.*//'"'"')=" .bash_aliases'
 
 alias gg="$HOME/.config/ghostty/toggle-opacity.sh"
-alias bcom='claude --plugin-dir ~/projects/boomicompanion_plugin/0.3.7'
+alias bcom='claude --plugin-dir ~/projects/boomicompanion_plugin/0.5.18/'
+alias bcom3='claude --plugin-dir ~/projects/boomicompanion_plugin/0.3.7'
 alias bcom2='claude --plugin-dir ~/projects/boomicompanion_plugin/0.2.8'
 
 fopencode() {
   fc -p
   [[ -n "$OPENAI_API_KEY" ]] || export OPENAI_API_KEY=$(bw get notes "OpenAI API Key")
-  [[ -n "$GEMINI_API_KEY" ]] || export GEMINI_API_KEY=$(bw get notes "Gemini API Key")
+  [[ -n "$GOOGLE_GENERATIVE_AI_API_KEY" ]] || export GOOGLE_GENERATIVE_AI_API_KEY=$(bw get notes "Gemini API Key")
+  [[ -n "$OPENCODE_API_KEY" ]] || export OPENCODE_API_KEY=$(bw get notes "OpenCode Go API Key")
   opencode
   fc -P
 }
 alias oc='fopencode'
 
-alias bu='export BW_SESSION=$(bw unlock --raw)'
+alias bu='echo "Use: bw list items  (first call prompts for password)"'
 
 # alias a='OUTPUT_FORMAT=json arc-cli'
 # alias alw='OUTPUT_FORMAT=json arc-cli list windows'
@@ -35,7 +37,7 @@ alias yt-ts='youtube-download-transcript'
 
 # alias yt-ts='tail -n+4 transcript.en.vtt | sed -e "/^$/d" -e "/^[0-9]\{2\}.*/d" -e "s/\(&nbsp;\)\{1,\}$//" > transcript.txt'
 alias yt='yt-dlp'
-alias serve="browser-sync start -s -f . --no-notify --host $(ipconfig getifaddr en0) --port 9000"
+alias serve='browser-sync start -s -f . --no-notify --host $(ipconfig getifaddr en0) --port 9000'
 alias bt="$HOME/projects/boomi-groovy-2/boomitest.sh"
 alias b="$HOME/projects/boomi-groovy-2/boomi.sh"
 alias c='cd $(tree ~ -dfi | perl -pe "s/^.*?\///" | perl -pe "s/ (\[|->).*$//" | fzf --ansi --height 5 --layout=reverse --no-info --color="bg+:0") && l'
@@ -291,8 +293,8 @@ alias ta='tmux attach'
 # ssh
 alias sshls="ls -al ~/.ssh"
 alias sshkg="ssh-keygen -t rsa -b 4096 -C" # enter email address
-alias ssheval="eval $(ssh-agent -s)"
-alias sshadd="ssh-add ~/.ssh/id_rsa"
+alias ssheval='eval $(ssh-agent -s)'
+alias sshadd="ssh-add --apple-use-keychain ~/.ssh/id_rsa"
 alias sshkill="ssh-agent -k" # kill agent server
 alias sshprocs="ps -e | grep ssh-agent"
 # Kill all stray ssh-agent procs:
