@@ -1,4 +1,7 @@
-# some opts
+typeset -gU cdpath fpath path
+autoload -Uz add-zsh-hook
+
+# ----- opts -----
 setopt menucomplete
 setopt interactivecomments # Comments in the interactive shell
 unsetopt listtypes # removes / from directories
@@ -22,20 +25,41 @@ setopt hist_reduce_blanks # remove superfluous blanks
 setopt hist_ignore_space # ignore commands that start with space
 setopt hist_ignore_dups # Don't add duplicate entries
 setopt hist_verify # show command with history expansion to user before running it
-setopt HIST_IGNORE_SPACE # prefix command with space to be ignored in history
 
-# Sources
-source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $(brew --prefix)/share/zsh-vi-mode/zsh-vi-mode.zsh
-source $(brew --prefix)/share/zsh-autopair/autopair.zsh
+# ----- env -----
+
+export BOOMI_GROOVY_HOME="$HOME/projects/best/"
+export RIPGREP_CONFIG_PATH="$HOME/.config/.ripgreprc"
+export EDITOR="nvim"
+export VISUAL="nvim"
+export BROWSER="lynx"
+export MANPAGER='nvim +Man!'
+export NODE_EXTRA_CA_CERTS="$HOME/.certs/zscaler_root.pem"
+export BW_SERVER="http://localhost:8087"
+
+path=(
+  "/opt/homebrew/bin"
+  "/opt/homebrew/sbin"
+  "$HOME/.local/bin"
+  "$HOME/scripts"
+  "$HOME/.cargo/bin"
+  "$HOME/projects/best"
+  "$path[@]"
+)
+
+eval "$(mise activate zsh)"
+
+# ----- sources -----
 source "$ZDOTDIR/zsh-functions"
-source "$ZDOTDIR/zsh-aliases"
+source "$HOME/.config/aliases"
+source /opt/homebrew/share/zsh-vi-mode/zsh-vi-mode.zsh
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-# Completion
+# ----- completion -----
 autoload -Uz compinit
 zmodload zsh/complist
-compinit
+compinit -C  # skip re-validation for faster startup; run 'compinit' to refresh
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 export LS_COLORS='no=00;37:fi=00:di=00;33:ln=04;36:pi=40;33:so=01;35:bd=40;33;01:'
@@ -46,39 +70,19 @@ bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect 'j' vi-down-line-or-history
 
-# do ls after cd
-function chpwd() {
-    emulate -L zsh
-    ls -a
-}
+source "$ZDOTDIR/zsh-completions"
 
 # Edit line in vim with ctrl-e:
 autoload edit-command-line
 zle -N edit-command-line
 bindkey '^e' edit-command-line
 
-# eliminates duplicates in *paths
-typeset -gU cdpath fpath path
+# ---- fzf -----
 
+# Set up fzf key bindings and fuzzy completion after zsh-vi-mode initializes
+zvm_after_init_commands+=( 'eval "$(fzf --zsh)"' )
 
-
-# ---- FZF -----
-
-# Set up fzf key bindings and fuzzy completion
-eval "$(fzf --zsh)"
-
-# -- setup fzf theme --
-# fg="#CBE0F0"
-# bg="#011628"
-# bg_highlight="#143652"
-# purple="#B388FF"
-# blue="#06BCE4"
-# cyan="#2CF9ED"
-
-# export FZF_DEFAULT_OPTS="--color=fg:${fg},bg:${bg},hl:${purple},fg+:${fg},bg+:${bg_highlight},hl+:${purple},info:${blue},prompt:${cyan},pointer:${cyan},marker:${cyan},spinner:${cyan},header:${cyan}"
-
-# -- Use fd instead of fzf --
-
+# Use fd instead of fzf
 export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
@@ -94,11 +98,6 @@ _fzf_compgen_path() {
 _fzf_compgen_dir() {
   fd --type=d --hidden --exclude .git . "$1"
 }
-
-# untangle fzf with zsh-vi-mode
-zvm_after_init_commands+=('[ -f $HOME/.fzf.zsh ] && source $HOME/.fzf.zsh')
-# source ~/fzf-git.sh/fzf-git.sh
-
 
 show_file_or_dir_preview="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
 
@@ -120,110 +119,28 @@ _fzf_comprun() {
   esac
 }
 
-# --- Sesh ---
-zle     -N             sesh-sessions
-bindkey -M emacs '\es' sesh-sessions
-bindkey -M vicmd '\es' sesh-sessions
-bindkey -M viins '\es' sesh-sessions
+# ----- hooks -----
 
+# herdr
+if [[ -n "$HERDR_TAB_ID" ]]; then
+  herdr_rename_tab() {
+    herdr tab rename "$HERDR_TAB_ID" "$(basename "$PWD")" >/dev/null 2>&1
+  }
+  add-zsh-hook chpwd herdr_rename_tab
+  herdr_rename_tab  # set it on shell start too
+fi
 
-# ---- Bat (better cat) ----
+# ls after cd
+_ls_after_cd() {
+    ls -a
+}
+add-zsh-hook chpwd _ls_after_cd
 
-# export BAT_THEME=tokyonight_night
-
-# ---- Eza (better ls) -----
-
-# alias ls="eza --icons=always"
-
-# # ---- Zoxide (better cd) ----
+# ----- zoxide -----
 
 eval "$(zoxide init zsh)"
-alias cd="z"
 
-# ---- Yazi ----
+# ---- starship ----
 
-function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		builtin cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
-}
-
-# ---- Starship ----
 eval "$(starship init zsh)"
-
-# ---- OpenCode ----
-#compdef opencode
-###-begin-opencode-completions-###
-#
-# yargs command completion script
-#
-# Installation: opencode completion >> ~/.zshrc
-#    or opencode completion >> ~/.zprofile on OSX.
-#
-_opencode_yargs_completions()
-{
-  local reply
-  local si=$IFS
-  IFS=$'
-' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" opencode --get-yargs-completions "${words[@]}"))
-  IFS=$si
-  if [[ ${#reply} -gt 0 ]]; then
-    _describe 'values' reply
-  else
-    _default
-  fi
-}
-if [[ "'${zsh_eval_context[-1]}" == "loadautofunc" ]]; then
-  _opencode_yargs_completions "$@"
-else
-  compdef _opencode_yargs_completions opencode
-fi
-###-end-opencode-completions-###
-
-# --- Bitwarden ---
-# The `bw` function (in zsh-functions) manages session tokens transparently.
-# First `bw` command prompts for master password; subsequent ones reuse it.
-
-# ---- SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!! ----
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-
-
-
-
-
-
-# ---- VIM MODE (OLD) ----
-
-# # Edit line in vim with ctrl-e:
-# autoload edit-command-line
-# zle -N edit-command-line
-# bindkey '^e' edit-command-line
-#
-# bindkey -v # vim mode
-# export KEYTIMEOUT=1 # Reduces delay when entering vi-mode
-#
-# # Change cursor shape for different vi modes.
-# function zle-keymap-select () {
-#     case $KEYMAP in
-#         vicmd) echo -ne '\e[1 q';;      # block
-#         viins|main) echo -ne '\e[5 q';; # beam
-#     esac
-# }
-# zle -N zle-keymap-select
-# zle-line-init() {
-#     zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
-#     # echo -ne "\e[5 q"
-#     echo -ne "\e[1 q"
-# }
-# zle -N zle-line-init
-# # echo -ne '\e[5 q' # Use beam shape cursor on startup.
-# # preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
-
-
-# vim: ft=zsh
 

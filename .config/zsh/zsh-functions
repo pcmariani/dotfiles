@@ -1,310 +1,45 @@
-mods() {
-	llm models | fzf | sed -e 's/.* //' -e 's/)//'
+rgfzf() {
+  command rg --color=always --line-number --no-heading --smart-case \
+    -g '!Library' -g '!site-packages' -g '!raycast' "${*:-}" \
+    | command fzf -d':' --ansi \
+        --preview "command bat -p --color=always {1} --highlight-line {2}" \
+        --preview-window ~8,+{2}-5 \
+    | awk -F':' '{print $1}'
 }
 
-rmd() {
-    pandoc $1 | lynx -stdin
+rgr() {
+  rg --files --hidden -g "$1"
 }
 
-browser-chrome() {
-    export BROWSER='/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe'
+youtube-download-transcript() {
+  yt-dlp --skip-download --write-subs --write-auto-subs --sub-lang en --sub-format vtt --output "$2.transcript.%(ext)s" $1
+  sed -i '' -e "1,4d" -e "/^$/d" -e "/^[0-9]\{2\}.*/d" -e "s/\(&nbsp;\)\{1,\}$//" "$2.transcript.en.vtt"
+  # on mac you need '' after -i
 }
 
-browser-lynx() {
-    export BROWSER='lynx'
+yadm-lazygit() {
+  pushd "$HOME"
+  yadm enter lazygit
+  popd
 }
 
-function rgfzf {
- command rg --color=always --line-number --no-heading --smart-case -g '!Library' -g '!site-packages' -g'!raycast' "${*:-}" \
-     | command fzf -d':' --ansi --preview "command bat -p --color=always {1} --highlight-line {2}" --preview-window ~8,+{2}-5 \
-     | awk -F':' '{print $1}'
-}
+mkdircd() { \mkdir -p -- "$1" && \cd -P -- "$1"; }
 
-function sesh-sessions() {
-  {
-    exec </dev/tty
-    exec <&1
-    local session
-    session=$(sesh list -i | gum filter --limit 1 --no-sort --fuzzy --no-strip-ansi --placeholder 'Pick a sesh' --height 50 --prompt='⚡')
-    zle reset-prompt > /dev/null 2>&1 || true
-    [[ -z "$session" ]] && return
-    sesh connect $session
-  }
-}
-
-# Watch a directory for create/delete events, with optional exclusions
-watch_dir() {
-  if [[ -z "$1" ]]; then
-    echo "Usage: watch_dir <directory> [--all|-a] [--level|-L <n>]"
-    return 1
-  fi
-
-  # Directories to exclude
-  local exclude_dirs=("node_modules" ".git" "tmp")
-
-  local dir="$1"
-  shift
-
-  # Defaults
-  local show_hidden=false
-  local level=3
-
-  # Parse optional flags
-  while [[ $# -gt 0 ]]; do
-    case $1 in
-      -a|--all) show_hidden=true; shift ;;
-      -L|--level) level="$2"; shift 2 ;;
-      *) echo "Unknown option: $1"; return 1 ;;
-    esac
-  done
-
-  # Build fswatch exclude arguments
-  local exclude_args=()
-  for e in "${exclude_dirs[@]}"; do
-    exclude_args+=("--exclude" "$dir/$e")
-  done
-
-  # Prepare tree options
-  local tree_opts=("-L" "$level")
-  $show_hidden && tree_opts+=("-a")
-
-  # Expand directory to absolute path for display
-  local abs_dir
-  abs_dir=$(realpath "$dir")  # macOS/Linux; resolves ~ to full path
-
-  # Replace $HOME with ~
-  if [[ "$abs_dir" == "$HOME"* ]]; then
-    abs_dir="~${abs_dir#$HOME}"
-  fi
-
-  # Initial static header
-  clear
-  echo "$abs_dir"
-
-  # Save cursor position after header
-  tput sc  # save cursor
-
-  # Watch for create/delete events
-  fswatch -0 -r --event Created --event Removed "${exclude_args[@]}" "$dir" | while IFS= read -r -d '' event
-  do
-    # Restore cursor to header-bottom and clear below
-    tput rc    # restore cursor
-    tput ed    # clear to end of screen
-
-    # Print tree
-    tree "${tree_opts[@]}" "$dir"
-
-    # Move cursor back to below header for next update
-    tput rc
-  done
-}
-
-
-# --- Bitwarden session management ---
-#
-# Shares a session token across all shells/panes via a file (+ tmux global env).
-# The `bw()` wrapper auto-refreshes when the session expires — prompts for your
-# master password once per session lifetime, then routes transparently.
-#
-# Session TTL defaults to 12 hours. Set BW_SESSION_TTL to change (in seconds).
-
-[[ -d "$HOME/.config/bw" ]] || mkdir -p "$HOME/.config/bw" 2>/dev/null
-
-export BW_SESSION_FILE="$HOME/.config/bw/session"
-: ${BW_SESSION_TTL:=43200}   # 12 hours (in seconds)
-
-# --- Shell-start: load any existing session from file or tmux global env ---
-_bw_session_age() {
-    [[ -f "$BW_SESSION_FILE" ]] || return 1
-    local saved_ts=$(tail -1 "$BW_SESSION_FILE" 2>/dev/null)
-    [[ -n "$saved_ts" ]] && echo $(( $(date +%s) - saved_ts )) || return 1
-}
-
-if [[ -z "$BW_SESSION" ]]; then
-    # Try the shared file first
-    _bw_age=$(_bw_session_age)
-    if [[ -n "$_bw_age" ]] && [[ "$_bw_age" -lt "$BW_SESSION_TTL" ]]; then
-        export BW_SESSION=$(head -1 "$BW_SESSION_FILE")
-    fi
-    unset _bw_age
-
-    # Fall back to tmux global env (which may be fresher)
-    if [[ -z "$BW_SESSION" ]] && [[ -n "$TMUX" ]]; then
-        _bw_tmux=$(tmux show-environment -g BW_SESSION 2>/dev/null | cut -d= -f2)
-        if [[ -n "$_bw_tmux" ]] && BW_SESSION="$_bw_tmux" command bw unlock --check &>/dev/null; then
-            export BW_SESSION="$_bw_tmux"
-            # Sync back to file for panes outside tmux
-            echo "$_bw_tmux" > "$BW_SESSION_FILE"
-            date +%s >> "$BW_SESSION_FILE"
-        fi
-        unset _bw_tmux
-    fi
-fi
-
-# --- bw wrapper — transparent session management ---
-bw() {
-    # Commands that manage sessions directly — pass through unchanged
-    case "$1" in
-        serve|login|logout|lock|config|--version|-h|--help)
-            command bw "$@"
-            return $?
-            ;;
-    esac
-
-    # Validate current session; refresh if expired or missing
-    if ! command bw unlock --check &>/dev/null; then
-        # Try the shared file (another pane may have refreshed it)
-        local age=$(_bw_session_age)
-        if [[ -n "$age" ]] && [[ "$age" -lt "$BW_SESSION_TTL" ]]; then
-            export BW_SESSION=$(head -1 "$BW_SESSION_FILE")
-        fi
-
-        # Try tmux global env (may have been set by another pane)
-        if ! command bw unlock --check &>/dev/null && [[ -n "$TMUX" ]]; then
-            local existing=$(tmux show-environment -g BW_SESSION 2>/dev/null | cut -d= -f2)
-            if [[ -n "$existing" ]] && BW_SESSION="$existing" command bw unlock --check &>/dev/null; then
-                export BW_SESSION="$existing"
-            fi
-        fi
-
-        # Still no valid session — prompt once
-        if ! command bw unlock --check &>/dev/null; then
-            echo "Unlocking Bitwarden (enter master password)..." >&2
-            local new_session=$(command bw unlock --raw)
-            if [[ -z "$new_session" ]]; then
-                echo "Bitwarden unlock failed." >&2
-                return 1
-            fi
-            export BW_SESSION="$new_session"
-            echo "$new_session" > "$BW_SESSION_FILE"
-            date +%s >> "$BW_SESSION_FILE"
-            [[ -n "$TMUX" ]] && tmux set-environment -g BW_SESSION "$new_session"
-        fi
-    fi
-
-    command bw "$@"
-}
-
- #boomi_processlog() {
- #rt BW_SESSION=
- #
-#     curl --location --request POST 'https://api.boomi.com/api/rest/v2/aofoundation-W1GLSD/ProcessLog' \
-#         --header 'Content-Type: application/json' \
-#         --header 'Accept: application/json' \
-#         --header 'Authorization: Basic Qk10PTUlfVE9LRU4ucGV0ZXJfbWFyaWFuaUBkZWxsLmNvbToyNWY4YjZjYi05NWI5LTRjYTktOTk2Yy1lZDU5YzgzNjAxM2Q=' \
-#         --data-raw '{"executionId" : "execution-7e9bda43-f3f3-496c-8ab7-b16abeafa203-2020.12.11","logLevel" : "INFO"}' | jq .url | sed 's/"//g'
+# # do ls after cd
+# function chpwd() {
+#     emulate -L zsh
+#     ls -a
 # }
 
-# environment-export() {
-#     envsArray=()
-#     for filename in "$@" ; do
-#         if [ "${filename##*.}" = "gpg" ] ; then
-#             gpg -o "$filename.tmp" -d "$filename"
-#             filename="$filename.tmp"
-#         fi
-#         while IFS="=" read -r key value ; do
-#             if [ ! -z "$value" ] && [ "${key:0:1}" != '#' ] ; then
-#                 valueTrimmed="$(echo $value | sed 's/\s*#.*$//')"
-#                 export "$key"="$(eval echo $valueTrimmed)"
-#             fi
-#         done < "$ENVDIR/$filename"
-#         envsArray+="$filename"
-#     done
-#     export ACTIVE_ENVS="$(echo ${envsArray[*]})"
-# }
-#
-# environment-unset() {
-#     # IFS=' ' read -r -a ACTIVE_ENVS <<< "$string"
-#     envsArray=("${(@s/ /)ACTIVE_ENVS}")
-#     for filename in "${envsArray[@]}" ; do
-#         # echo "$filename"
-#         while IFS="=" read -r key value ; do
-#             if [ ! -z "$value" ] && [ "${key:0:1}" != '#' ] ; then
-#                 unset "$key"
-#             fi
-#         done < "$ENVDIR/$filename"
-#         if [ "${filename##*.}" = "tmp" ] ; then
-#             rm $ENVDIR/$filename
-#         fi
-#     done
-#     unset ACTIVE_ENVS
-# }
-
-# History wrapper
-# hh() {
-#   local clear list
-#   zparseopts -E c=clear l=list
-#
-#   if [[ -n "$clear" ]]; then
-#     # if -c provided, clobber the history file
-#     echo -n >| "$HISTFILE"
-#     echo >&2 History file deleted. Reload the session to see its effects.
-#   elif [[ -n "$list" ]]; then
-#     # if -l provided, run as if calling `fc' directly
-#     builtin fc "$@"
-#   else
-#     # unless a number is provided, show all history events (starting from 1)
-#     [[ ${@[-1]-} = *[0-9]* ]] && builtin fc -l "$@" || builtin fc -l "$@" 1
-#   fi
-# }
-
-# todo-list() {
-#   clear 
-#   echo "\x1b[0;36mTodos:\x1b[0m"
-#
-#   # echo ' _           _     '
-#   # echo '| |_ ___  __| |___ '
-#   # echo '|  _/ _ \/ _` / _ \'
-#   # echo ' \__\___/\__,_\___/'
-#
-#   echo 
-#   todo.sh ls "$*" \
-#     | sed -e 's/^\(.*m[0-9]\+\)/    \1./' \
-#           -e 's/\(\....m\)\( [^(]\)/\1    \2/' \
-#           -e's/\(\....m.*\)(\([A-B]\))/\1 \2 /' \
-#           -e 's/[@\+]/^   &/g' \
-#     | column -t -s'^' \
-#     | head -n-2 
-#   echo
-# }
-
-# todo-add() {
-#   todo.sh add "$*"
-#   todo-list
-# }
-
-#-----------------------------------------------------------------------------
-# From ChristianChiarulli Machfiles
-
-# Function to source files if they exist
-# function zsh_add_file() {
-#     [ -f "$ZDOTDIR/$1" ] && source "$ZDOTDIR/$1"
-# }
-
-# function zsh_add_plugin() {
-#     PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
-#     if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then 
-#         # For plugins
-#         zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh" || \
-#         zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.zsh"
-#     else
-#         git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
-#     fi
-# }
-
-# function zsh_add_completion() {
-#     PLUGIN_NAME=$(echo $1 | cut -d "/" -f 2)
-#     if [ -d "$ZDOTDIR/plugins/$PLUGIN_NAME" ]; then 
-#         # For completions
-# 		completion_file_path=$(ls $ZDOTDIR/plugins/$PLUGIN_NAME/_*)
-# 		fpath+="$(dirname "${completion_file_path}")"
-#         zsh_add_file "plugins/$PLUGIN_NAME/$PLUGIN_NAME.plugin.zsh"
-#     else
-#         git clone "https://github.com/$1.git" "$ZDOTDIR/plugins/$PLUGIN_NAME"
-# 		fpath+=$(ls $ZDOTDIR/plugins/$PLUGIN_NAME/_*)
-#         [ -f $ZDOTDIR/.zccompdump ] && $ZDOTDIR/.zccompdump
-#     fi
-# 	completion_file="$(basename "${completion_file_path}")"
-# 	if [ "$2" = true ] && compinit "${completion_file:1}"
+# sesh-sessions() {
+#   {
+#     exec </dev/tty
+#     exec <&1
+#     local session
+#     session=$(sesh list -i | gum filter --limit 1 --no-sort --fuzzy --no-strip-ansi --placeholder 'Pick a sesh' --height 50 --prompt='⚡')
+#     zle reset-prompt > /dev/null 2>&1 || true
+#     [[ -z "$session" ]] && return
+#     sesh connect $session
+#   }
 # }
 
