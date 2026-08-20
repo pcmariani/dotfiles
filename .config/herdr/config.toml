@@ -1,0 +1,131 @@
+# herdr configuration: ~/.config/herdr/config.toml
+
+onboarding                   = false
+
+[theme]
+name                         = "one-dark"
+auto_switch                  = false
+
+[theme.custom]
+panel_bg                     = "none"
+accent                       = "#606070"
+surface0                     = "none"
+
+[terminal]
+new_cwd                      = "follow" # new panes inherit the CWD of the source pane
+
+[keys]
+prefix                       = "ctrl+a"
+split_horizontal             = "prefix+b"
+toggle_sidebar               = "prefix+u"
+edit_scrollback              = "prefix+e"
+previous_workspace           = ["prefix+p", "prefix+ctrl+p", "prefix+k", "prefix+ctrl+k"]
+next_workspace               = ["prefix+n", "prefix+ctrl+n", "prefix+j", "prefix+ctrl+j"]
+previous_agent               = ["prefix+shift+p", "prefix+shift+k"]
+next_agent                   = ["prefix+shift+n", "prefix+shift+j"]
+previous_tab                 = ["prefix+ctrl+h", "prefix+h" ]
+next_tab                     = ["prefix+ctrl+l", "prefix+l" ]
+rename_tab                   = "prefix+,"
+
+[[keys.command]]
+key                          = "ctrl+h"
+type                         = "plugin_action"
+command                      = "herdr-splits.nav-left"
+description                  = "move left"
+
+[[keys.command]]
+key                          = "ctrl+j"
+type                         = "plugin_action"
+command                      = "herdr-splits.nav-down"
+description                  = "move down"
+
+[[keys.command]]
+key                          = "ctrl+k"
+type                         = "plugin_action"
+command                      = "herdr-splits.nav-up"
+description                  = "move up"
+
+[[keys.command]]
+key                          = "ctrl+l"
+type                         = "plugin_action"
+command                      = "herdr-splits.nav-right"
+description                  = "move right"
+
+[[keys.command]]
+key                          = "alt+h"
+type                         = "plugin_action"
+command                      = "herdr-splits.resize-left"
+description                  = "resize left"
+
+[[keys.command]]
+key                          = "alt+j"
+type                         = "plugin_action"
+command                      = "herdr-splits.resize-down"
+description                  = "resize down"
+
+[[keys.command]]
+key                          = "alt+k"
+type                         = "plugin_action"
+command                      = "herdr-splits.resize-up"
+description                  = "resize up"
+
+[[keys.command]]
+key                          = "alt+l"
+type                         = "plugin_action"
+command                      = "herdr-splits.resize-right"
+description                  = "resize right"
+
+[[keys.command]]
+key                          = "prefix+space"
+command                      = "herdr plugin pane open --plugin fullerzz.sesh --entrypoint picker --placement popup"
+description                  = "open Sesh picker"
+
+[[keys.command]]
+key                          = "prefix+\\"
+type                         = "plugin_action"
+command                      = "fullerzz.sesh.last"
+description                  = "previous Sesh workspace"
+
+[[keys.command]]
+key                          = "prefix+t"
+type                         = "popup"
+command                      = "exec \"${SHELL:-sh}\""
+description                  = "scratch terminal"
+width                        = "80%"
+height                       = "80%"
+
+[ui]
+mouse_capture                = true
+confirm_close                = true
+pane_outer_borders           = false
+pane_gaps                    = true
+pane_borders                 = true
+pane_scrollbars              = false
+agent_panel_sort             = "spaces"
+sidebar_collapsed_mode       = "hidden" #companct, hidden
+prompt_new_tab_name          = false
+hide_tab_bar_when_single_tab = true
+status_indicators            = "symbols"
+
+[ui.toast]
+delivery                     = "terminal"
+herdr.position               = "top-right"
+clipboard.enabled            = false
+
+[ui.sidebar.agents]
+row_gap = 1
+rows = [ ["state_icon", "workspace", "tab", "agent"] ]
+
+[ui.sidebar.spaces]
+row_gap = 1
+rows = [ ["state_icon", "workspace", "branch", "git_status"] ]
+
+[session]
+resume_agents_on_restore     = true
+
+[update]
+channel                      = "stable"
+
+[experimental]
+kitty_graphics               = true
+
