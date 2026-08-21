@@ -22,7 +22,7 @@ alias gy='yadm-lazygit'
 alias yg='yadm-lazygit'
 alias ys='yadm status'
 alias yd='yadm diff'
-alias yl='yadm list'
+alias yls='yadm list'
 alias yla='yadm list -a'
 alias ya='yadm add'
 alias yau='yadm add -u'
@@ -35,15 +35,36 @@ alias fvf='v $(fzf)'
 # --- edit files --- #
 alias e='v',
 alias ea='e ~/.config/aliases'
-alias eg='e ~/.gitconfig'
-alias ez='e ~/.config/zsh/.zshrc'
-alias eze='e ~/.zshenv'
-alias ezf='e ~/.config/zsh/zsh-functions'
-alias est='e ~/.config/starship.toml'
-alias etx='e ~/.tmux.conf'
+alias eh='e ~/.config/herder/config.toml'
+
+alias eg='e  $HOME/.gitconfig'
+alias egh='e $HOME/.gitconfig'
+alias erg='e $HOME/.ripgreprc'
+alias ez='e  $HOME/.config/zsh/.zshrc'
+alias eze='e $HOME/.zshenv'
+alias ezf='e $HOME/.config/zsh/zsh-functions'
+alias est='e $HOME/.config/starship.toml'
+alias etx='e $HOME/.tmux.conf'
+# .ripgreprc
+# alacritty/alacritty.toml
+# alacritty/alacritty.yml
+# aliases
+# bash_functions
+# exercism/user.json
+# ghostty/config
+# herdr/config.toml
+# karabiner.edn
+# karabiner/karabiner.json
+# mise/config.toml
+# starship.toml
+# zsh/.zhistory
+# zsh/.zshrc
+# zsh/zsh-aliases
+# zsh/zsh-completions
+# zsh/zsh-functions
 
 # --- source files --- #
-alias .a='. ~/.config/aliases && echo aliases sourced'
+alias .a='source ~/.config/aliases && echo aliases sourced'
 alias .z='source ~/.config/zsh/.zshrc && echo .zshrc sourced'
 alias .za='source ~/.config/zsh/zsh-aliases && echo zsh-aliases sourced'
 alias .ze='source ~/.zshenv && echo .zshenv sourced'
