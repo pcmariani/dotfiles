@@ -2,6 +2,7 @@ typeset -gU cdpath fpath path
 autoload -Uz add-zsh-hook
 
 # ----- opts -----
+
 setopt menucomplete
 setopt interactivecomments # Comments in the interactive shell
 unsetopt listtypes # removes / from directories
@@ -50,6 +51,7 @@ path=(
 eval "$(mise activate zsh)"
 
 # ----- sources -----
+
 source "$ZDOTDIR/zsh-functions"
 source "$HOME/.config/aliases"
 source /opt/homebrew/share/zsh-vi-mode/zsh-vi-mode.zsh
@@ -57,6 +59,7 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # ----- completion -----
+
 autoload -Uz compinit
 zmodload zsh/complist
 compinit -C  # skip re-validation for faster startup; run 'compinit' to refresh
@@ -69,7 +72,6 @@ bindkey -M menuselect 'h' vi-backward-char
 bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect 'j' vi-down-line-or-history
-
 source "$ZDOTDIR/zsh-completions"
 
 # Edit line in vim with ctrl-e:

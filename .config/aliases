@@ -1,15 +1,21 @@
-# vim: set ft=sh:
-
-# alias gg="$HOME/.config/ghostty/toggle-opacity.sh"
-
-alias cd="z" # for zonxide
+# --- Commands --- #
+alias ping='ping -c 10'
+alias grep="grep --color=auto --exclude-dir=.git"
+alias da='date "+%Y-%m-%d %A %T %Z"'
+alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
+alias openports='netstat -nape --inet'
+alias h='history'
+alias hgrep="fc -El 0 | grep"
+alias diff='diff --color=auto'
+alias al='alias | sort | less'
+alias ddg='ddgr'
+alias cd='z' # for zoxide
 alias oc='opencode'
-
 alias yt-ts='youtube-download-transcript'
-
 alias yt='yt-dlp'
 alias serve='browser-sync start -s -f . --no-notify --host $(ipconfig getifaddr en0) --port 9000'
 alias puml='java -jar ~/.local/lib/plantuml-1.2023.4.jar'
+# alias gg="$HOME/.config/ghostty/toggle-opacity.sh"
 
 # --- yadm --- #
 alias gy='yadm-lazygit'
@@ -20,47 +26,28 @@ alias yl='yadm list'
 alias yla='yadm list -a'
 alias ya='yadm add'
 alias yau='yadm add -u'
-alias yc='yadm commit -m'
-alias yp='yadm push origin master'
-alias yac='$HOME/scripts/yadm-commit-daily.sh'
 
-# --- Emacs --- #
-# alias e='emacsclient --alternate-editor="" --no-wait'
-alias e='nvim -O'
-alias doom='~/.emacs.d/bin/doom'
-
-# --- Vim --- #
-alias v='nvim -O'
+# --- nvim --- #
+alias v='nvim -O' # one vertical window per file
 alias vis='nvim "+set si"'
 alias fvf='v $(fzf)'
 
-# --- Edit files --- #
-alias edit='e'
-alias ea='edit ~/.config/aliases'
-alias eb='edit ~/.bashrc'
-alias ef='edit ~/.config/bash_functions'
-alias eg='edit ~/.gitconfig'
-alias ei='edit ~/.inputrc'
-alias ev='edit ~/.config/nvim/init.lua ~/.config/nvim/lua/pete/* ~/.config/nvim/after/plugin/*'
-# alias evl='edit ~/.config/nvim/lua/pete/*'
-# alias evp='edit ~/.config/nvim/after/plugin/*'
-alias ebp='edit ~/.bash_profile'
-alias est='edit ~/.config/starship.toml'
-alias etx='edit ~/.tmux.conf'
-alias ez=' edit ~/.config/zsh/.zshrc'
-alias ezal='edit ~/.config/zsh/zsh-aliases'
-alias eze='edit ~/.zshenv'
-alias ezf='edit ~/.config/zsh/zsh-functions'
+# --- edit files --- #
+alias e='v',
+alias ea='e ~/.config/aliases'
+alias eg='e ~/.gitconfig'
+alias ez='e ~/.config/zsh/.zshrc'
+alias eze='e ~/.zshenv'
+alias ezf='e ~/.config/zsh/zsh-functions'
+alias est='e ~/.config/starship.toml'
+alias etx='e ~/.tmux.conf'
+
+# --- source files --- #
 alias .a='. ~/.config/aliases && echo aliases sourced'
-if [ -n "$ZSH_VERSION" ]; then
-  alias .z='source ~/.config/zsh/.zshrc && echo .zshrc sourced'
-  alias .za='source ~/.config/zsh/zsh-aliases && echo zsh-aliases sourced'
-  alias .ze='source ~/.zshenv && echo .zshenv sourced'
-  alias .zf='source ~/.config/zsh/zsh-functions && echo zsh-functions sourced'
-else
-  alias .b='clear; . ~/.bashrc'
-  alias .bf='. ~/.config/bash_functions && echo bash_functions sourced'
-fi
+alias .z='source ~/.config/zsh/.zshrc && echo .zshrc sourced'
+alias .za='source ~/.config/zsh/zsh-aliases && echo zsh-aliases sourced'
+alias .ze='source ~/.zshenv && echo .zshenv sourced'
+alias .zf='source ~/.config/zsh/zsh-functions && echo zsh-functions sourced'
 
 # --- git --- #
 alias g='lazygit'
@@ -68,42 +55,12 @@ alias gs='git status'
 alias gls='git ls-tree --full-tree -r --name-only HEAD'
 alias gh.create='git init && git add . && git commit -m "initial commit" && gh repo create $(pwd | sed "s/.*\///") --private --source=. --remote=origin --push'
 
-# --- 256 colors script ---
-alias 256="$HOME/scripts/256-colors.sh"
-
-# --- Color ls & exa --- #
-if command -v eza >/dev/null; then
-  alias l="eza -a --icons --group-directories-first"
-  alias ls="eza --icons --group-directories-first"
-  alias lsd="eza -ad --icons --group-directories-first --no-user --git */"
-  alias la="eza -la --icons --group-directories-first --no-user --git"
-  alias lad="eza -lad --icons --group-directories-first --no-user --git */"
-else
-  alias l="ls -1"
-  alias ls="ls -G"
-  alias ll="ls -l"
-  alias la="ls -lA"
-fi
-
-# --- Commands --- #
-alias cls='clear'
-# alias mkdir='mkdircd'
-# alias ps='ps axf'
-alias pst='pstree -p'
-alias ping='ping -c 10'
-# alias less='less -R'
-# alias less='/opt/homebrew/bin/less'
-alias grep="grep --color=auto --exclude-dir=.git"
-alias da='date "+%Y-%m-%d %A %T %Z"'
-
-# --- Logs --- #
-## Show all logs in /var/log
-alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
-
-# --- Network --- #
-
-## Show open ports
-alias openports='netstat -nape --inet'
+# --- ls --- #
+alias l="eza -a --icons --group-directories-first"
+alias ls="eza --icons --group-directories-first"
+alias lsd="eza -ad --icons --group-directories-first --no-user --git */"
+alias la="eza -la --icons --group-directories-first --no-user --git"
+alias lad="eza -lad --icons --group-directories-first --no-user --git */"
 
 # --- chmod --- #
 alias ch+x='chmod +x'
@@ -114,54 +71,22 @@ alias 666='chmod -R 666'
 alias 755='chmod -R 755'
 alias 777='chmod -R 777'
 
-# --- tmux --- #
-alias ta='tmux attach'
-
 # --- directory nav --- #
-if [ -n "$ZSH_VERSION" ]; then
-  alias d='dirs -v | head -10 | sed -e "1d" -e "s/^\([0-9]\)\s*/[\1] /"'
-  alias 0='cd ~'
-  alias 1='cd ~1'
-  alias 2='cd ~2'
-  alias 3='cd ~3'
-  alias 4='cd ~4'
-  alias 5='cd ~5'
-  alias 6='cd ~6'
-  alias 7='cd ~7'
-  alias 8='cd ~8'
-  alias 9='cd ~9'
-else
-  alias d='dirs -v | head -10 | sed -e "1s/.*//" -e "s/^\([0-9]\)\s*/    \1)  /"'
-  alias pushdd="pushd \$PWD > /dev/null"
-  alias popdd='popd >/dev/null'
-  alias cd='pushdd;cd;ls'
-  alias 1='pushd +1 > /dev/null;l'
-  alias 2='pushd +2 > /dev/null;l'
-  alias 3='pushd +3 > /dev/null;l'
-  alias 4='pushd +4 > /dev/null;l'
-  alias cd.='popdd'
-  alias cd..='popdd;popdd'
-  alias cd...='popdd;popdd;popdd'
-  alias cd....='popdd;popdd;popdd;popdd'
-fi
+alias d='dirs -v | head -10 | sed -e "1d" -e "s/^\([0-9]\)\s*/[\1] /"'
+alias 0='cd ~'
+alias 1='cd ~1'
+alias 2='cd ~2'
+alias 3='cd ~3'
+alias 4='cd ~4'
+alias 5='cd ~5'
+alias 6='cd ~6'
+alias 7='cd ~7'
+alias 8='cd ~8'
+alias 9='cd ~9'
 
-# command aliases
-alias h='history'
-alias hgrep="fc -El 0 | grep"
-alias dud='du -d 1 -h'
-alias duf='du -sh *'
-# alias fd='find . -type d -name'
-# alias ff='find . -type f -name'
-alias clh='curl localhost:'
-alias diff='diff --color=auto'
-alias ccat='highlight --out-format=ansi'
-alias al='alias | sort | less'
-# alias zs='source $ZDOTDIR/.zshrc'
-alias ddg='ddgr'
-# alias sn='sncli'
-alias pse='ps -e'
+# --- boneyard --- #
 
-# --- Aptitude --- #
+# apt
 # alias apt.install='sudo apt install -y'
 # alias apt.update='sudo apt update'
 # alias apt.upgrade='sudo apt upgrade'
@@ -170,4 +95,46 @@ alias pse='ps -e'
 # alias apt.installed='apt list --installed'
 # alias apt.search='apt search'
 # alias apt.autoremove='sudo apt autoremove'
-#alias searchdp='apt-cache search'
+# alias searchdp='apt-cache search'
+
+# emacs
+# alias e='emacsclient --alternate-editor="" --no-wait'
+# alias e='nvim -O'
+# alias doom='~/.emacs.d/bin/doom'
+
+# bash
+# alias eb='e ~/.bashrc'
+# alias ef='e ~/.config/bash_functions'
+# alias ebp='edit ~/.bash_profile'
+# alias ei='e ~/.inputrc'
+# alias .b='clear; . ~/.bashrc'
+# alias .bf='. ~/.config/bash_functions && echo bash_functions sourced'
+# alias l="ls -1"
+# alias ls="ls -G"
+# alias ll="ls -l"
+# alias la="ls -lA"
+# alias d='dirs -v | head -10 | sed -e "1s/.*//" -e "s/^\([0-9]\)\s*/    \1)  /"'
+# alias pushdd="pushd \$PWD > /dev/null"
+# alias popdd='popd >/dev/null'
+# alias cd='pushdd;cd;ls'
+# alias 1='pushd +1 > /dev/null;l'
+# alias 2='pushd +2 > /dev/null;l'
+# alias 3='pushd +3 > /dev/null;l'
+# alias 4='pushd +4 > /dev/null;l'
+# alias cd.='popdd'
+# alias cd..='popdd;popdd'
+# alias cd...='popdd;popdd;popdd'
+# alias cd....='popdd;popdd;popdd;popdd'
+
+# commands
+# alias mkdir='mkdircd'
+# alias ps='ps axf'
+# alias pst='pstree -p'
+# alias less='less -R'
+# alias less='/opt/homebrew/bin/less'
+# alias dud='du -d 1 -h'
+# alias duf='du -sh *'
+# alias fd='find . -type d -name'
+# alias ff='find . -type f -name'
+
+# vim: set ft=sh:
