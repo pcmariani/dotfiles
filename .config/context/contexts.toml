@@ -35,7 +35,7 @@
 rows          = 12
 width_percent = 30                        # percent of screen width
 font          = "Iosevka Nerd Font Mono"  # same as Ghostty
-font_size     = 18                        # choose's own default is 26
+font_size     = 22                        # choose's own default is 26
 match_color   = "00FFFF"                  # cyan, matching your Ghostty cursor
 selection_bg  = "1E1E2E"                  # Catppuccin Mocha base
 
