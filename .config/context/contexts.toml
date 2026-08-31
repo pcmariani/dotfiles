@@ -18,7 +18,11 @@
 #           terminal (ambient until rollout step 5),
 #           default (herdr's own session),
 #           next, prev, focused, visible (AeroSpace grammar tokens).
-ambient = ["work", "personal", "browser", "ai"]
+#
+# "terminal" is listed below because AeroSpace still persists it. Remove it
+# from both files together at rollout step 5, when the quick terminal takes
+# over — `context doctor` will complain if they drift apart.
+ambient = ["work", "personal", "browser", "ai", "terminal"]
 
 
 [[context]]
