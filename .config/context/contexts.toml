@@ -30,14 +30,20 @@
 # option for either the panel background or the general text colour — the
 # panel follows the system appearance.
 #   match_color  the characters you have typed, as they match
-#   selection_bg the highlighted row's background
+#   selection_bg documented as "background color of selected element". That
+#                wording is ambiguous — it may mean the highlighted ROW, or
+#                only the matched substring's background when -u is set. If
+#                changing this has no visible effect, it is the latter, and
+#                the row highlight is the system colour and not ours to set.
 [picker]
 rows          = 12
-width_percent = 30                        # percent of screen width
+width_percent = 40                        # percent of SCREEN width, so it
+                                          # differs per display: 40% is 1376px
+                                          # on the LG, 576px on the laptop
 font          = "Iosevka Nerd Font Mono"  # same as Ghostty
-font_size     = 22                        # choose's own default is 26
+font_size     = 24                        # choose's own default is 26
 match_color   = "00FFFF"                  # cyan, matching your Ghostty cursor
-selection_bg  = "1E1E2E"                  # Catppuccin Mocha base
+selection_bg  = "000000"                  # see note below
 
 # Where to look for undeclared contexts. Everything under these roots at depth
 # 1-2 becomes a pickable context, ranked by directory mtime, except:
