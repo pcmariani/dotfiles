@@ -28,6 +28,20 @@
           "type" : "basic"
         } ]
       }, {
+        "description" : "context picker",
+        "manipulators" : [ {
+          "from" : {
+            "key_code" : "spacebar",
+            "modifiers" : {
+              "mandatory" : [ "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context-pick\"'"
+          } ],
+          "type" : "basic"
+        } ]
+      }, {
         "description" : "mod-tap layers",
         "manipulators" : [ {
           "to_if_alone" : [ {

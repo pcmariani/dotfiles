@@ -52,6 +52,16 @@
          :rules  [[:##caps_lock :left_control nil {:alone :escape}]]
          }
 
+        ; Placed before the mod-tap layers so ctrl-space is claimed here rather
+        ; than falling through to the plain-spacebar space-mode trigger. Since
+        ; caps_lock is already left_control (rule above), this is caps+space:
+        ; one chord rather than a mode-hold, which matters for the key that
+        ; gets pressed most.
+        {
+         :des "context picker"
+         :rules [[:!Tspacebar [:shell "~/projects/context-based-mac/bin/context-pick"]]]
+         }
+
         ; note: When adding a new layer, if you want it to be able to cross with an old one, you must add the name negated (:!new_name) to all other mod-tap layer conditions
         {
          :des "mod-tap layers"
