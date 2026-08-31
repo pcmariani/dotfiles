@@ -12,15 +12,11 @@
 # The client folder itself is not a context. It is a label, because it
 # is not somewhere work happens.
 
-# Reserved: work, personal, browser, ai (ambient workspaces),
-#           terminal (retired 2026-08-31, still reserved),
-#           default (herdr's own session),
-#           next, prev, focused, visible (AeroSpace grammar tokens).
-#
-# "terminal" was retired from aerospace.toml when the Ghostty quick terminal
-# took over hyper-T, so it is no longer ambient. It stays reserved in code
-# (context/model.py) so a context can never claim the old name.
-ambient = ["work", "personal", "browser", "ai"]
+# Reserved names are not listed here. A safety floor lives in
+# context/model.py (herdr's "default", AeroSpace's grammar tokens, and the
+# ambient workspace names), and `context doctor` reads aerospace.toml directly
+# to catch a context colliding with any persistent workspace — so adding an
+# ambient workspace needs no edit in this file.
 
 
 [[context]]
