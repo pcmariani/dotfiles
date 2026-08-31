@@ -138,18 +138,11 @@
                  [:b [:aerospace "workspace browser"]]
                  [:p [:aerospace "workspace personal"]]
 
-                 ;; Context slots. Declared in ~/.config/context/contexts.toml,
-                 ;; never assigned at runtime, so these never reshuffle. An
-                 ;; unclaimed slot shows a notification and does nothing.
-                 [:1 [:shell "~/projects/context-based-mac/bin/context slot 1"]]
-                 [:2 [:shell "~/projects/context-based-mac/bin/context slot 2"]]
-                 [:3 [:shell "~/projects/context-based-mac/bin/context slot 3"]]
-                 [:4 [:shell "~/projects/context-based-mac/bin/context slot 4"]]
-                 [:5 [:shell "~/projects/context-based-mac/bin/context slot 5"]]
-                 [:6 [:shell "~/projects/context-based-mac/bin/context slot 6"]]
-                 [:7 [:shell "~/projects/context-based-mac/bin/context slot 7"]]
-                 [:8 [:shell "~/projects/context-based-mac/bin/context slot 8"]]
-                 [:9 [:shell "~/projects/context-based-mac/bin/context slot 9"]]
+                 ;; 1-9 are deliberately unbound. Numbered context slots were
+                 ;; tried and removed 2026-08-31: pinning a number to a name
+                 ;; needs a config edit to renumber, and the picker's fuzzy
+                 ;; match (ctrl-space, "apo", enter) is close enough in
+                 ;; keystrokes to not warrant a second mechanism.
 
                  ;; AeroSpace - windows
                  [:h [:aerospace "focus left"]]
@@ -190,16 +183,9 @@
                  [:##b [:aerospace "move-node-to-workspace browser"]]
                  [:##p [:aerospace "move-node-to-workspace personal"]]
 
-                 ;; Send the focused window to slot N's context. Does not follow.
-                 [:##1 [:shell "~/projects/context-based-mac/bin/context slot 1 --move"]]
-                 [:##2 [:shell "~/projects/context-based-mac/bin/context slot 2 --move"]]
-                 [:##3 [:shell "~/projects/context-based-mac/bin/context slot 3 --move"]]
-                 [:##4 [:shell "~/projects/context-based-mac/bin/context slot 4 --move"]]
-                 [:##5 [:shell "~/projects/context-based-mac/bin/context slot 5 --move"]]
-                 [:##6 [:shell "~/projects/context-based-mac/bin/context slot 6 --move"]]
-                 [:##7 [:shell "~/projects/context-based-mac/bin/context slot 7 --move"]]
-                 [:##8 [:shell "~/projects/context-based-mac/bin/context slot 8 --move"]]
-                 [:##9 [:shell "~/projects/context-based-mac/bin/context slot 9 --move"]]
+                 ;; 1-9 unbound alongside space-mode. Sending a window to a
+                 ;; project context has no binding for now; a move-mode picker
+                 ;; is the intended home for it if the need proves real.
 
                  [:##h [:aerospace "move left"]]
                  [:##j [:aerospace "move down"]]

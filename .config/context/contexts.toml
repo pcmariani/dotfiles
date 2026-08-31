@@ -7,8 +7,6 @@
 # org   — who the work is for. Display and search only: free text, so
 #         real capitalisation and spaces are fine. Clients and internal
 #         orgs both live here.
-# slot  — declared, never assigned. space-<slot> means this context
-#         permanently, whether or not anything is running.
 # dir   — working directory for the herdr session. Optional.
 #
 # The client folder itself is not a context. It is a label, because it
@@ -28,27 +26,20 @@ ambient = ["work", "personal", "browser", "ai"]
 [[context]]
 name = "apollo"
 org  = "Apollo"
-slot = 1
 dir  = "~/clients/Apollo"
 
 [[context]]
 name = "scs-jnl-parse"
 org  = "SCS"
-slot = 2
 dir  = "~/clients/SCS/jnl-parse-consolidated"
 
 [[context]]
 name = "sb-sales-analysis"
 org  = "Sports Basement"
-slot = 3
 # Directory name is misspelled upstream ("anlysis"); the context is not.
 dir  = "~/clients/SportsBasement/sales-test-anlysis"
 
-# Slot 4 left free for notification-framework (org = "Boomi").
-
-# No org: this is personal tooling, not client work. The picker shows it
-# under "(no org)".
+# No org: this is personal tooling, not client work.
 [[context]]
 name = "context-based-mac"
-slot = 5
 dir  = "~/projects/context-based-mac"
