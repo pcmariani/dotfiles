@@ -1,0 +1,43 @@
+# Context definitions.
+#
+# name  — identity. Doubles as the AeroSpace workspace name, the herdr
+#         session name, and a filesystem path component, so it is
+#         constrained to ^[a-z][a-z0-9-]{0,31}$ regardless of how the
+#         directory itself is capitalised or spelled.
+# org   — who the work is for. Display and search only: free text, so
+#         real capitalisation and spaces are fine. Clients and internal
+#         orgs both live here.
+# slot  — declared, never assigned. space-<slot> means this context
+#         permanently, whether or not anything is running.
+# dir   — working directory for the herdr session. Optional.
+#
+# The client folder itself is not a context. It is a label, because it
+# is not somewhere work happens.
+
+# Reserved: work, personal, browser, ai (ambient workspaces),
+#           terminal (ambient until rollout step 5),
+#           default (herdr's own session),
+#           next, prev, focused, visible (AeroSpace grammar tokens).
+ambient = ["work", "personal", "browser", "ai"]
+
+
+[[context]]
+name = "apollo"
+org  = "Apollo"
+slot = 1
+dir  = "~/clients/Apollo"
+
+[[context]]
+name = "scs-jnl-parse"
+org  = "SCS"
+slot = 2
+dir  = "~/clients/SCS/jnl-parse-consolidated"
+
+[[context]]
+name = "sb-sales-analysis"
+org  = "Sports Basement"
+slot = 3
+# Directory name is misspelled upstream ("anlysis"); the context is not.
+dir  = "~/clients/SportsBasement/sales-test-anlysis"
+
+# Slot 4 left free for notification-framework (org = "Boomi").
