@@ -25,23 +25,49 @@ local function pickerOpt(key, fallback)
   return v
 end
 
--- Two-line rows: marker + org + name on top, path underneath. Padding is
--- computed here rather than in Python because only this side knows the font is
--- monospaced and what the column widths should be.
+-- Two-line rows: marker + name on top, org and path underneath.
+--
+-- The org is NOT a padded column on the top line any more. Only a handful of
+-- contexts have one, so padding every row to the widest org ("Sports
+-- Basement", 15 chars) left almost every line with a 15-space hole in it.
+--
+-- subText stays a PLAIN string on purpose. It is the search fallback: whether
+-- fuzzy matching reaches inside a styledtext `text` could not be verified
+-- without a keypress, and paths contain the context name, so a plain
+-- searchable subText means typing a name still finds its row either way.
 local function choicesFrom(rows)
-  local orgw, namew = 0, 0
-  for _, r in ipairs(rows) do
-    orgw = math.max(orgw, #(r.org or ""))
-    namew = math.max(namew, #(r.name or ""))
-  end
+  local mono = pickerOpt("monospace", true)
+  local face = pickerOpt("font", "Menlo")
+  local size = pickerOpt("font_size", 15)
+  local fg = "#" .. pickerOpt("text_color", "C8D3D5")
+  local accent = "#" .. pickerOpt("accent_color", "00FFAA")
+
   local out = {}
   for i, r in ipairs(rows) do
-    out[i] = {
-      text = string.format("%s  %-" .. orgw .. "s  %-" .. namew .. "s",
-                           MARKERS[r.state] or " ", r.org or "", r.name or ""),
-      subText = r.path or "",
-      name = r.name,
-    }
+    local marker = MARKERS[r.state] or " "
+    local line = marker .. "  " .. (r.name or "")
+    local text
+
+    if mono then
+      text = hs.styledtext.new(line, {
+        font = { name = face, size = size },
+        color = { hex = fg },
+      })
+      -- Tint just the marker, so a live context reads at a glance without
+      -- colouring the whole row.
+      if r.state == "running" or r.state == "current" then
+        text = text:setStyle({ color = { hex = accent } }, 1, 1)
+      end
+    else
+      text = line
+    end
+
+    local below = r.path or ""
+    if r.org and r.org ~= "" then
+      below = r.org .. "  ·  " .. below
+    end
+
+    out[i] = { text = text, subText = below, name = r.name }
   end
   return out
 end
@@ -64,6 +90,21 @@ local applied = nil
 -- following open expensive. Most refreshes return identical rows — the
 -- contexts and their states have not moved — so skip the update unless
 -- something actually changed.
+-- Panel-wide styling. Called from setup() AND after every refresh, because at
+-- setup time the cache is empty — the config arrives with the first
+-- `--emit`, so styling applied only at setup would always be the fallbacks.
+local function applyStyle()
+  if not chooser then return end
+  chooser:bgDark(true)
+  -- fgColor is the colour of ALL the text, not the matched substring. Pointing
+  -- it at match_color (cyan) is what turned every row cyan.
+  chooser:fgColor({ hex = "#" .. pickerOpt("text_color", "C8D3D5") })
+  chooser:subTextColor({ hex = "#" .. pickerOpt("subtext_color", "5F7377") })
+  chooser:searchSubText(true)
+  chooser:placeholderText(pickerOpt("prompt", "context"))
+  chooser:rows(pickerOpt("rows", FALLBACK_ROWS))
+end
+
 local function applyChoices()
   if not chooser then return end
   local sig = signature(cache.rows)
@@ -80,6 +121,7 @@ function M.refresh(callback)
       local ok, data = pcall(hs.json.decode, stdout)
       if ok and type(data) == "table" and type(data.rows) == "table" then
         cache = data
+        applyStyle()      -- the config only arrives here, never at setup
         applyChoices()
       else
         print("context-picker: could not parse --emit output")
@@ -111,12 +153,7 @@ function M.setup()
     if choice and choice.name then enter(choice.name) end
   end)
 
-  chooser:rows(pickerOpt("rows", FALLBACK_ROWS))
-  chooser:bgDark(true)
-  chooser:fgColor({ hex = "#" .. pickerOpt("match_color", "00FFFF") })
-  chooser:subTextColor({ hex = "#808080" })
-  chooser:searchSubText(true)
-  chooser:placeholderText("context")
+  applyStyle()
 
   -- Prewarm. The first show() of a new chooser costs ~138ms building its view
   -- hierarchy, the second ~60ms, then ~23ms. Paying that at load means the
@@ -142,6 +179,13 @@ function M.show()
   chooser:width(math.min(100, target / screenWidth * 100))
   chooser:rows(pickerOpt("rows", FALLBACK_ROWS))
 
+  -- Always open on an empty query. The chooser keeps the last one otherwise,
+  -- which not only pre-filters the list but re-ranks it by match score —
+  -- discarding the running-first ordering and putting an arbitrary row under
+  -- the cursor. Clearing it is what makes ctrl-space then Enter land on the
+  -- last context again.
+  chooser:query("")
+
   if #cache.rows == 0 then
     -- Cold cache: wait for the fetch rather than flash an empty panel. Still
     -- faster than the choose path, which pays this AND the 200ms launch.
@@ -165,6 +209,15 @@ end
 
 function M.hide()
   if chooser then chooser:hide() end
+end
+
+-- Exposed for the smoke check: show() must always open on an empty query.
+function M.query()
+  return chooser and chooser:query() or ""
+end
+
+function M.setQueryForTest(text)
+  if chooser then chooser:query(text) end
 end
 
 -- Consumed by `context doctor`.

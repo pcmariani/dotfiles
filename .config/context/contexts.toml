@@ -40,10 +40,24 @@ rows          = 12
 width_percent = 55                        # percent of SCREEN width, so it
                                           # differs per display: 40% is 1376px
                                           # on the LG, 576px on the laptop
-font          = "Iosevka Nerd Font Mono"  # same as Ghostty
-font_size     = 24                        # choose's own default is 26
+# Menlo, not Iosevka: it is a system font, always resident, and measured 35ms
+# faster to first paint (204ms vs 239ms). choose reloads the font on every
+# launch, so a large third-party family is paid for on every keystroke of the
+# hotkey. The glyphs we use (● ○) are in both.
+font          = "Menlo"
+# Drives BOTH backends now. The resident panel's rows are compact, so it wants
+# a smaller number than choose did at 24 — raise it if the rows look cramped.
+font_size     = 16
 match_color   = "00FFFF"                  # cyan, matching your Ghostty cursor
 selection_bg  = "000000"                  # see note below
+
+# Resident (Hammerspoon) backend only. It colours ALL text with one colour and
+# has no match colour, so match_color above does not reach it — wiring them
+# together turned every row cyan, which is what made it ugly.
+text_color    = "C8D3D5"                  # phosphor-ish off-white
+subtext_color = "5F7377"                  # dim, for the org + path line
+accent_color  = "00FFAA"                  # the ● on a live context
+monospace     = true                      # Menlo via styledtext; see note
 
 # Where to look for undeclared contexts. Everything under these roots at depth
 # 1-2 becomes a pickable context, ranked by directory mtime, except:
@@ -51,8 +65,15 @@ selection_bg  = "000000"                  # see note below
 #   - dotfile directories
 #   - the paths listed below
 [discover]
-roots      = ["~/projects", "~/clients"]
-max_depth  = 2
+# Depth is per root, because the two have different shapes. A project lives at
+# ~/projects/<project>, so depth 1; walking deeper pulled in 32 rows that were
+# project internals (clang/snake, dev-system/docs, boomicompanion_plugin/0.2.8).
+# Client work lives at ~/clients/<client>/<project>, so depth 2.
+roots = [
+  { path = "~/projects", max_depth = 1 },
+  { path = "~/clients",  max_depth = 2 },
+]
+max_depth = 2       # default for any root that does not set its own
 
 # exclude      = drops a path AND everything under it
 # exclude_self = drops only the named directory, keeping its children.
