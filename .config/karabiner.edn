@@ -116,27 +116,30 @@
                  [:s [:open "Slack"]]
                  ; [:q [:open "finder"]]
                  ; [:e [:open "Spotify"]]
-                 ; [:t [:!!t]] ; ghostty dropdown terminal
+                 [:t [:!!t]] ;; ghostty quick terminal (hyper-T)
 
-                 ;; AeroSpace - workspaces
+                 ;; Ambient workspaces. These hold singleton apps — Slack,
+                 ;; Messages, Mail — which cannot be partitioned per project,
+                 ;; plus the unfiled-but-persistent browser and AI windows.
                  [:tab [:aerospace "workspace-back-and-forth"]]
 
                  [:w [:aerospace "workspace work"]]
                  [:a [:aerospace "workspace ai"]]
-                 [:t [:aerospace "workspace terminal"]]
                  [:b [:aerospace "workspace browser"]]
                  [:p [:aerospace "workspace personal"]]
 
-                 [:1 [:aerospace "workspace 1"]]
-                 [:2 [:aerospace "workspace 2"]]
-                 [:3 [:aerospace "workspace 3"]]
-                 [:4 [:aerospace "workspace 4"]]
-                 [:5 [:aerospace "workspace 5"]]
-                 [:6 [:aerospace "workspace 6"]]
-                 [:7 [:aerospace "workspace 7"]]
-                 [:8 [:aerospace "workspace 8"]]
-                 [:9 [:aerospace "workspace 9"]]
-                 [:0 [:aerospace "workspace 10"]]
+                 ;; Context slots. Declared in ~/.config/context/contexts.toml,
+                 ;; never assigned at runtime, so these never reshuffle. An
+                 ;; unclaimed slot shows a notification and does nothing.
+                 [:1 [:shell "~/projects/context-based-mac/bin/context slot 1"]]
+                 [:2 [:shell "~/projects/context-based-mac/bin/context slot 2"]]
+                 [:3 [:shell "~/projects/context-based-mac/bin/context slot 3"]]
+                 [:4 [:shell "~/projects/context-based-mac/bin/context slot 4"]]
+                 [:5 [:shell "~/projects/context-based-mac/bin/context slot 5"]]
+                 [:6 [:shell "~/projects/context-based-mac/bin/context slot 6"]]
+                 [:7 [:shell "~/projects/context-based-mac/bin/context slot 7"]]
+                 [:8 [:shell "~/projects/context-based-mac/bin/context slot 8"]]
+                 [:9 [:shell "~/projects/context-based-mac/bin/context slot 9"]]
 
                  ;; AeroSpace - windows
                  [:h [:aerospace "focus left"]]
@@ -174,20 +177,19 @@
 
                  [:##w [:aerospace "move-node-to-workspace work"]]
                  [:##a [:aerospace "move-node-to-workspace ai"]]
-                 [:##t [:aerospace "move-node-to-workspace terminal"]]
                  [:##b [:aerospace "move-node-to-workspace browser"]]
                  [:##p [:aerospace "move-node-to-workspace personal"]]
 
-                 [:##1 [:aerospace "move-node-to-workspace 1"]]
-                 [:##2 [:aerospace "move-node-to-workspace 2"]]
-                 [:##3 [:aerospace "move-node-to-workspace 3"]]
-                 [:##4 [:aerospace "move-node-to-workspace 4"]]
-                 [:##5 [:aerospace "move-node-to-workspace 5"]]
-                 [:##6 [:aerospace "move-node-to-workspace 6"]]
-                 [:##7 [:aerospace "move-node-to-workspace 7"]]
-                 [:##8 [:aerospace "move-node-to-workspace 8"]]
-                 [:##9 [:aerospace "move-node-to-workspace 9"]]
-                 [:##0 [:aerospace "move-node-to-workspace 10"]]
+                 ;; Send the focused window to slot N's context. Does not follow.
+                 [:##1 [:shell "~/projects/context-based-mac/bin/context slot 1 --move"]]
+                 [:##2 [:shell "~/projects/context-based-mac/bin/context slot 2 --move"]]
+                 [:##3 [:shell "~/projects/context-based-mac/bin/context slot 3 --move"]]
+                 [:##4 [:shell "~/projects/context-based-mac/bin/context slot 4 --move"]]
+                 [:##5 [:shell "~/projects/context-based-mac/bin/context slot 5 --move"]]
+                 [:##6 [:shell "~/projects/context-based-mac/bin/context slot 6 --move"]]
+                 [:##7 [:shell "~/projects/context-based-mac/bin/context slot 7 --move"]]
+                 [:##8 [:shell "~/projects/context-based-mac/bin/context slot 8 --move"]]
+                 [:##9 [:shell "~/projects/context-based-mac/bin/context slot 9 --move"]]
 
                  [:##h [:aerospace "move left"]]
                  [:##j [:aerospace "move down"]]

@@ -27,5 +27,9 @@ macos-non-native-fullscreen = visible-menu
 # window-vsync = true
 # window-colorspace = display-p3
 # quick-terminal-screen = macos-menu-bar
-# keybind = global:shift+cmd+ctrl+alt+t=toggle_quick_terminal
+
+# Hyper-T, reached via Goku as space-mode `t`. Replaces the retired "terminal"
+# workspace: unfiled terminal use is ephemeral, so a dropdown suits it better
+# than a persistent workspace.
+keybind = global:shift+cmd+ctrl+alt+t=toggle_quick_terminal
 

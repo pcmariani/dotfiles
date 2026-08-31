@@ -58,7 +58,13 @@ automatically-unhide-macos-hidden-apps = false
 # even when they are invisible.
 # This config option is only available since 'config-version = 2'
 # Fallback value (if you omit the key): persistent-workspaces = []
-persistent-workspaces = ["work", "ai", "terminal", "browser", "personal"]
+# Ambient workspaces only. These hold singleton apps that cannot be
+# partitioned per project (Slack, Messages) plus unfiled-but-persistent
+# browser and AI windows. Project contexts are created on demand by
+# `context enter` and are deliberately NOT persistent, so an empty one
+# evaporates. Keep this list in sync with `ambient` in
+# ~/.config/context/contexts.toml — `context doctor` checks.
+persistent-workspaces = ["work", "ai", "browser", "personal"]
 
 # A callback that runs every time binding mode changes
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes

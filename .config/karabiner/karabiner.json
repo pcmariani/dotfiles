@@ -398,6 +398,20 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "t"
+          },
+          "to" : [ {
+            "key_code" : "t",
+            "modifiers" : [ "left_command", "left_control", "left_option", "left_shift" ]
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "tab"
           },
           "to" : [ {
@@ -437,19 +451,6 @@
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "t"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace terminal"
-          } ],
-          "conditions" : [ {
-            "name" : "space-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
             "key_code" : "b"
           },
           "to" : [ {
@@ -479,7 +480,7 @@
             "key_code" : "1"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 1"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 1\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -492,7 +493,7 @@
             "key_code" : "2"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 2"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 2\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -505,7 +506,7 @@
             "key_code" : "3"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 3"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 3\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -518,7 +519,7 @@
             "key_code" : "4"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 4"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 4\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -531,7 +532,7 @@
             "key_code" : "5"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 5"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 5\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -544,7 +545,7 @@
             "key_code" : "6"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 6"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 6\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -557,7 +558,7 @@
             "key_code" : "7"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 7"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 7\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -570,7 +571,7 @@
             "key_code" : "8"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 8"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 8\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -583,20 +584,7 @@
             "key_code" : "9"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 9"
-          } ],
-          "conditions" : [ {
-            "name" : "space-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "0"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace 10"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 9\"'"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -829,22 +817,6 @@
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "t",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace terminal"
-          } ],
-          "conditions" : [ {
-            "name" : "cmd-space-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
             "key_code" : "b",
             "modifiers" : {
               "optional" : [ "any" ]
@@ -883,7 +855,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 1"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 1 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",
@@ -899,7 +871,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 2"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 2 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",
@@ -915,7 +887,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 3"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 3 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",
@@ -931,7 +903,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 4"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 4 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",
@@ -947,7 +919,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 5"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 5 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",
@@ -963,7 +935,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 6"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 6 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",
@@ -979,7 +951,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 7"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 7 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",
@@ -995,7 +967,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 8"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 8 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",
@@ -1011,23 +983,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 9"
-          } ],
-          "conditions" : [ {
-            "name" : "cmd-space-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "0",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace move-node-to-workspace 10"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context slot 9 --move\"'"
           } ],
           "conditions" : [ {
             "name" : "cmd-space-mode",

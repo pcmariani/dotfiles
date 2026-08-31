@@ -15,14 +15,14 @@
 # is not somewhere work happens.
 
 # Reserved: work, personal, browser, ai (ambient workspaces),
-#           terminal (ambient until rollout step 5),
+#           terminal (retired 2026-08-31, still reserved),
 #           default (herdr's own session),
 #           next, prev, focused, visible (AeroSpace grammar tokens).
 #
-# "terminal" is listed below because AeroSpace still persists it. Remove it
-# from both files together at rollout step 5, when the quick terminal takes
-# over — `context doctor` will complain if they drift apart.
-ambient = ["work", "personal", "browser", "ai", "terminal"]
+# "terminal" was retired from aerospace.toml when the Ghostty quick terminal
+# took over hyper-T, so it is no longer ambient. It stays reserved in code
+# (context/model.py) so a context can never claim the old name.
+ambient = ["work", "personal", "browser", "ai"]
 
 
 [[context]]
@@ -45,3 +45,10 @@ slot = 3
 dir  = "~/clients/SportsBasement/sales-test-anlysis"
 
 # Slot 4 left free for notification-framework (org = "Boomi").
+
+# No org: this is personal tooling, not client work. The picker shows it
+# under "(no org)".
+[[context]]
+name = "context-based-mac"
+slot = 5
+dir  = "~/projects/context-based-mac"
