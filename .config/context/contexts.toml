@@ -1,41 +1,73 @@
 # Context definitions.
 #
-# name  — identity. Doubles as the AeroSpace workspace name, the herdr
-#         session name, and a filesystem path component, so it is
-#         constrained to ^[a-z][a-z0-9-]{0,31}$ regardless of how the
-#         directory itself is capitalised or spelled.
-# org   — who the work is for. Display and search only: free text, so
-#         real capitalisation and spaces are fine. Clients and internal
-#         orgs both live here.
-# dir   — working directory for the herdr session. Optional.
+# A context is a PATH. Entries here decorate paths; [discover] below finds the
+# rest; the two merge into one list joined by path, with declared entries
+# shadowing discovered ones at the same path. Nothing here is ever written by
+# the tool.
 #
-# The client folder itself is not a context. It is a label, because it
-# is not somewhere work happens.
+# path  — the directory. Optional: an entry with only a name is a context with
+#         no folder, declarable but never discovered.
+# name  — overrides the derived name. Derivation is `parent.basename`,
+#         slugified to lowercase ASCII with `.` as the hierarchy separator:
+#           ~/clients/SCS/jnl-parse-consolidated -> scs.jnl-parse-consolidated
+#         falling back to `basename` alone when that would exceed the byte cap.
+#         The name is the AeroSpace workspace AND the herdr session id, so it is
+#         capped at 50 bytes here — macOS limits a unix socket path to 104, and
+#         ~/.config/herdr/sessions/<name>/herdr.sock has to fit. The cap is
+#         computed from $HOME, so it differs on another machine.
+# org   — who the work is for. Display and search only, so free text: real
+#         capitalisation and spaces are fine.
+#
+# Reserved names live in context/model.py (herdr's "default", AeroSpace's
+# grammar tokens, the ambient workspace names). `context doctor` additionally
+# reads aerospace.toml, so a context colliding with any persistent workspace is
+# caught without listing them here.
+#
+# `dir` still works as a deprecated alias for `path`.
 
-# Reserved names are not listed here. A safety floor lives in
-# context/model.py (herdr's "default", AeroSpace's grammar tokens, and the
-# ambient workspace names), and `context doctor` reads aerospace.toml directly
-# to catch a context colliding with any persistent workspace — so adding an
-# ambient workspace needs no edit in this file.
 
+# Where to look for undeclared contexts. Everything under these roots at depth
+# 1-2 becomes a pickable context, ranked by directory mtime, except:
+#   - anything inside a git repo (a repo's subdirectories are its internals)
+#   - dotfile directories
+#   - the paths listed below
+[discover]
+roots      = ["~/projects", "~/clients"]
+max_depth  = 2
+
+# exclude      = drops a path AND everything under it
+# exclude_self = drops only the named directory, keeping its children.
+# These two client folders are containers, not places work happens — entering
+# one gives a terminal at a directory of 50-115 unrelated project folders — but
+# their children are real contexts, so they cannot simply be excluded.
+exclude_self = ["~/clients/SCS", "~/clients/SportsBasement"]
 
 [[context]]
 name = "apollo"
 org  = "Apollo"
-dir  = "~/clients/Apollo"
+path = "~/clients/Apollo"
 
 [[context]]
 name = "scs-jnl-parse"
 org  = "SCS"
-dir  = "~/clients/SCS/jnl-parse-consolidated"
+path = "~/clients/SCS/jnl-parse-consolidated"
 
 [[context]]
 name = "sb-sales-analysis"
 org  = "Sports Basement"
 # Directory name is misspelled upstream ("anlysis"); the context is not.
-dir  = "~/clients/SportsBasement/sales-test-anlysis"
+path = "~/clients/SportsBasement/sales-test-anlysis"
 
 # No org: this is personal tooling, not client work.
 [[context]]
 name = "context-based-mac"
-dir  = "~/projects/context-based-mac"
+path = "~/projects/context-based-mac"
+
+# Collision override. Both ~/clients/plexus and ~/projects/plexus derive
+# "plexus" — each is a direct child of a root, so parent.basename gives no
+# qualifier. Naming one after its root breaks the tie; entering either is
+# blocked until this exists. (Both are stale scratch dirs; excluding them
+# under [discover] would work equally well.)
+[[context]]
+name = "projects.plexus"
+path = "~/projects/plexus"
