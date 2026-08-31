@@ -1,8 +1,10 @@
 [tools]
 "asdf:mise-plugins/mise-groovy" = "2.4.21"
+bun = "latest"
 go = "latest"
 java = "corretto-11.0.32.10.1"
 lua = "5.1"
 node = "latest"
 python = "3.12"
+rust = "latest"
 uv = "latest"
