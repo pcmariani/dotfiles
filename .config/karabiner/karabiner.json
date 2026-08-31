@@ -37,7 +37,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context-pick\"'"
+            "shell_command" : "osascript -e 'do shell script \"~/projects/context-based-mac/bin/context pick\"'"
           } ],
           "type" : "basic"
         } ]

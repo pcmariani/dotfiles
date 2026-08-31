@@ -59,7 +59,7 @@
         ; gets pressed most.
         {
          :des "context picker"
-         :rules [[:!Tspacebar [:shell "~/projects/context-based-mac/bin/context-pick"]]]
+         :rules [[:!Tspacebar [:shell "~/projects/context-based-mac/bin/context pick"]]]
          }
 
         ; note: When adding a new layer, if you want it to be able to cross with an old one, you must add the name negated (:!new_name) to all other mod-tap layer conditions
