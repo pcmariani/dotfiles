@@ -104,12 +104,3 @@ path = "~/clients/SportsBasement/sales-test-anlysis"
 [[context]]
 name = "context-based-mac"
 path = "~/projects/context-based-mac"
-
-# Collision override. Both ~/clients/plexus and ~/projects/plexus derive
-# "plexus" — each is a direct child of a root, so parent.basename gives no
-# qualifier. Naming one after its root breaks the tie; entering either is
-# blocked until this exists. (Both are stale scratch dirs; excluding them
-# under [discover] would work equally well.)
-[[context]]
-name = "projects.plexus"
-path = "~/projects/plexus"
