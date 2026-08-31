@@ -1,5 +1,15 @@
 -- ~/.hammerspoon/init.lua
 
+-- Command-line bridge, so `hs -c "..."` can talk to this running instance.
+-- Used by the context picker; also how `context doctor` probes the backend.
+require("hs.ipc")
+
+-- Resident context picker. ctrl-space reaches this through bin/context-pick.
+-- A global, not a local: `hs -c` evaluates in the global environment, and
+-- bin/context-pick probes for this name.
+contextPicker = require("context-picker")
+contextPicker.setup()
+
 -----------------------------------------------------------
 -- Microphone mute
 -----------------------------------------------------------
