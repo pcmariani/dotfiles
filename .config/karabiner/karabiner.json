@@ -37,7 +37,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context pick"
+            "key_code" : "f18"
           } ],
           "type" : "basic"
         } ]
@@ -611,7 +611,7 @@
             "key_code" : "comma"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'do shell script \"~/.config/aerospace/set-layout.sh accordion\"'"
+            "shell_command" : "/Users/petermariani/.config/aerospace/set-layout.sh accordion"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -624,7 +624,7 @@
             "key_code" : "period"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'do shell script \"~/.config/aerospace/set-layout.sh tiles\"'"
+            "shell_command" : "/Users/petermariani/.config/aerospace/set-layout.sh tiles"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -653,7 +653,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'do shell script \"~/.config/aerospace/new-chrome.sh\"'"
+            "shell_command" : "/Users/petermariani/.config/aerospace/new-chrome.sh"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -669,7 +669,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'do shell script \"~/.config/aerospace/new-ghostty.sh\"'"
+            "shell_command" : "/Users/petermariani/.config/aerospace/new-ghostty.sh"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
