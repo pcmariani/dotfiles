@@ -26,6 +26,19 @@
 # `dir` still works as a deprecated alias for `path`.
 
 
+# Picker appearance. `choose` colours exactly two things and there is no
+# option for either the panel background or the general text colour — the
+# panel follows the system appearance.
+#   match_color  the characters you have typed, as they match
+#   selection_bg the highlighted row's background
+[picker]
+rows          = 12
+width_percent = 30                        # percent of screen width
+font          = "Iosevka Nerd Font Mono"  # same as Ghostty
+font_size     = 18                        # choose's own default is 26
+match_color   = "00FFFF"                  # cyan, matching your Ghostty cursor
+selection_bg  = "1E1E2E"                  # Catppuccin Mocha base
+
 # Where to look for undeclared contexts. Everything under these roots at depth
 # 1-2 becomes a pickable context, ranked by directory mtime, except:
 #   - anything inside a git repo (a repo's subdirectories are its internals)
