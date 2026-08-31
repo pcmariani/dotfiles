@@ -35,6 +35,7 @@
              :openg "open -g \"%s\""
              :link "osascript -e 'do shell script \"open %s\"'"
              :shell "osascript -e 'do shell script \"%s\"'"
+             :aerospace "/opt/homebrew/bin/aerospace %s"
              }
 
  ;; define application identifiers
@@ -56,71 +57,142 @@
          :des "mod-tap layers"
          :rules [
                  ;chrome mode
-                 [:a nil [:!d-mode :!s-mode :!v-mode :!space-mode]
+                 [:a nil [:!d-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :a :halt true} :delayed {:canceled {:key :a}} :held {:set ["a-mode" 1] :repeat false} :afterup {:set ["a-mode" 0]}
                    ;:params {:alone 199 :held 200 :delay 200} 
                    }]
 
                  ;special-characters-mode
-                 [:s nil [:!a-mode :!d-mode :!v-mode :!space-mode]
-                  {:alone {:key :s :halt true} :delayed {:canceled {:key :s}} :held {:set ["s-mode" 1] :repeat false} :afterup {:set ["s-mode" 0]}}]
+                 [:s nil [:!a-mode :!d-mode :!v-mode :!space-mode :!cmd-space-mode]
+                  {:alone {:key :s :halt true} 
+                   :delayed {:canceled {:key :s}} 
+                   :held {:set ["s-mode" 1] :repeat false} 
+                   :afterup {:set ["s-mode" 0]}}]
 
                  ;digits-mode
-                 [:d nil [:!a-mode :!s-mode :!v-mode :!space-mode]
-                  {:alone {:key :d :halt true} :delayed {:canceled {:key :d}} :held {:set ["d-mode" 1] :repeat false} :afterup {:set ["d-mode" 0]}}]
+                 [:d nil [:!a-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
+                  {:alone {:key :d :halt true} 
+                   :delayed {:canceled {:key :d}} 
+                   :held {:set ["d-mode" 1] :repeat false} 
+                   :afterup {:set ["d-mode" 0]}}]
 
                  ;vim-mode
-                 [:v nil [:!a-mode :!d-mode :!s-mode :!space-mode]
-                  {:alone {:key :v :halt true} :delayed {:canceled {:key :v}} :held {:set ["v-mode" 1] :repeat false} :afterup {:set ["v-mode" 0]}}]
+                 [:v nil [:!a-mode :!d-mode :!s-mode :!space-mode :!cmd-space-mode]
+                  {:alone {:key :v :halt true} 
+                   :delayed {:canceled {:key :v}} 
+                   :held {:set ["v-mode" 1] :repeat false} 
+                   :afterup {:set ["v-mode" 0]}}]
 
                  ;space-mode
-                 [:spacebar nil [:!a-mode :!d-mode :!s-mode :!space-mode]
-                  {:alone {:key :spacebar :halt true} :delayed {:canceled {:key :spacebar}} :held {:set ["space-mode" 1] :repeat false} :afterup {:set ["space-mode" 0]}}]
+                 [:spacebar nil [:!a-mode :!d-mode :!s-mode :!space-mode :!cmd-space-mode]
+                  {:alone {:key :spacebar :halt true} 
+                   :delayed {:canceled {:key :spacebar}} 
+                   :held {:set ["space-mode" 1] :repeat false} 
+                   :afterup {:set ["space-mode" 0]}}]
 
+                 ;cmd-space-mode
+                 ; note: :modi re-emits the command so a tap still reaches
+                 ; Spotlight. Beware :modifiers, which goku silently drops.
+                 [:!Cspacebar nil [:!a-mode :!d-mode :!s-mode :!space-mode :!cmd-space-mode]
+                  {:alone {:key :spacebar :modi :left_command :halt true}
+                   :delayed {:canceled {:key :spacebar :modi :left_command}}
+                   :held {:set ["cmd-space-mode" 1] :repeat false}
+                   :afterup {:set ["cmd-space-mode" 0]}}]
                  ]
          }
 
         {
-         :des "space-mode: application switching, window management, vim navigation"
+         :des "space-mode: AeroSpace commands"
          :rules [
                  :space-mode
-                 ;; window management - left side
-                 ; number row
-                 [:tab :!Ctab] ; same as Command Tab
-                 [:!Stab :!CStab] ; same as Command Tab
-                 ; [:P :!Cgrave_accent_and_tilde]
-                 [:grave_accent_and_tilde [:openg "rectangle://execute-action?name=maximize"]]
-                 ; [:grave_accent_and_tilde "osacript ~/scripts/switch-fullscreen-app-windows.scpt"]
-                 ; [:t [:openg "rectangle://execute-action?name=larger"]]
-                 ; [:quote :!CTf] ;; full screen
-                 [:1 [:openg "rectangle://execute-action?name=first-third"]]
-                 [:2 [:openg "rectangle://execute-action?name=left-half"]]
-                 [:3 [:openg "rectangle://execute-action?name=right-half"]]
-                 [:4 [:openg "rectangle://execute-action?name=last-third"]]
-                 [:5 [:openg "rectangle://execute-action?name=next-display"]]
 
-                 ;; application switching - left side
-                 ; top row
-                 [:q [:open "finder"]]
-                 [:w [:open "Messages"]]
-                 [:e [:open "Spotify"]]
-                 [:r [:open "Postman"]]
-                 [:t [:!!t]] ; ghostty dropdown terminal
-                 ; middle row
-                 [:a :!CTO1] ; Control Command Option 1 - switch to first workspace
-                 [:s [:open "Ghostty"]]
-                 [:!Ss [:open "Alacritty"]]
-                 [:d [:open "Google Chrome"]]
-                 [:!Sd [:open "Arc"]]
-                 [:f [:open "Slack"]]
-                 ; bottom row
-                 [:z [:open "Zscaler"]]
-                 [:c [:open "Neovide"]]
-                 [:v [:open "MacVim"]]
+                 ;; commands
+                 [:m :!!m] ;; hammerspoon hyper M: toggle mute mic
+                 [:!Sr :!!r] ;; hammerspoon hyper R: reload hammerspoon
 
-                 ;; vim navigation - right side
-                 [:k :!Sopen_bracket]
-                 [:j :!Sclose_bracket]
+                 ;; applications
+                 [:g :!!g] ;; hammerspoon hyper G: focus chrome Boomi Gmail
+                 [:i [:open "Messages"]]
+                 [:s [:open "Slack"]]
+                 ; [:q [:open "finder"]]
+                 ; [:e [:open "Spotify"]]
+                 ; [:t [:!!t]] ; ghostty dropdown terminal
+
+                 ;; AeroSpace - workspaces
+                 [:tab [:aerospace "workspace-back-and-forth"]]
+
+                 [:w [:aerospace "workspace work"]]
+                 [:a [:aerospace "workspace ai"]]
+                 [:t [:aerospace "workspace terminal"]]
+                 [:b [:aerospace "workspace browser"]]
+                 [:p [:aerospace "workspace personal"]]
+
+                 [:1 [:aerospace "workspace 1"]]
+                 [:2 [:aerospace "workspace 2"]]
+                 [:3 [:aerospace "workspace 3"]]
+                 [:4 [:aerospace "workspace 4"]]
+                 [:5 [:aerospace "workspace 5"]]
+                 [:6 [:aerospace "workspace 6"]]
+                 [:7 [:aerospace "workspace 7"]]
+                 [:8 [:aerospace "workspace 8"]]
+                 [:9 [:aerospace "workspace 9"]]
+                 [:0 [:aerospace "workspace 10"]]
+
+                 ;; AeroSpace - windows
+                 [:h [:aerospace "focus left"]]
+                 [:j [:aerospace "focus down"]]
+                 [:k [:aerospace "focus up"]]
+                 [:l [:aerospace "focus right"]]
+
+                 [:hyphen [:aerospace "resize smart -200"]]
+                 [:equal_sign [:aerospace "resize smart +200"]]
+
+                 ;; AeroSpace - window state
+                 [:f [:aerospace "fullscreen"]]
+                 [:z [:aerospace "layout floating tiling"]]
+                 [:r [:aerospace "flatten-workspace-tree"]] ;; reset the layout tree
+
+                 ;; AeroSpace - layout
+                 [:comma [:shell "~/.config/aerospace/set-layout.sh accordion"]]
+                 [:period [:shell "~/.config/aerospace/set-layout.sh tiles"]]
+
+                 ;; AeroSpace - monitor
+                 [:grave_accent_and_tilde [:aerospace "move-workspace-to-monitor --wrap-around next"]]
+
+                 ;; AeroSpace - new intance
+                 [:!Sb [:shell "~/.config/aerospace/new-chrome.sh"]]
+                 [:!St [:shell "~/.config/aerospace/new-ghostty.sh"]]
+
+                 ]
+
+         }
+
+        {
+         :des "cmd-space-mode"
+         :rules [
+                 :cmd-space-mode
+
+                 [:##w [:aerospace "move-node-to-workspace work"]]
+                 [:##a [:aerospace "move-node-to-workspace ai"]]
+                 [:##t [:aerospace "move-node-to-workspace terminal"]]
+                 [:##b [:aerospace "move-node-to-workspace browser"]]
+                 [:##p [:aerospace "move-node-to-workspace personal"]]
+
+                 [:##1 [:aerospace "move-node-to-workspace 1"]]
+                 [:##2 [:aerospace "move-node-to-workspace 2"]]
+                 [:##3 [:aerospace "move-node-to-workspace 3"]]
+                 [:##4 [:aerospace "move-node-to-workspace 4"]]
+                 [:##5 [:aerospace "move-node-to-workspace 5"]]
+                 [:##6 [:aerospace "move-node-to-workspace 6"]]
+                 [:##7 [:aerospace "move-node-to-workspace 7"]]
+                 [:##8 [:aerospace "move-node-to-workspace 8"]]
+                 [:##9 [:aerospace "move-node-to-workspace 9"]]
+                 [:##0 [:aerospace "move-node-to-workspace 10"]]
+
+                 [:##h [:aerospace "move left"]]
+                 [:##j [:aerospace "move down"]]
+                 [:##k [:aerospace "move up"]]
+                 [:##l [:aerospace "move right"]]
 
                  ]
          }
@@ -135,8 +207,7 @@
                  ]
          }
 
-        ; AAAAA paaaaa
-        {
+        { 
          :des "d-mode"
          :rules [
                  :d-mode
@@ -150,6 +221,7 @@
                  [:i :8]
                  [:o :9]
                  [:right_command :0]
+                 [:spacebar :0]
                  ]
          }
 
