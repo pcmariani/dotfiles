@@ -37,7 +37,7 @@
 #                the row highlight is the system colour and not ours to set.
 [picker]
 rows          = 12
-width_percent = 40                        # percent of SCREEN width, so it
+width_percent = 55                        # percent of SCREEN width, so it
                                           # differs per display: 40% is 1376px
                                           # on the LG, 576px on the laptop
 font          = "Iosevka Nerd Font Mono"  # same as Ghostty
