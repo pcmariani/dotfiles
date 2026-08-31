@@ -35,39 +35,67 @@ end
 -- fuzzy matching reaches inside a styledtext `text` could not be verified
 -- without a keypress, and paths contain the context name, so a plain
 -- searchable subText means typing a name still finds its row either way.
+local function pad(s, width)
+  s = s or ""
+  local n = utf8.len(s) or #s
+  if n >= width then return s end
+  return s .. string.rep(" ", width - n)
+end
+
+-- One aligned line per row: marker, org, name, path — each its own colour.
+--
+-- Built by CONCATENATING pre-styled fragments rather than styling ranges of
+-- one string. setStyle's indices are neither plainly byte- nor
+-- character-based (styling range 2,2 of "●ABCDEF" produced a run at 3..3),
+-- and the marker glyph is multibyte, so range arithmetic here would be
+-- guesswork. Concatenation has no index math at all.
+--
+-- There is no subText: rows are single-line so more of them fit, matching the
+-- one-row-per-line terminal look. That is only safe because fuzzy search was
+-- verified to match styled text with no subText present — typing "zebra7"
+-- against styled rows whose `name` did not contain it still selected row 7.
 local function choicesFrom(rows)
   local mono = pickerOpt("monospace", true)
   local face = pickerOpt("font", "Menlo")
   local size = pickerOpt("font_size", 15)
   local fg = "#" .. pickerOpt("text_color", "C8D3D5")
+  local dim = "#" .. pickerOpt("subtext_color", "5F7377")
   local accent = "#" .. pickerOpt("accent_color", "00FFAA")
+  local orgHex = "#" .. pickerOpt("org_color", "C678DD")
+
+  local function frag(s, hex)
+    return hs.styledtext.new(s, {
+      font = { name = face, size = size },
+      color = { hex = hex },
+    })
+  end
+
+  local orgw, namew = 0, 0
+  for _, r in ipairs(rows) do
+    orgw = math.max(orgw, utf8.len(r.org or "") or 0)
+    namew = math.max(namew, utf8.len(r.name or "") or 0)
+  end
 
   local out = {}
   for i, r in ipairs(rows) do
     local marker = MARKERS[r.state] or " "
-    local line = marker .. "  " .. (r.name or "")
+    -- The current context is dimmed as well as sunk to the bottom, so the row
+    -- you are already in never looks like a destination.
+    local nameHex = (r.state == "current") and dim or fg
+    local markHex = (r.state == "running") and accent or dim
     local text
 
     if mono then
-      text = hs.styledtext.new(line, {
-        font = { name = face, size = size },
-        color = { hex = fg },
-      })
-      -- Tint just the marker, so a live context reads at a glance without
-      -- colouring the whole row.
-      if r.state == "running" or r.state == "current" then
-        text = text:setStyle({ color = { hex = accent } }, 1, 1)
-      end
+      text = frag(marker .. "  ", markHex)
+          .. frag(pad(r.org, orgw) .. "  ", orgHex)
+          .. frag(pad(r.name, namew) .. "  ", nameHex)
+          .. frag(r.path or "", dim)
     else
-      text = line
+      text = string.format("%s  %s  %s  %s", marker, pad(r.org, orgw),
+                           pad(r.name, namew), r.path or "")
     end
 
-    local below = r.path or ""
-    if r.org and r.org ~= "" then
-      below = r.org .. "  ·  " .. below
-    end
-
-    out[i] = { text = text, subText = below, name = r.name }
+    out[i] = { text = text, name = r.name }
   end
   return out
 end

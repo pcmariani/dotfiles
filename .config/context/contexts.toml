@@ -36,7 +36,7 @@
 #                changing this has no visible effect, it is the latter, and
 #                the row highlight is the system colour and not ours to set.
 [picker]
-rows          = 12
+rows          = 18                        # single-line rows, so more fit
 width_percent = 55                        # percent of SCREEN width, so it
                                           # differs per display: 40% is 1376px
                                           # on the LG, 576px on the laptop
@@ -54,10 +54,12 @@ selection_bg  = "000000"                  # see note below
 # Resident (Hammerspoon) backend only. It colours ALL text with one colour and
 # has no match colour, so match_color above does not reach it — wiring them
 # together turned every row cyan, which is what made it ugly.
-text_color    = "C8D3D5"                  # phosphor-ish off-white
-subtext_color = "5F7377"                  # dim, for the org + path line
+# One aligned line per row: ● org name path, each column its own colour.
+text_color    = "C8D3D5"                  # the name
+subtext_color = "5F7377"                  # the path, and the current context
 accent_color  = "00FFAA"                  # the ● on a live context
-monospace     = true                      # Menlo via styledtext; see note
+org_color     = "C678DD"                  # the org column
+monospace     = true                      # Menlo via styledtext
 
 # Where to look for undeclared contexts. Everything under these roots at depth
 # 1-2 becomes a pickable context, ranked by directory mtime, except:
