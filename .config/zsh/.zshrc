@@ -5,55 +5,31 @@ autoload -Uz add-zsh-hook
 
 setopt menucomplete
 setopt interactivecomments # Comments in the interactive shell
-unsetopt listtypes # removes / from directories
-
-# Changing directories
-setopt autocd
+setopt autocd # Changing directories
 setopt globdots
 setopt auto_pushd
 setopt pushd_ignore_dups
 setopt pushd_silent
+unsetopt listtypes # removes / from directories
 
 # History
 export HISTFILE="$ZDOTDIR/.zhistory"
-export HISTSIZE=1000000
-export SAVEHIST=1000000
-setopt inc_append_history # add commands to HISTFILE in order of execution
-setopt share_history # share command history data
+export HISTSIZE=10000
+export SAVEHIST=10000
 setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
-setopt hist_find_no_dups # don't display duplicates in reverse search
-setopt hist_reduce_blanks # remove superfluous blanks
-setopt hist_ignore_space # ignore commands that start with space
 setopt hist_ignore_dups # Don't add duplicate entries
+setopt hist_ignore_all_dups # Don't add duplicate entries
+setopt hist_ignore_space # ignore commands that start with space
+setopt hist_save_no_dups # don't write duplicates to history file
+setopt hist_reduce_blanks # remove superfluous blanks
+setopt hist_find_no_dups # don't display duplicates in reverse search
 setopt hist_verify # show command with history expansion to user before running it
-
-# ----- env -----
-
-export BOOMI_GROOVY_HOME="$HOME/projects/best/"
-export RIPGREP_CONFIG_PATH="$HOME/.config/.ripgreprc"
-export EDITOR="nvim"
-export VISUAL="nvim"
-export BROWSER="lynx"
-export MANPAGER='nvim +Man!'
-export NODE_EXTRA_CA_CERTS="$HOME/.certs/zscaler_root.pem"
-export BW_SERVER="http://localhost:8087"
-
-path=(
-  "/opt/homebrew/bin"
-  "/opt/homebrew/sbin"
-  "$HOME/.local/bin"
-  "$HOME/scripts"
-  "$HOME/.cargo/bin"
-  "$HOME/projects/best"
-  "$path[@]"
-)
-
-eval "$(mise activate zsh)"
+setopt share_history # share command history data
 
 # ----- sources -----
 
 source "$ZDOTDIR/zsh-functions"
-source "$HOME/.config/aliases"
+source "$ZDOTDIR/aliases"
 source /opt/homebrew/share/zsh-vi-mode/zsh-vi-mode.zsh
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -137,6 +113,10 @@ _ls_after_cd() {
     ls -a
 }
 add-zsh-hook chpwd _ls_after_cd
+
+# ----- mise -----
+
+eval "$(mise activate zsh)"
 
 # ----- zoxide -----
 

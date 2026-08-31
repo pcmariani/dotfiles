@@ -22,6 +22,7 @@ alias gy='yadm-lazygit'
 alias yg='yadm-lazygit'
 alias ys='yadm status'
 alias yd='yadm diff'
+alias ym='yadm mv'
 alias yls='yadm list'
 alias yla='yadm list -a'
 alias ya='yadm add'
@@ -32,43 +33,24 @@ alias v='nvim -O' # one vertical window per file
 alias vis='nvim "+set si"'
 alias fvf='v $(fzf)'
 
+# --- find --- #
+alias f='fd -H -i'
+
 # --- edit files --- #
-alias e='v',
-alias ea='e ~/.config/aliases'
-alias eh='e ~/.config/herder/config.toml'
-
-alias eg='e  $HOME/.gitconfig'
-alias egh='e $HOME/.gitconfig'
-alias erg='e $HOME/.ripgreprc'
-alias ez='e  $HOME/.config/zsh/.zshrc'
-alias eze='e $HOME/.zshenv'
-alias ezf='e $HOME/.config/zsh/zsh-functions'
-alias est='e $HOME/.config/starship.toml'
-alias etx='e $HOME/.tmux.conf'
-# .ripgreprc
-# alacritty/alacritty.toml
-# alacritty/alacritty.yml
-# aliases
-# bash_functions
-# exercism/user.json
-# ghostty/config
-# herdr/config.toml
-# karabiner.edn
-# karabiner/karabiner.json
-# mise/config.toml
-# starship.toml
-# zsh/.zhistory
-# zsh/.zshrc
-# zsh/zsh-aliases
-# zsh/zsh-completions
-# zsh/zsh-functions
-
-# --- source files --- #
-alias .a='source ~/.config/aliases && echo aliases sourced'
-alias .z='source ~/.config/zsh/.zshrc && echo .zshrc sourced'
-alias .za='source ~/.config/zsh/zsh-aliases && echo zsh-aliases sourced'
-alias .ze='source ~/.zshenv && echo .zshenv sourced'
-alias .zf='source ~/.config/zsh/zsh-functions && echo zsh-functions sourced'
+alias e='v'
+alias ea='e ~/.config/zsh/aliases'
+alias eg='e  ~/.gitconfig'
+alias egh='e ~/.config/ghostty/config'
+alias eh='e ~/.config/herdr/config.toml'
+alias ek='e  ~/.config/karabiner.edn'
+alias erg='e ~/.config/.ripgreprc'
+alias est='e ~/.config/starship.toml'
+alias etx='e ~/.tmux.conf'
+alias ev='e ~/.vimrc'
+alias ez='e  ~/.config/zsh/.zshrc'
+alias eze='e ~/.zshenv'
+alias ezf='e ~/.config/zsh/zsh-functions'
+alias .z='exec zsh && echo zsh reloaded'
 
 # --- git --- #
 alias g='lazygit'
@@ -77,15 +59,18 @@ alias gls='git ls-tree --full-tree -r --name-only HEAD'
 alias gh.create='git init && git add . && git commit -m "initial commit" && gh repo create $(pwd | sed "s/.*\///") --private --source=. --remote=origin --push'
 
 # --- ls --- #
-alias l="eza -a --icons --group-directories-first"
+alias l="eza -la --icons --no-user --no-permissions --git --group-directories-first"
 alias ls="eza --icons --group-directories-first"
-alias lsd="eza -ad --icons --group-directories-first --no-user --git */"
-alias la="eza -la --icons --group-directories-first --no-user --git"
-alias lad="eza -lad --icons --group-directories-first --no-user --git */"
+alias la="eza -a --icons --group-directories-first --no-user"
+alias lsd="eza -d --icons --group-directories-first */"
+alias lsd="eza -d --icons --group-directories-first */"
+alias lad="eza -lad --icons --group-directories-first --no-user --no-permissions --git */"
+alias lasm="eza -la --icons --no-user --no-permissions --git --sort=modified"
+alias lasc="eza -la --icons --no-user --no-permissions --git --sort=created"
 
 # --- chmod --- #
-alias ch+x='chmod +x'
-alias ch-x='chmod -x'
+alias x+='chmod +x'
+alias x-='chmod -x'
 alias 000='chmod -R 000'
 alias 644='chmod -R 644'
 alias 666='chmod -R 666'

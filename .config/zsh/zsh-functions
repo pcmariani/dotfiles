@@ -1,10 +1,20 @@
-rgfzf() {
-  command rg --color=always --line-number --no-heading --smart-case \
-    -g '!Library' -g '!site-packages' -g '!raycast' "${*:-}" \
-    | command fzf -d':' --ansi \
-        --preview "command bat -p --color=always {1} --highlight-line {2}" \
-        --preview-window ~8,+{2}-5 \
-    | awk -F':' '{print $1}'
+t() {
+  local level=2
+  local -a paths=("$@")
+  local dim=$'\e[2m'
+  local reset=$'\e[0m'
+
+  if [[ ${paths[-1]} == <-> ]]; then
+    level=${paths[-1]}
+    paths[-1]=()
+  fi
+
+  if [[ -t 1 ]]; then
+    command tree -C -L "$level" "${paths[@]:-.}" |
+      sed "s/[├└│─]/${dim}&${reset}/g"
+  else
+    command tree -L "$level" "${paths[@]:-.}"
+  fi
 }
 
 rgr() {
@@ -25,6 +35,50 @@ yadm-lazygit() {
 
 mkdircd() { \mkdir -p -- "$1" && \cd -P -- "$1"; }
 
+ff() {
+  local files
+  local query="$*"
+  files=$(
+    fd -t f -H -i |
+      fzf --multi \
+        --height=60% \
+        --layout=reverse \
+        --border=rounded \
+        --border-label='Find Files | nvim' \
+        --border-label-pos=2 \
+        --preview 'bat -pp --color=always --style=plain --line-range=:500 {}' \
+        --preview-window=right:45% \
+        --info=inline-right \
+        --prompt='❯ ' \
+        --color='pointer:green' \
+        --query="$query"
+  ) || return
+  [[ -n "$files" ]] && nvim -O ${(f)files}
+}
+
+fg() {
+  local files
+  local query="$*"
+  files=$(
+    printf '' |
+      fzf --multi \
+        --disabled \
+        --height=60% \
+        --layout=reverse \
+        --border=rounded \
+        --border-label='Live Grep in Files | nvim' \
+        --border-label-pos=2 \
+        --preview 'bat -pp --color=always --style=plain --line-range=:500 {}' \
+        --preview-window=right:45% \
+        --info=inline-right \
+        --prompt='❯ ' \
+        --color='pointer:green' \
+        --query="$query" \
+        --bind 'start:reload:if [[ -n {q} ]]; then rg -l -i --hidden --glob "!.git" -- {q} 2>/dev/null || true; fi' \
+        --bind 'change:reload:if [[ -n {q} ]]; then rg -l -i --hidden --glob "!.git" -- {q} 2>/dev/null || true; fi'
+  ) || return
+  [[ -n "$files" ]] && nvim -O ${(f)files}
+}
 # # do ls after cd
 # function chpwd() {
 #     emulate -L zsh

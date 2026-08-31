@@ -1,1 +1,10 @@
 export ZDOTDIR=$HOME/.config/zsh
+export BOOMI_GROOVY_HOME="$HOME/projects/best/"
+export RIPGREP_CONFIG_PATH="$HOME/.config/.ripgreprc"
+export EDITOR="nvim"
+export VISUAL="nvim"
+export BROWSER="lynx"
+export MANPAGER='nvim +Man!'
+export NODE_EXTRA_CA_CERTS="$HOME/.certs/zscaler_root.pem"
+export BW_SERVER="http://localhost:8087"
+export PNPM_HOME="/Users/petermariani/Library/pnpm"
