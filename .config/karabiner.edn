@@ -34,6 +34,10 @@
              :open-args "open -a \"%s\""
              :openg "open -g \"%s\""
              :link "osascript -e 'do shell script \"open %s\"'"
+             ;; :shell wraps the command in osascript, which costs ~106ms per press.
+             ;; Prefer :run, which emits the shell_command directly. Note that
+             ;; :run has no login shell, so use absolute paths — `~` will not
+             ;; expand and Homebrew is not on PATH.
              :shell "osascript -e 'do shell script \"%s\"'"
              ;; Direct: no osascript wrapper. Measured at ~106ms of pure
              ;; overhead per invocation, which is the largest single cost in
@@ -63,7 +67,7 @@
         ; gets pressed most.
         {
          :des "context picker"
-         :rules [[:!Tspacebar [:run "/Users/petermariani/projects/context-based-mac/bin/context pick"]]]
+         :rules [[:!Tspacebar [:run "/Users/petermariani/projects/context-based-mac/bin/context-pick"]]]
          }
 
         ; note: When adding a new layer, if you want it to be able to cross with an old one, you must add the name negated (:!new_name) to all other mod-tap layer conditions
@@ -163,15 +167,15 @@
                  [:r [:aerospace "flatten-workspace-tree"]] ;; reset the layout tree
 
                  ;; AeroSpace - layout
-                 [:comma [:shell "~/.config/aerospace/set-layout.sh accordion"]]
-                 [:period [:shell "~/.config/aerospace/set-layout.sh tiles"]]
+                 [:comma [:run "/Users/petermariani/.config/aerospace/set-layout.sh accordion"]]
+                 [:period [:run "/Users/petermariani/.config/aerospace/set-layout.sh tiles"]]
 
                  ;; AeroSpace - monitor
                  [:grave_accent_and_tilde [:aerospace "move-workspace-to-monitor --wrap-around next"]]
 
                  ;; AeroSpace - new intance
-                 [:!Sb [:shell "~/.config/aerospace/new-chrome.sh"]]
-                 [:!St [:shell "~/.config/aerospace/new-ghostty.sh"]]
+                 [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
+                 [:!St [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
 
                  ]
 
