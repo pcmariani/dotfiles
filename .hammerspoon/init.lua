@@ -10,6 +10,12 @@ require("hs.ipc")
 contextPicker = require("context-picker")
 contextPicker.setup()
 
+-- Karabiner maps ctrl-space (caps+space) to F18 and this shows the picker.
+-- Going through F18 rather than having Karabiner run bin/context-pick avoids
+-- the `hs -c` round trip, which was 60-70ms of the ~130ms total. Karabiner
+-- still claims the chord, so it cannot fall through to the space-mode layer.
+hs.hotkey.bind({}, "f18", function() contextPicker.show() end)
+
 -----------------------------------------------------------
 -- Microphone mute
 -----------------------------------------------------------

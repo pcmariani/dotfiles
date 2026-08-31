@@ -65,9 +65,19 @@
         ; caps_lock is already left_control (rule above), this is caps+space:
         ; one chord rather than a mode-hold, which matters for the key that
         ; gets pressed most.
+        ;
+        ; Emits F18 rather than shelling out. Hammerspoon binds F18 and shows
+        ; the picker in-process, which skips the `hs -c` round trip — that
+        ; round trip measured 60-70ms of the ~130ms total, because it waits for
+        ; the runloop and the panel activation. F18 is unused by macOS and by
+        ; anything else here. The rule still claims ctrl-space exactly as it
+        ; did, so the ordering comment above still holds.
+        ;
+        ; bin/context-pick remains the terminal entry point and the fallback
+        ; for when Hammerspoon is not running.
         {
          :des "context picker"
-         :rules [[:!Tspacebar [:run "/Users/petermariani/projects/context-based-mac/bin/context-pick"]]]
+         :rules [[:!Tspacebar :f18]]
          }
 
         ; note: When adding a new layer, if you want it to be able to cross with an old one, you must add the name negated (:!new_name) to all other mod-tap layer conditions
