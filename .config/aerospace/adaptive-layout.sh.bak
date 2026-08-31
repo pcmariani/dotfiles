@@ -1,0 +1,12 @@
+#!/bin/bash
+
+monitor=$(aerospace list-monitors --focused | cut -d'|' -f2- | xargs)
+
+case "$monitor" in
+  "LG HDR WQHD")
+    aerospace layout --root tiles
+    ;;
+  "Built-in Retina Display")
+    aerospace layout --root accordion
+    ;;
+esac
