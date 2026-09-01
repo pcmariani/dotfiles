@@ -679,10 +679,7 @@
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "t",
-            "modifiers" : {
-              "mandatory" : [ "left_shift" ]
-            }
+            "key_code" : "return_or_enter"
           },
           "to" : [ {
             "shell_command" : "/Users/petermariani/.config/aerospace/new-ghostty.sh"

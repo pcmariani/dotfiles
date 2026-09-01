@@ -207,8 +207,11 @@
                  [:grave_accent_and_tilde [:aerospace "move-workspace-to-monitor --wrap-around next"]]
 
                  ;; AeroSpace - new intance
+                 ;; Ghostty moved off shift-T 2026-09-01 to free that key for
+                 ;; the coming tab picker. space-enter reads well for "open a
+                 ;; terminal here" and was unbound.
                  [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
-                 [:!St [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
+                 [:return_or_enter [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
 
                  ;; context - pin the live Chrome tabs of the context you are
                  ;; standing in. No name argument on purpose: the focused
