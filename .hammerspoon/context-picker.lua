@@ -12,8 +12,47 @@ local REFRESH_SECONDS = 60
 local FALLBACK_WIDTH_PX = 900
 local FALLBACK_ROWS = 12
 
--- Kept identical to STATE_MARKERS in context/format.py.
-local MARKERS = { running = "●", current = "○", idle = " " }
+-- State markers are IMAGES, not glyphs.
+--
+-- hs.chooser draws a circled-arrow icon in every row's image slot whether or
+-- not we ask for one. Verified: rows carrying no `image` key and no marker text
+-- at all still rendered it, so it is the cell's own art and cannot be turned
+-- off. The only way to remove it is to occupy the slot -- a 1x1 transparent
+-- image leaves the row clean.
+--
+-- Since the slot has to be filled anyway, it becomes the state marker. That is
+-- strictly better than the old text glyphs: the slot is already pixel-aligned
+-- so no padding maths is involved, and it frees the text line of the leading
+-- "marker .. two spaces" that used to eat three columns on all 91 rows.
+--
+-- Built once and cached. A canvas per row would be 91 canvases per refresh.
+local DOT_PX = 18
+local markerCache = {}
+
+-- hex = nil means "no marker": a transparent pixel that suppresses the arrow.
+local function dotImage(hex)
+  local key = hex or "none"
+  if markerCache[key] then return markerCache[key] end
+
+  local img
+  if hex == nil then
+    img = hs.canvas.new({ x = 0, y = 0, w = 1, h = 1 }):imageFromCanvas()
+  else
+    local c = hs.canvas.new({ x = 0, y = 0, w = DOT_PX, h = DOT_PX })
+    c[1] = {
+      type = "circle",
+      center = { x = DOT_PX / 2, y = DOT_PX / 2 },
+      radius = DOT_PX / 3.6,
+      action = "fill",
+      fillColor = { hex = hex },
+    }
+    img = c:imageFromCanvas()
+    c:delete()
+  end
+
+  markerCache[key] = img
+  return img
+end
 
 local cache = { rows = {}, picker = {}, generated = 0 }
 local chooser = nil
@@ -25,16 +64,8 @@ local function pickerOpt(key, fallback)
   return v
 end
 
--- Two-line rows: marker + name on top, org and path underneath.
---
--- The org is NOT a padded column on the top line any more. Only a handful of
--- contexts have one, so padding every row to the widest org ("Sports
--- Basement", 15 chars) left almost every line with a 15-space hole in it.
---
--- subText stays a PLAIN string on purpose. It is the search fallback: whether
--- fuzzy matching reaches inside a styledtext `text` could not be verified
--- without a keypress, and paths contain the context name, so a plain
--- searchable subText means typing a name still finds its row either way.
+-- Pad to a column width in CHARACTERS, not bytes. Org names are ASCII today,
+-- but utf8.len is what keeps a multibyte one from throwing the column out.
 local function pad(s, width)
   s = s or ""
   local n = utf8.len(s) or #s
@@ -42,13 +73,41 @@ local function pad(s, width)
   return s .. string.rep(" ", width - n)
 end
 
--- One aligned line per row: marker, org, name, path — each its own colour.
+local ORG_SEP = "/"
+
+-- The org PREFIXES the name, and the two share ONE padded column.
+--
+-- Keeping them in separate columns is what caused the wrapping. Every row was
+-- padded to the widest org ("Sports Basement", 15) even though only 3 of 91
+-- contexts have one, which put a 17-column hole in 88 rows and pushed the line
+-- to 108 characters — about 1037px of Menlo 16pt inside a 900px panel, so the
+-- path wrapped onto a second line flush with the left margin.
+--
+-- Treating "org/name" as a single unit costs nothing. Measured on this
+-- machine: the widest org+name is 38 characters, which is EXACTLY the widest
+-- bare name, because the longest name (sportsbasement.sales-transactions-logs)
+-- has no org. The line is now 38 + 2 + 48 = 88 characters (~845px), so only
+-- the longest paths take an ellipsis and nothing wraps.
+local function labelText(r)
+  local org = r.org
+  if org and org ~= "" then
+    return org .. ORG_SEP .. (r.name or "")
+  end
+  return r.name or ""
+end
+
+-- One aligned line per row: org/name in a padded column, then the path.
+-- The marker is not in the text at all any more — see dotImage.
 --
 -- Built by CONCATENATING pre-styled fragments rather than styling ranges of
 -- one string. setStyle's indices are neither plainly byte- nor
--- character-based (styling range 2,2 of "●ABCDEF" produced a run at 3..3),
--- and the marker glyph is multibyte, so range arithmetic here would be
--- guesswork. Concatenation has no index math at all.
+-- character-based (styling range 2,2 of "●ABCDEF" produced a run at 3..3), so
+-- range arithmetic here would be guesswork. Concatenation has no index math.
+--
+-- Every fragment carries lineBreak = "truncateTail". Without it the cell wraps
+-- a too-long line onto a second row; with it the tail is clipped with a real
+-- ellipsis. The path is deliberately LAST so that it is the thing truncated —
+-- behind it, an org would be eaten first.
 --
 -- There is no subText: rows are single-line so more of them fit, matching the
 -- one-row-per-line terminal look. That is only safe because fuzzy search was
@@ -67,35 +126,47 @@ local function choicesFrom(rows)
     return hs.styledtext.new(s, {
       font = { name = face, size = size },
       color = { hex = hex },
+      paragraphStyle = { lineBreak = "truncateTail" },
     })
   end
 
-  local orgw, namew = 0, 0
+  -- One width for the whole org/name column.
+  local labelw = 0
   for _, r in ipairs(rows) do
-    orgw = math.max(orgw, utf8.len(r.org or "") or 0)
-    namew = math.max(namew, utf8.len(r.name or "") or 0)
+    labelw = math.max(labelw, utf8.len(labelText(r)) or 0)
   end
 
   local out = {}
   for i, r in ipairs(rows) do
-    local marker = MARKERS[r.state] or " "
     -- The current context is dimmed as well as sunk to the bottom, so the row
     -- you are already in never looks like a destination.
     local nameHex = (r.state == "current") and dim or fg
-    local markHex = (r.state == "running") and accent or dim
+    local label = labelText(r)
+    local trailing = string.rep(" ", math.max(0, labelw - (utf8.len(label) or 0))) .. "  "
     local text
 
     if mono then
-      text = frag(marker .. "  ", markHex)
-          .. frag(pad(r.org, orgw) .. "  ", orgHex)
-          .. frag(pad(r.name, namew) .. "  ", nameHex)
-          .. frag(r.path or "", dim)
+      local org = r.org
+      if org and org ~= "" then
+        text = frag(org .. ORG_SEP, orgHex) .. frag(r.name or "", nameHex)
+      else
+        text = frag(r.name or "", nameHex)
+      end
+      text = text .. frag(trailing, dim) .. frag(r.path or "", dim)
     else
-      text = string.format("%s  %s  %s  %s", marker, pad(r.org, orgw),
-                           pad(r.name, namew), r.path or "")
+      text = pad(label, labelw) .. "  " .. (r.path or "")
     end
 
-    out[i] = { text = text, name = r.name }
+    out[i] = {
+      text = text,
+      name = r.name,
+      -- Running is the only state worth an accent; current gets a quiet dot
+      -- because it is where you already are. Idle gets a transparent pixel,
+      -- purely to keep the chooser from drawing its circled arrow.
+      image = dotImage((r.state == "running" and accent)
+                    or (r.state == "current" and dim)
+                    or nil),
+    }
   end
   return out
 end
