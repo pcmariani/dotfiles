@@ -44,6 +44,10 @@
              ;; the picker's launch path.
              :run "%s"
              :aerospace "/opt/homebrew/bin/aerospace %s"
+             ;; Absolute path for the same reason as :run above — a hotkey gets
+             ;; PATH=/usr/bin:/bin:/usr/sbin:/sbin, where python3 is 3.9 and has
+             ;; no tomllib. bin/context re-execs the right interpreter itself.
+             :context "/Users/petermariani/projects/context-based-mac/bin/context %s"
              }
 
  ;; define application identifiers
@@ -205,6 +209,21 @@
                  ;; AeroSpace - new intance
                  [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
                  [:!St [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
+
+                 ;; context - pin the live Chrome tabs of the context you are
+                 ;; standing in. No name argument on purpose: the focused
+                 ;; workspace IS the context, which is the whole point of a key.
+                 ;;
+                 ;; --add rather than the default replace. `pin` replaces, and a
+                 ;; key is easy to fumble: pressing this with only a New Tab
+                 ;; open would swap a curated set for chrome://newtab/. The
+                 ;; empty-set guard does not catch that, because one tab is not
+                 ;; zero tabs. --add cannot lose anything.
+                 ;;
+                 ;; --notify because Karabiner discards stdout and the exit
+                 ;; status, so without it a successful pin is indistinguishable
+                 ;; from the key never firing.
+                 [:!Sp [:context "--notify pin --add"]]
 
                  ]
 
