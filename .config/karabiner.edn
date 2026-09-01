@@ -149,7 +149,10 @@
                  ;; Ambient workspaces. These hold singleton apps — Slack,
                  ;; Messages, Mail — which cannot be partitioned per project,
                  ;; plus the unfiled-but-persistent browser and AI windows.
-                 [:tab [:aerospace "workspace-back-and-forth"]]
+                 ;; Previous workspace. Moved off plain tab 2026-09-01 when tab
+                 ;; became the in-workspace window cycler; shift-tab keeps the
+                 ;; one-key jump rather than losing it.
+                 [:!Stab [:aerospace "workspace-back-and-forth"]]
 
                  [:w [:aerospace "workspace work"]]
                  [:a [:aerospace "workspace ai"]]
@@ -163,9 +166,25 @@
                  ;; keystrokes to not warrant a second mechanism.
 
                  ;; AeroSpace - windows
+                 ;; Cycle the windows of this workspace. dfs-next walks the
+                 ;; layout tree, so it reaches every window regardless of how
+                 ;; the splits are nested; --wrap-around makes the last one
+                 ;; return to the first instead of stopping.
+                 [:tab [:aerospace "focus dfs-next --wrap-around"]]
+
+                 ;; j/k cross the monitor boundary; h/l deliberately do not.
+                 ;; The monitors are stacked vertically (1 = LG HDR WQHD above
+                 ;; 2 = Built-in Retina), so only up/down ever needs to leave
+                 ;; the workspace. Putting the flag on h/l too would let a
+                 ;; horizontal press jump monitors anywhere the frames overlap
+                 ;; sideways -- a surprise that is hard to attribute later.
+                 ;;
+                 ;; The action is `stop`, not `wrap-around-all-monitors`:
+                 ;; pressing j at the bottom of monitor 2 should do nothing,
+                 ;; not teleport to the top of monitor 1.
                  [:h [:aerospace "focus left"]]
-                 [:j [:aerospace "focus down"]]
-                 [:k [:aerospace "focus up"]]
+                 [:j [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action stop down"]]
+                 [:k [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
                  [:l [:aerospace "focus right"]]
 
                  [:hyphen [:aerospace "resize smart -200"]]

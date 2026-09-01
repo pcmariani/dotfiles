@@ -426,7 +426,10 @@
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "tab"
+            "key_code" : "tab",
+            "modifiers" : {
+              "mandatory" : [ "left_shift" ]
+            }
           },
           "to" : [ {
             "shell_command" : "/opt/homebrew/bin/aerospace workspace-back-and-forth"
@@ -491,6 +494,19 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "tab"
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus dfs-next --wrap-around"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "h"
           },
           "to" : [ {
@@ -507,7 +523,7 @@
             "key_code" : "j"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus down"
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries all-monitors-outer-frame --boundaries-action stop down"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -520,7 +536,7 @@
             "key_code" : "k"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus up"
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries all-monitors-outer-frame --boundaries-action stop up"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
