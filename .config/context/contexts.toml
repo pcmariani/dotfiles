@@ -104,3 +104,64 @@ path = "~/clients/SportsBasement/sales-test-anlysis"
 [[context]]
 name = "context-based-mac"
 path = "~/projects/context-based-mac"
+
+
+# Apps `context open <app> [name]` can launch with a context's directory as
+# the scope. Moved here from SCOPED_APPS in context/opener.py on 2026-09-02,
+# once a second scoping MECHANISM had shown what actually varies. Adding an
+# app now needs no Python.
+#
+# There is no universal "launch it in this directory". macOS apps fall into
+# four groups, and only the first two are expressible here:
+#
+#   1. inherit the spawn cwd        -- neovide, nvim
+#   2. take the path as an ARGUMENT -- `code <dir>` opens it as a workspace
+#   3. `open -a App <path>`         -- the generic document route
+#   4. no path affordance at all    -- Chrome, which is why context models
+#                                      Chrome WINDOW OWNERSHIP instead
+#
+# name       typed as the argument to `context open`. A plain lowercase token.
+# argv       the command. Absolute, always: a hotkey gets
+#            PATH=/usr/bin:/bin:/usr/sbin:/sbin, where a bare command name
+#            resolves to nothing. Never templated.
+# path_args  arguments carrying the scope, with `{path}` substituted at launch.
+#            For a group-2 app this IS the mechanism; for group 1 it is a
+#            workaround for the app's own cwd handling.
+# app_name   what AeroSpace calls the app's windows, so the new window can be
+#            moved into the context's workspace. The app NAME, not a bundle
+#            id -- a binary launched outside an .app bundle reports
+#            NULL-APP-BUNDLE-ID, so bundle-id matching finds nothing. Omit it
+#            and `open` scopes the directory but leaves placement alone.
+
+# Group 1, and the worked example of why the spawn cwd is NOT enough: neovide
+# starts the editor via `login -fpq <user> /bin/zsh -c exec nvim --embed`, and
+# a LOGIN shell resets cwd to $HOME. Measured 2026-09-02 -- with only the spawn
+# cwd set, neovide reported the project root while its embedded nvim reported
+# /Users/petermariani. `-- +cd <path>` survives it. Launching from a terminal
+# HIDES this (neovide then execs nvim directly, no login wrapper), so an
+# interactive test passes while the hotkey path silently opens in $HOME.
+# Check the CHILD: `lsof -a -d cwd -p <nvim pid>`.
+#
+# A bare path here would make nvim OPEN the directory rather than chdir to it.
+# Note `--new-window` is not standalone for neovide: it needs --reuse-instance.
+[[app]]
+name      = "neovide"
+argv      = ["/opt/homebrew/bin/neovide"]
+path_args = ["--", "+cd {path}"]
+app_name  = "neovide"
+
+# Group 2, and the reason this table is data rather than a switch. VSCode does
+# not care about the working directory at all: the folder argument IS the
+# scope. Its `--new-window` IS standalone, unlike neovide's -- exactly the kind
+# of per-app spelling that cannot be abstracted away.
+#
+# The CLI lives inside the bundle and is not on PATH, which is moot here since
+# every argv[0] is absolute anyway. AeroSpace calls these windows `Code`, not
+# "Visual Studio Code". A cold launch can open THREE windows (a Preview tab,
+# Release Notes, and the project window), which is why `open` moves every new
+# window it sees rather than picking one.
+[[app]]
+name      = "code"
+argv      = ["/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"]
+path_args = ["--new-window", "{path}"]
+app_name  = "Code"
