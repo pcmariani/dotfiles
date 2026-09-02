@@ -96,6 +96,33 @@ gaps.outer.bottom =     4
 gaps.outer.top =        4
 gaps.outer.right =      4
 
+# Ambient workspaces live on the LAPTOP. The external monitor is for whatever
+# context you are in, so switching contexts never disturbs Slack, Messages or
+# mail. Decided 2026-09-02; see docs/HANDOFF.md in context-based-mac for why a
+# context owns one screen rather than spanning both (AeroSpace workspaces
+# cannot span monitors at all).
+#
+# Without this, nothing pinned any workspace to any monitor, so workspaces
+# wandered to whichever screen they were last shown on -- and `aerospace
+# workspace X` focuses X on the monitor it currently lives on, dragging focus
+# across screens. That was the root cause of most multi-monitor friction.
+#
+# 'built-in' is a case-insensitive regex SUBSTRING of the monitor name, so it
+# survives resolution changes and display reordering in a way a 1-based index
+# does not. 'main' is the fallback: with the lid closed the built-in display
+# does not exist, and a pattern matching no connected monitor is not documented
+# behaviour. First matching pattern wins, so on a single screen this whole
+# block is a no-op -- there is only one place a workspace can be.
+#
+# Only these four can be pinned: a force-assignment's left-hand side must be a
+# LITERAL workspace name (the regex applies to the monitor pattern), and the
+# context workspaces are created on demand, 91 and counting.
+[workspace-to-monitor-force-assignment]
+work     = ['built-in', 'main']
+ai       = ['built-in', 'main']
+browser  = ['built-in', 'main']
+personal = ['built-in', 'main']
+
 # The context picker is an ephemeral Ghostty window. Tiling it would reshuffle
 # the current workspace on every invocation, so float it instead. Matched on
 # the --title that bin/context-pick passes to Ghostty.
