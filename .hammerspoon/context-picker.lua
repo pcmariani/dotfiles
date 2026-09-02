@@ -138,9 +138,18 @@ local function choicesFrom(rows)
 
   local out = {}
   for i, r in ipairs(rows) do
+    -- Ambient workspaces are destinations, not work: they carry no directory
+    -- and no session, and entering one only focuses the workspace. Colouring
+    -- them like an org keeps them legible as a different KIND of row without
+    -- adding a column, and they sit in a fixed block at the top so the
+    -- position is learnable.
+    local ambient = (r.kind == "ambient")
+
     -- The current context is dimmed as well as sunk to the bottom, so the row
     -- you are already in never looks like a destination.
-    local nameHex = (r.state == "current") and dim or fg
+    local nameHex = (r.state == "current") and dim
+                 or (ambient and orgHex)
+                 or fg
     local label = labelText(r)
     local trailing = string.rep(" ", math.max(0, labelw - (utf8.len(label) or 0))) .. "  "
     local text
@@ -161,10 +170,13 @@ local function choicesFrom(rows)
       text = text,
       name = r.name,
       -- Running is the only state worth an accent; current gets a quiet dot
-      -- because it is where you already are. Idle gets a transparent pixel,
-      -- purely to keep the chooser from drawing its circled arrow.
+      -- because it is where you already are. An ambient row gets its own
+      -- colour so the top block reads as one group at a glance. Idle gets a
+      -- transparent pixel, purely to keep the chooser from drawing its
+      -- circled arrow.
       image = dotImage((r.state == "running" and accent)
                     or (r.state == "current" and dim)
+                    or (ambient and orgHex)
                     or nil),
     }
   end
