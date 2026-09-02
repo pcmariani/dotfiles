@@ -11,6 +11,10 @@
 #         slugified to lowercase ASCII with `.` as the hierarchy separator:
 #           ~/clients/SCS/jnl-parse-consolidated -> scs.jnl-parse-consolidated
 #         falling back to `basename` alone when that would exceed the byte cap.
+#         As of the 2026-09-02 root trial the dotted form is UNREACHABLE: every
+#         root walks to depth 1, so a candidate's parent is always the root and
+#         the name is always a bare `basename` (~/clients/SCS -> scs). The code
+#         still implements it; the config no longer reaches it.
 #         The name is the AeroSpace workspace AND the herdr session id, so it is
 #         capped at 50 bytes here — macOS limits a unix socket path to 104, and
 #         ~/.config/herdr/sessions/<name>/herdr.sock has to fit. The cap is
@@ -67,28 +71,63 @@ monospace     = true                      # Menlo via styledtext
 #   - dotfile directories
 #   - the paths listed below
 [discover]
-# Depth is per root, because the two have different shapes. A project lives at
-# ~/projects/<project>, so depth 1; walking deeper pulled in 32 rows that were
-# project internals (clang/snake, dev-system/docs, boomicompanion_plugin/0.2.8).
-# Client work lives at ~/clients/<client>/<project>, so depth 2.
+# TRIAL, 2026-09-02: a context is the CLIENT/PROJECT ROOT, not a workstream
+# folder inside it. ~/clients/SCS is the context; SCS/settlements is a
+# workstream within it, and herdr holds several of those inside one session
+# scoped to `scs`. So both roots walk to depth 1 and the two lists are the same
+# shape -- there is nothing left for a per-root depth to express.
+#
+# Revert by putting `max_depth = 2` back on ~/clients and restoring the
+# exclude_self line below; nothing in the code changed.
+#
+# The old rationale, kept because it explains what depth 2 was FOR: client work
+# was modelled as ~/clients/<client>/<project>, which is what produced 92
+# contexts (SCS alone had 23). Walking ~/projects deeper than 1 pulled in 32
+# rows of project internals (clang/snake, dev-system/docs,
+# boomicompanion_plugin/0.2.8), which is why that root was always 1 -- and is
+# also why the projects side needed no change here: it was already root-shaped.
 roots = [
   { path = "~/projects", max_depth = 1 },
-  { path = "~/clients",  max_depth = 2 },
+  { path = "~/clients",  max_depth = 1 },
 ]
-max_depth = 2       # default for any root that does not set its own
+max_depth = 1       # default for any root that does not set its own
 
-# exclude      = drops a path AND everything under it
-# exclude_self = drops only the named directory, keeping its children.
-# These two client folders are containers, not places work happens — entering
-# one gives a terminal at a directory of 50-115 unrelated project folders — but
-# their children are real contexts, so they cannot simply be excluded.
-exclude_self = ["~/clients/SCS", "~/clients/SportsBasement"]
+# exclude = drops a path AND everything under it.
+#
+# `exclude_self` (drop a directory, keep its children) was deleted with this
+# trial rather than emptied: it existed ONLY to say that ~/clients/SCS and
+# ~/clients/SportsBasement are containers rather than places work happens. At
+# depth 1 those ARE the contexts and their children are not, so the setting
+# inverts -- what it dropped is now exactly what is wanted. Its parsing is
+# still in the code and still tested; it just has nothing to say.
 
 [[context]]
 name = "apollo"
 org  = "Apollo"
 path = "~/clients/Apollo"
 
+# WORKSTREAM entries, kept deliberately through the root trial.
+#
+# Both point INSIDE a client root, which is exactly the conflation the trial
+# exists to remove -- so they were briefly deleted on 2026-09-02 and restored
+# the same day, for a reason worth recording.
+#
+# Removing them did not just hide two picker rows. The name is the join key, so
+# `context enter scs-jnl-parse` stopped resolving while the herdr session of
+# that name kept running with a live Claude session inside it. Entering the new
+# `scs` root created a SECOND, empty session and opened a terminal at the
+# 23-folder junk drawer, which read as "my work is gone". It was not gone; it
+# was in a session that no longer had a route in. (`herdr --session <name>`
+# still reaches one directly, which is how they came back.)
+#
+# So the rule the trial taught: a context may be retired once its work is
+# genuinely idle, never while a session is live. These two are where the work
+# is right now. Drop them when those engagements go quiet.
+#
+# They also anchor the two largest Claude memory stores, which are keyed by
+# working directory: sales-test-anlysis has 81 records, SCS/claude has 22, and
+# the SCS root itself has 1. Entering the root instead of the workstream gets
+# the cold store.
 [[context]]
 name = "scs-jnl-parse"
 org  = "SCS"
@@ -99,6 +138,8 @@ name = "sb-sales-analysis"
 org  = "Sports Basement"
 # Directory name is misspelled upstream ("anlysis"); the context is not.
 path = "~/clients/SportsBasement/sales-test-anlysis"
+
+# No org: this is personal tooling, not client work.
 
 # No org: this is personal tooling, not client work.
 [[context]]
