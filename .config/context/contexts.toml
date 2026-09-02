@@ -139,6 +139,21 @@ org  = "Sports Basement"
 # Directory name is misspelled upstream ("anlysis"); the context is not.
 path = "~/clients/SportsBasement/sales-test-anlysis"
 
+# The third workstream, declared 2026-09-02 for the same reason as the two
+# above but arriving by a different route: it was never declared at all. It was
+# DISCOVERED at depth 2, so the depth-1 flip simply deleted it, and putting an
+# entry back was the only way to restore it.
+#
+# The name must stay exactly `scs.claude` -- that is the id of the herdr
+# session already running with a live Claude agent in it
+# (deploy-cw13-shipment-cache-fix). Naming it anything else would leave that
+# session orphaned and create a second, empty one, which is precisely the
+# failure this whole block records.
+[[context]]
+name = "scs.claude"
+org  = "SCS"
+path = "~/clients/SCS/claude"
+
 # No org: this is personal tooling, not client work.
 
 # No org: this is personal tooling, not client work.
