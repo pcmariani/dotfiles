@@ -174,7 +174,14 @@
                  ;; layout tree, so it reaches every window regardless of how
                  ;; the splits are nested; --wrap-around makes the last one
                  ;; return to the first instead of stopping.
-                 [:tab [:aerospace "focus dfs-next --wrap-around"]]
+                 ;;
+                 ;; TEMPORARILY wrapped in cycle-window.sh to log an
+                 ;; intermittent bug where focus lands in a DIFFERENT
+                 ;; workspace. Costs ~100ms extra per press. Once
+                 ;; `grep ANOMALY ~/.local/state/context/space-tab.log`
+                 ;; has caught one, put this back to:
+                 ;;   [:tab [:aerospace "focus dfs-next --wrap-around"]]
+                 [:tab [:run "/Users/petermariani/.config/aerospace/cycle-window.sh"]]
 
                  ;; j/k cross the monitor boundary; h/l deliberately do not.
                  ;; The monitors are stacked vertically (1 = LG HDR WQHD above

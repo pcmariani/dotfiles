@@ -497,7 +497,7 @@
             "key_code" : "tab"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus dfs-next --wrap-around"
+            "shell_command" : "/Users/petermariani/.config/aerospace/cycle-window.sh"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
