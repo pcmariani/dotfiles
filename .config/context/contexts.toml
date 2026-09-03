@@ -127,38 +127,23 @@ path = "~/clients/Apollo"
 # still reaches one directly, which is how they came back.)
 #
 # So the rule the trial taught: a context may be retired once its work is
-# genuinely idle, never while a session is live. These two are where the work
-# is right now. Drop them when those engagements go quiet.
+# genuinely idle, never while a session is live.
 #
-# They also anchor the two largest Claude memory stores, which are keyed by
-# working directory: sales-test-anlysis has 81 records, SCS/claude has 22, and
-# the SCS root itself has 1. Entering the root instead of the workstream gets
-# the cold store.
+# RETIRED 2026-09-03: `sb-sales-analysis` and `scs.claude` are gone, in the
+# right order -- both herdr sessions were stopped FIRST, then these blocks
+# removed, so neither was ever an orphan. Every context name now equals its
+# herdr session name, both derived from the client root. `scs-jnl-parse`
+# remains because it is still declared work.
+#
+# Retiring them leaves two large Claude memory stores unowned, since those are
+# keyed by working directory: SportsBasement/sales-test-anlysis has 77 files
+# and SCS/claude has 23, against roots holding 0 and 1. Entering the root now
+# gets the cold store, and doctor's memory-store check reports exactly this
+# until those stores go quiet.
 [[context]]
 name = "scs-jnl-parse"
 org  = "SCS"
 path = "~/clients/SCS/jnl-parse-consolidated"
-
-[[context]]
-name = "sb-sales-analysis"
-org  = "Sports Basement"
-# Directory name is misspelled upstream ("anlysis"); the context is not.
-path = "~/clients/SportsBasement/sales-test-anlysis"
-
-# The third workstream, declared 2026-09-02 for the same reason as the two
-# above but arriving by a different route: it was never declared at all. It was
-# DISCOVERED at depth 2, so the depth-1 flip simply deleted it, and putting an
-# entry back was the only way to restore it.
-#
-# The name must stay exactly `scs.claude` -- that is the id of the herdr
-# session already running with a live Claude agent in it
-# (deploy-cw13-shipment-cache-fix). Naming it anything else would leave that
-# session orphaned and create a second, empty one, which is precisely the
-# failure this whole block records.
-[[context]]
-name = "scs.claude"
-org  = "SCS"
-path = "~/clients/SCS/claude"
 
 # No org: this is personal tooling, not client work.
 
