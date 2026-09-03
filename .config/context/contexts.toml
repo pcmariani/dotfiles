@@ -7,14 +7,21 @@
 #
 # path  — the directory. Optional: an entry with only a name is a context with
 #         no folder, declarable but never discovered.
-# name  — overrides the derived name. Derivation is `parent.basename`,
-#         slugified to lowercase ASCII with `.` as the hierarchy separator:
-#           ~/clients/SCS/jnl-parse-consolidated -> scs.jnl-parse-consolidated
-#         falling back to `basename` alone when that would exceed the byte cap.
-#         As of the 2026-09-02 root trial the dotted form is UNREACHABLE: every
-#         root walks to depth 1, so a candidate's parent is always the root and
-#         the name is always a bare `basename` (~/clients/SCS -> scs). The code
-#         still implements it; the config no longer reaches it.
+# name  — overrides the derived name. Derivation is a bare `basename`,
+#         slugified to lowercase ASCII (~/clients/SCS -> scs). A declared entry
+#         only gets one derived for free when its `path` is a DIRECT child of
+#         a discovery root — `config.py` raises for anything deeper rather than
+#         guess, because the name is the join key (AeroSpace workspace, herdr
+#         session, Chrome stamp) and a silent rename would orphan running work.
+#
+#         HISTORY: before the 2026-09-02 root trial this was `parent.basename`,
+#         with `.` as the hierarchy separator
+#         (~/clients/SCS/jnl-parse-consolidated -> scs.jnl-parse-consolidated),
+#         built for depth-2 discovery where two same-named workstreams under
+#         different clients had to be told apart. Spec 1 (2026-09-03) deleted
+#         it outright: every root now walks exactly one level, so a
+#         candidate's parent is always the root and carries no information.
+#         There is no code path left that produces the dotted form.
 #         The name is the AeroSpace workspace AND the herdr session id, so it is
 #         capped at 50 bytes here — macOS limits a unix socket path to 104, and
 #         ~/.config/herdr/sessions/<name>/herdr.sock has to fit. The cap is
@@ -65,8 +72,9 @@ accent_color  = "00FFAA"                  # the ● on a live context
 org_color     = "C678DD"                  # the org column
 monospace     = true                      # Menlo via styledtext
 
-# Where to look for undeclared contexts. Everything under these roots at depth
-# 1-2 becomes a pickable context, ranked by directory mtime, except:
+# Where to look for undeclared contexts. Every direct child of these roots —
+# depth 1, and only depth 1 — becomes a pickable context, ranked by directory
+# mtime, except:
 #   - anything inside a git repo (a repo's subdirectories are its internals)
 #   - dotfile directories
 #   - the paths listed below
@@ -77,14 +85,18 @@ monospace     = true                      # Menlo via styledtext
 # walk to depth 1 and the two lists are the same shape -- there is nothing left
 # for a per-root depth to express.
 #
-# Trialled 2026-09-02, CONFIRMED PERMANENT 2026-09-03 after a day of use. This
-# is the model now, not an experiment: 33 contexts is the settled number, and
-# the picker's `folders` producer (which reaches a root's workstreams again) is
-# designed against it.
+# Trialled 2026-09-02, CONFIRMED PERMANENT 2026-09-03 after a day of use, and
+# EXECUTED (Spec 1) 2026-09-03: `max_depth` is deleted in both its forms, the
+# code rejects it rather than ignoring it, and the picker's `folders` producer
+# (which reaches a root's workstreams again) is designed against depth 1.
+# The row count keeps moving as roots and declarations change — see
+# `docs/HANDOFF.md` for the current number, not this file.
 #
-# Reverting would mean putting `max_depth = 2` back on ~/clients and restoring
-# exclude_self. Recorded as history, NOT as a live option -- code now depends on
-# depth 1, and `derive_name`'s `parent.basename` form is unreachable under it.
+# Reverting would mean re-adding `max_depth` and restoring `exclude_self` to
+# the code, not just this config. Recorded as history, NOT as a live option --
+# `derive_name`'s `parent.basename` form is not just unreachable, it is DELETED
+# from the code (`context/derive.py`); there is nothing left to revert to
+# without writing it again.
 #
 # The old rationale, kept because it explains what depth 2 was FOR: client work
 # was modelled as ~/clients/<client>/<project>, which is what produced 92
@@ -93,10 +105,14 @@ monospace     = true                      # Menlo via styledtext
 # boomicompanion_plugin/0.2.8), which is why that root was always 1 -- and is
 # also why the projects side needed no change here: it was already root-shaped.
 roots = [
-  { path = "~/projects", max_depth = 1 },
-  { path = "~/clients",  max_depth = 1 },
+  "~/projects",
+  "~/clients",
+  # A container exactly like ~/clients: it holds projects rather than being
+  # one, and is not a git repo. Its B_H is declared below, because
+  # ~/clients/B_H derives the same `b-h` and a derived-name collision blocks
+  # entering either.
+  "~/projects/boomi-projects",
 ]
-max_depth = 1       # default for any root that does not set its own
 
 # exclude = drops a path AND everything under it.
 #
@@ -151,6 +167,15 @@ path = "~/clients/SCS/jnl-parse-consolidated"
 [[context]]
 name = "context-based-mac"
 path = "~/projects/context-based-mac"
+
+# Declared to break a derived-name collision, not because it needs decoration.
+# ~/clients/B_H and ~/projects/boomi-projects/B_H both derive `b-h`, and
+# `merge` drops a discovered candidate whose path is already declared -- so
+# naming this one takes it out of derivation entirely and leaves `b-h` to the
+# client folder. Verified: 36 contexts, zero collisions.
+[[context]]
+name = "boomi-b-h"
+path = "~/projects/boomi-projects/B_H"
 
 
 # Apps `context open <app> [name]` can launch with a context's directory as
