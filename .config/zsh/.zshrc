@@ -126,3 +126,12 @@ eval "$(zoxide init zsh)"
 
 eval "$(starship init zsh)"
 
+
+# gpg-agent draws its passphrase prompt on a terminal it has to be told about.
+# Without this, anything that pipes data to gpg on stdin -- `yadm encrypt`
+# being the one that bites -- fails with:
+#   gpg: problem with the agent: Inappropriate ioctl for device
+# Guarded, so a non-tty shell neither pays for `tty` nor exports "not a tty".
+if [[ -o interactive ]] && tty -s; then
+  export GPG_TTY="$(tty)"
+fi
