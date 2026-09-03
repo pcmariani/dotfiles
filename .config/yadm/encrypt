@@ -1,0 +1,19 @@
+# Files yadm bundles into an ENCRYPTED archive (~/.local/share/yadm/archive),
+# which is the only form in which they reach the repo. Patterns are relative
+# to $HOME.
+#
+# Why these are encrypted rather than tracked directly: this dotfiles repo is
+# PUBLIC, and Chrome state is real per-context browsing history -- client
+# account ids, Boomi component UUIDs, ticket and admin URLs, a personal inbox.
+# Individually unremarkable; in aggregate, and permanently in public git
+# history, not something to publish by default.
+#
+# Refresh with `yadm encrypt` (prompts for a passphrase -- symmetric, no GPG
+# key needed), then commit the archive. It is DELIBERATELY manual and
+# occasional: its only job is surviving a machine migration, which happens
+# about once a year, so a debounced automatic write was ~500 writes per event.
+#
+# On a new machine `yadm decrypt` restores these to their original paths --
+# which for Chrome state IS the hot store `context` already reads, so there is
+# no import step and no fallback code.
+.local/state/context/chrome/*.json

@@ -1,0 +1,12 @@
+.Trash/**
+Applications/**
+Library/**
+
+# Chrome state: per-context browsing history, kept PLAINTEXT and LOCAL.
+# This dotfiles repo is public (github.com/pcmariani/dotfiles), and these files
+# hold real URLs from client work -- account ids, component UUIDs, ticket links.
+# They reach the repo only via yadm's ENCRYPTED archive; see
+# ~/.config/yadm/encrypt. Never commit the plaintext.
+.local/state/context/chrome/**
+# The retired pinned-tab store, same reasoning. Stage 3 deletes the feature.
+.config/context/tabs/**
