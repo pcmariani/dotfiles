@@ -72,7 +72,13 @@ persistent-workspaces = ["work", "ai", "browser", "personal"]
 on-mode-changed = []
 
 on-focus-changed = [
-    'exec-and-forget [ $(/opt/homebrew/bin/aerospace list-windows --workspace focused --count) -eq 1 ] && /opt/homebrew/bin/borders width=0 || /opt/homebrew/bin/borders width=4'
+    'exec-and-forget [ $(/opt/homebrew/bin/aerospace list-windows --workspace focused --count) -eq 1 ] && /opt/homebrew/bin/borders width=0 || /opt/homebrew/bin/borders width=4',
+    # Keep the terminal picker's pre-rendered rows in step with reality. The
+    # loop only re-renders after a dismissal, so a workspace change made any
+    # other way (space-tab, an aerospace hotkey, a click) left the panel
+    # showing a stale current row and stale dots. The script debounces itself,
+    # because this fires on every WINDOW focus change too.
+    'exec-and-forget /Users/petermariani/.config/context/picker-refresh.sh'
 ]
 
 focus-follows-mouse.enabled = false

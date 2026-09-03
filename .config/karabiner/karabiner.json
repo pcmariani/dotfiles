@@ -40,6 +40,18 @@
             "key_code" : "f18"
           } ],
           "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "spacebar",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "p",
+            "modifiers" : [ "left_command", "left_control", "left_option", "left_shift" ]
+          } ],
+          "type" : "basic"
         } ]
       }, {
         "description" : "mod-tap layers",
@@ -683,6 +695,23 @@
           },
           "to" : [ {
             "shell_command" : "/Users/petermariani/.config/aerospace/new-ghostty.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "p",
+            "modifiers" : {
+              "mandatory" : [ "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "p",
+            "modifiers" : [ "left_command", "left_control", "left_option", "left_shift" ]
           } ],
           "conditions" : [ {
             "name" : "space-mode",

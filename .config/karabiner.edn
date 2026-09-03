@@ -79,9 +79,19 @@
         ;
         ; bin/context-pick remains the terminal entry point and the fallback
         ; for when Hammerspoon is not running.
+        ;
+        ; ctrl-SHIFT-space is the TERMINAL picker, and it is a direct chord for
+        ; exactly the reason given above. space-shift-P still works, but it
+        ; goes through the space mod-tap layer, whose `:held` action does not
+        ; fire until `to_if_held_down_threshold_milliseconds` (160) has
+        ; elapsed -- so 160ms passes before shift-P even means hyper-P. That
+        ; is the whole of the "slight hiccup" against ctrl-space, and none of
+        ; it is Ghostty or fzf: by then fzf is already running and waiting on
+        ; the hidden panel.
         {
          :des "context picker"
-         :rules [[:!Tspacebar :f18]]
+         :rules [[:!Tspacebar :f18]
+                 [:!TSspacebar :!!p]]
          }
 
         ; note: When adding a new layer, if you want it to be able to cross with an old one, you must add the name negated (:!new_name) to all other mod-tap layer conditions
@@ -220,10 +230,20 @@
                  [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
                  [:return_or_enter [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
 
-                 ;; space-shift-P was `context pin --add`, and is now free.
-                 ;; A context's Chrome state is RECORDED on leaving, not
-                 ;; declared, so there is no curated set left to save and
-                 ;; nothing for the key to do.
+                 ;; space-shift-P was `context pin --add`, freed when a
+                 ;; context's Chrome state became RECORDED on leaving rather
+                 ;; than declared. It now shows the terminal context picker.
+                 ;;
+                 ;; It sends hyper-P, which is the PRIVATE global hotkey of the
+                 ;; isolated Ghostty instance configured by
+                 ;; ~/.config/context/picker.ghostty. Deliberately not hyper-T,
+                 ;; which is the user's own quick-terminal dropdown (space-t),
+                 ;; and not plain space-p, which is `workspace personal`.
+                 ;;
+                 ;; Karabiner drives this, not Hammerspoon, so the picker's
+                 ;; driver is never also its observer -- the contention that
+                 ;; made two earlier latency harnesses unusable.
+                 [:!Sp [:!!p]] ;; terminal context picker (hyper-P)
 
                  ]
 

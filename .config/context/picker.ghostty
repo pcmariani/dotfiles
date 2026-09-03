@@ -1,0 +1,86 @@
+# The isolated Ghostty instance that hosts the context picker.
+#
+# Launched with --config-default-files=false so it inherits NOTHING from
+# ~/.config/ghostty/config -- in particular it must not inherit that config's
+# `global:shift+cmd+ctrl+alt+t` bind, which drives the user's own space-t
+# dropdown. This instance is a separate process with its own hotkey.
+#
+# `ghostty +validate-config` prints nothing on failure and signals only through
+# its exit code, and it rejects `config-default-files` because that is CLI-only.
+# So a config that validates may still be wrong about isolation -- the
+# isolation guarantee is load-bearing and unverifiable by tooling.
+
+# Inherit no bindings, steal no hotkeys.
+keybind = clear
+
+# The picker's private global hotkey. hyper+P, free since `context pin` was
+# retired and space-shift-P was unbound. Deliberately NOT hyper+T, which is the
+# existing quick terminal.
+keybind = global:shift+cmd+ctrl+alt+p=toggle_quick_terminal
+
+# No dock icon, no app switcher, no stray window at launch.
+# NOTE: `initial-window = false` does NOT suppress the window under `open -na`
+# (measured). The launch procedure warms the surface and then closes the stray
+# window -- warmed FIRST, because the quick terminal's surface is created
+# lazily on first show and `command` runs per surface.
+macos-hidden = always
+initial-window = false
+quit-after-last-window-closed = false
+
+# APPEARANCE MUST BE RESTATED HERE.
+# This instance launches with --config-default-files=false, so it inherits
+# NOTHING from ~/.config/ghostty/config -- not the theme, not the font, not the
+# blur. That isolation is deliberate (it is what stops this instance stealing
+# the space-t hotkey), but it means every appearance setting has to be repeated.
+# Keep these in sync with ~/.config/ghostty/config by hand.
+theme = "Catppuccin Mocha"
+font-family = "Iosevka Nerd Font Mono"
+# A shade LARGER than the 17 used for real terminal work -- this is a list read
+# at a glance, not prose. A taller panel buys back the rows the bigger glyphs
+# cost: ~26 of 38 fit at 18 in 760px.
+font-size = 18
+background = 0a0a10
+background-opacity = 0.78
+background-blur-radius = 100
+window-padding-x = 14
+window-padding-y = 10
+
+quick-terminal-position = center
+
+# `quick-terminal-screen` CANNOT pin a physical display -- the only accepted
+# values are main / mouse / macos-menu-bar, all relative rules. `main` follows
+# the screen holding the focused window, so the picker appears where you are
+# working, which is what a context switcher wants.
+quick-terminal-screen = main
+
+# Size in PIXELS, not percent. Percent was the plan's placeholder, but it makes
+# the panel 2064px on the 3440px LG and 864px on the 1440px laptop. 900px
+# matches the existing Hammerspoon picker's width, which converts a 900px
+# target against mainScreen for exactly this reason.
+quick-terminal-size = 1020px,760px
+
+quick-terminal-animation-duration = 0
+
+# +-------------------------------------------------------------------------+
+# | autohide = true is correct ONLY while this instance serves ONE producer |
+# | with NO control channel.                                                |
+# |                                                                         |
+# | It MUST become `false` in the same change that introduces the control   |
+# | channel (plan Task 12). Focus-loss dismissal hides the panel without    |
+# | fzf knowing, which strands the channel with no reader -- and a blocking |
+# | writer then freezes the whole Hammerspoon runloop, taking ctrl-space,   |
+# | contextPicker, the space-tab wrapper and doctor's probe down with it.   |
+# |                                                                         |
+# | Today there is no channel, so focus-loss is harmless -- and it is how   |
+# | the panel hides after `context enter` moves focus to another workspace. |
+# +-------------------------------------------------------------------------+
+quick-terminal-autohide = true
+
+# The loop is the `command`, so no interactive shell is in the hot path.
+# Ghostty launches it via `/usr/bin/login -flp <user> /bin/bash --noprofile
+# --norc`, so no rc files load and the user's zsh startup cost is never paid.
+# That same `login` wrapper resets cwd to $HOME, so the loop must not rely on
+# inheriting a working directory.
+command = /Users/petermariani/.config/context/picker-loop.sh
+shell-integration = none
+confirm-close-surface = false
