@@ -172,7 +172,9 @@ path = "~/projects/context-based-mac"
 # ~/clients/B_H and ~/projects/boomi-projects/B_H both derive `b-h`, and
 # `merge` drops a discovered candidate whose path is already declared -- so
 # naming this one takes it out of derivation entirely and leaves `b-h` to the
-# client folder. Verified: 36 contexts, zero collisions.
+# client folder. Verified live 2026-09-03: 34 contexts, zero collisions -- see
+# docs/HANDOFF.md for why the plan's own 36-context estimate ran high (it
+# predates the same-day retirement of two holdover workstreams).
 [[context]]
 name = "boomi-b-h"
 path = "~/projects/boomi-projects/B_H"
