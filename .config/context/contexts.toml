@@ -71,14 +71,20 @@ monospace     = true                      # Menlo via styledtext
 #   - dotfile directories
 #   - the paths listed below
 [discover]
-# TRIAL, 2026-09-02: a context is the CLIENT/PROJECT ROOT, not a workstream
-# folder inside it. ~/clients/SCS is the context; SCS/settlements is a
-# workstream within it, and herdr holds several of those inside one session
-# scoped to `scs`. So both roots walk to depth 1 and the two lists are the same
-# shape -- there is nothing left for a per-root depth to express.
+# A context is the CLIENT/PROJECT ROOT, not a workstream folder inside it.
+# ~/clients/SCS is the context; SCS/settlements is a workstream within it, and
+# herdr holds several of those inside one session scoped to `scs`. So both roots
+# walk to depth 1 and the two lists are the same shape -- there is nothing left
+# for a per-root depth to express.
 #
-# Revert by putting `max_depth = 2` back on ~/clients and restoring the
-# exclude_self line below; nothing in the code changed.
+# Trialled 2026-09-02, CONFIRMED PERMANENT 2026-09-03 after a day of use. This
+# is the model now, not an experiment: 33 contexts is the settled number, and
+# the picker's `folders` producer (which reaches a root's workstreams again) is
+# designed against it.
+#
+# Reverting would mean putting `max_depth = 2` back on ~/clients and restoring
+# exclude_self. Recorded as history, NOT as a live option -- code now depends on
+# depth 1, and `derive_name`'s `parent.basename` form is unreachable under it.
 #
 # The old rationale, kept because it explains what depth 2 was FOR: client work
 # was modelled as ~/clients/<client>/<project>, which is what produced 92
