@@ -116,12 +116,13 @@ roots = [
 
 # exclude = drops a path AND everything under it.
 #
-# `exclude_self` (drop a directory, keep its children) was deleted with this
-# trial rather than emptied: it existed ONLY to say that ~/clients/SCS and
-# ~/clients/SportsBasement are containers rather than places work happens. At
-# depth 1 those ARE the contexts and their children are not, so the setting
-# inverts -- what it dropped is now exactly what is wanted. Its parsing is
-# still in the code and still tested; it just has nothing to say.
+# `exclude_self` (drop a directory, keep its children) existed ONLY to say
+# that ~/clients/SCS and ~/clients/SportsBasement were containers rather than
+# places work happens. At depth 1 those ARE the contexts and their children
+# are not, so the setting inverted -- what it dropped is now exactly what is
+# wanted. Spec 1 (2026-09-03) deleted its parsing and its tests along with
+# `max_depth`, not just this config: there is nothing left in the code to
+# revert to without writing it again.
 
 [[context]]
 name = "apollo"
