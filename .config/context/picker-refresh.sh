@@ -8,14 +8,13 @@
 # focus change, so the cache is refreshed from there: event-driven, and it adds
 # nothing to the hotkey's path.
 #
-# Called from `on-focus-changed` and `on-focused-monitor-changed` in
-# aerospace.toml via exec-and-forget.
+# Called from `exec-on-workspace-change` in aerospace.toml, which only fires
+# when the focused workspace actually changed.
 
 set -u
 
 : "${CTX:=/Users/petermariani/projects/context-based-mac/bin/context}"
 : "${STATE:=/Users/petermariani/.local/state/context}"
-: "${AEROSPACE:=/opt/homebrew/bin/aerospace}"
 PRE="$STATE/picker.prerendered"
 LOCK="$STATE/picker.refresh.lock"
 
