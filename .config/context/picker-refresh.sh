@@ -43,51 +43,45 @@ trap '/bin/rmdir "$LOCK" 2>/dev/null' EXIT
 TMP="$PRE.$$"
 if "$CTX" pick --rows --source contexts >"$TMP" 2>/dev/null && [ -s "$TMP" ]; then
     /bin/mv -f "$TMP" "$PRE"
-
-    # RETIRE THE FZF THAT IS HOLDING THE OLD ROWS.
-    #
-    # In prerender mode the loop starts fzf immediately after a dismissal, so
-    # fzf reads this file ONCE, then sits on the hidden panel waiting. Updating
-    # the file cannot reach it -- the rows you see are "as of the last
-    # dismissal". That is invisible when you arrive somewhere THROUGH the
-    # picker, because the dismissal restarts fzf; it shows up when you switch
-    # workspaces any other way (space-w to an ambient room, space-tab), where
-    # nothing restarts it and the current row is a switch behind until the
-    # second open.
-    #
-    # SIGTERM is the signal precisely so the loop can tell this from a user
-    # dismissal and not toggle the hidden panel back on. The panel is hidden
-    # while this runs, so the restart is invisible.
-    #
-    # Walked down from the loop's own pid, NEVER matched on the command line:
-    # fzf-lua runs fzf inside nvim and killing that would be a real loss.
-    # ONLY when the focused WORKSPACE changed. on-focus-changed fires on every
-    # window focus change -- alt-tab, clicking another window, an app raising
-    # itself -- and retiring fzf on each of those was both pointless churn and
-    # the thing that made the panel pop open on alt-tab. The rows only go stale
-    # when the workspace moves, so that is the only time this fires.
-    focused=$("$AEROSPACE" list-workspaces --focused 2>/dev/null)
-    rendered_for=$(/bin/cat "$STATE/picker.rendered-for" 2>/dev/null || echo "")
-    printf '%s' "$focused" > "$STATE/picker.rendered-for"
-
-    loop_pid=$(/bin/cat "$STATE/picker.loop.pid" 2>/dev/null)
-    if [ -n "${loop_pid:-}" ] && [ "$focused" != "$rendered_for" ]; then
-        # Written BEFORE the kill: fzf traps SIGTERM and exits 130, exactly as
-        # it does for Esc, so the loop cannot tell them apart by status.
-        /usr/bin/touch "$STATE/picker.retired"
-        for kid in $(/usr/bin/pgrep -P "$loop_pid" 2>/dev/null); do
-            # Both levels: fzf is a direct child while the loop pipes straight
-            # into it, but a grandchild under any shell that adds a subshell.
-            # And `ps -o comm=` gives the FULL PATH, so match on the basename.
-            for cand in "$kid" $(/usr/bin/pgrep -P "$kid" 2>/dev/null); do
-                case "$(/bin/ps -o comm= -p "$cand" 2>/dev/null)" in
-                    */fzf|fzf) /bin/kill -TERM "$cand" 2>/dev/null ;;
-                esac
-            done
-        done
-    fi
 else
     /bin/rm -f "$TMP"
+fi
+
+# RETIRE THE FZF THAT IS HOLDING THE OLD ROWS.
+#
+# In prerender mode the loop starts fzf immediately after a dismissal, so
+# fzf reads this file ONCE, then sits on the hidden panel waiting. Updating
+# the file cannot reach it -- the rows you see are "as of the last
+# dismissal". That is invisible when you arrive somewhere THROUGH the
+# picker, because the dismissal restarts fzf; it shows up when you switch
+# workspaces any other way (space-w to an ambient room, space-tab), where
+# nothing restarts it and the current row is a switch behind until the
+# second open.
+#
+# SIGTERM is the signal precisely so the loop can tell this from a user
+# dismissal and not toggle the hidden panel back on. The panel is hidden
+# while this runs, so the restart is invisible.
+#
+# Walked down from the loop's own pid, NEVER matched on the command line:
+# fzf-lua runs fzf inside nvim and killing that would be a real loss.
+# Unconditional now: this script only runs from exec-on-workspace-change, so
+# AeroSpace itself already guarantees the workspace changed by the time we
+# get here -- there is nothing left to compare against.
+loop_pid=$(/bin/cat "$STATE/picker.loop.pid" 2>/dev/null)
+if [ -n "${loop_pid:-}" ]; then
+    # Written BEFORE the kill: fzf traps SIGTERM and exits 130, exactly as
+    # it does for Esc, so the loop cannot tell them apart by status.
+    /usr/bin/touch "$STATE/picker.retired"
+    for kid in $(/usr/bin/pgrep -P "$loop_pid" 2>/dev/null); do
+        # Both levels: fzf is a direct child while the loop pipes straight
+        # into it, but a grandchild under any shell that adds a subshell.
+        # And `ps -o comm=` gives the FULL PATH, so match on the basename.
+        for cand in "$kid" $(/usr/bin/pgrep -P "$kid" 2>/dev/null); do
+            case "$(/bin/ps -o comm= -p "$cand" 2>/dev/null)" in
+                */fzf|fzf) /bin/kill -TERM "$cand" 2>/dev/null ;;
+            esac
+        done
+    done
 fi
 
 # Hold the lock a moment longer than the render, so a burst of focus events
