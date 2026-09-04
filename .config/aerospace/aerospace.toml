@@ -72,13 +72,33 @@ persistent-workspaces = ["work", "ai", "browser", "personal"]
 on-mode-changed = []
 
 on-focus-changed = [
-    'exec-and-forget [ $(/opt/homebrew/bin/aerospace list-windows --workspace focused --count) -eq 1 ] && /opt/homebrew/bin/borders width=0 || /opt/homebrew/bin/borders width=4',
-    # Keep the terminal picker's pre-rendered rows in step with reality. The
-    # loop only re-renders after a dismissal, so a workspace change made any
-    # other way (space-tab, an aerospace hotkey, a click) left the panel
-    # showing a stale current row and stale dots. The script debounces itself,
-    # because this fires on every WINDOW focus change too.
-    'exec-and-forget /Users/petermariani/.config/context/picker-refresh.sh'
+    'exec-and-forget [ $(/opt/homebrew/bin/aerospace list-windows --workspace focused --count) -eq 1 ] && /opt/homebrew/bin/borders width=0 || /opt/homebrew/bin/borders width=4'
+]
+
+# Keep the terminal picker's pre-rendered rows in step with reality, and let
+# `context record-focus` heal the outgoing context's Chrome snapshot.
+#
+# THIS IS THE RIGHT HOOK, and it was on `on-focus-changed` until 2026-09-04.
+# That one fires on every WINDOW focus change -- alt-tab, a click, an app
+# raising itself -- and the rows only go stale when the WORKSPACE moves, so
+# picker-refresh.sh grew a mkdir debounce lock and a `picker.rendered-for`
+# file purely to work out whether the workspace had actually changed. This
+# callback fires only when it has.
+#
+# It also exports AEROSPACE_PREV_WORKSPACE and AEROSPACE_FOCUSED_WORKSPACE.
+# `context record-focus` reads the first, which is authoritative -- it used to
+# infer the outgoing workspace from the MRU's head, which assumed the previous
+# focus event had not been dropped by the debounce.
+#
+# Note the shape: this takes a command and its arguments as a LIST, not an
+# `exec-and-forget` string like the callback above.
+#
+# picker-refresh.sh's own rendered-for comparison is now redundant. Leave it
+# until the shell side has tests -- it is harmless, and deleting untested
+# shell is how the last round of picker bugs reached the user.
+exec-on-workspace-change = [
+    '/bin/bash', '-c',
+    '/Users/petermariani/.config/context/picker-refresh.sh'
 ]
 
 focus-follows-mouse.enabled = false
