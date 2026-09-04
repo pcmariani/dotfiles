@@ -127,6 +127,42 @@ eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
 
+# ----- stale agent session env -----
+
+# A window opened from inside a Claude Code session used to inherit that
+# session's whole CLAUDE_* block, CLAUDE_CODE_CHILD_SESSION=1 included. A
+# `claude` that believes it is a child session writes NO transcript, so
+# `claude -c` in that window answers "no conversation found" and the
+# conversation is simply gone -- for the life of the window, long after the
+# session that spawned it died. Measured 2026-09-04, and isolated to that one
+# variable by experiment: CLAUDECODE=1 and a stale CLAUDE_PID are both
+# harmless on their own.
+#
+# The launcher that leaked it is fixed (context-based-mac, context/childenv.py),
+# but windows opened BEFORE that fix keep the bad block until they are
+# relaunched. This repairs new shells in them.
+#
+# Only when the owning session is really gone: a `claude` started from inside
+# a live session's tool call IS nested and must keep the flag. Checking the
+# pid is alive is not enough -- pids get recycled -- so the process has to
+# still be a claude.
+# >>> stale-agent-env guard >>>
+if [[ -n "$CLAUDE_CODE_CHILD_SESSION" ]]; then
+  _stale_agent_env=1
+  if [[ -n "$CLAUDE_PID" ]] && kill -0 "$CLAUDE_PID" 2>/dev/null; then
+    if [[ "$(ps -o comm= -p "$CLAUDE_PID" 2>/dev/null)" == *claude* ]]; then
+      _stale_agent_env=0
+    fi
+  fi
+  if (( _stale_agent_env )); then
+    unset CLAUDECODE CLAUDE_CODE_CHILD_SESSION CLAUDE_PID CLAUDE_CODE_SESSION_ID \
+          CLAUDE_CODE_ENTRYPOINT CLAUDE_CODE_EXECPATH CLAUDE_CODE_MESSAGING_SOCKET \
+          CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_EFFORT AI_AGENT
+  fi
+  unset _stale_agent_env
+fi
+# <<< stale-agent-env guard <<<
+
 # gpg-agent draws its passphrase prompt on a terminal it has to be told about.
 # Without this, anything that pipes data to gpg on stdin -- `yadm encrypt`
 # being the one that bites -- fails with:
