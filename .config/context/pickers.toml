@@ -17,6 +17,12 @@ producer = "/bin/cat /Users/petermariani/.local/state/context/picker.prerendered
 consumer = "/Users/petermariani/projects/context-based-mac/bin/context pick-accept contexts"
 fields   = "value-tab-display"
 multi    = false
+# The current context sorts to row 1 (context_records passes
+# current_first=True), so the cursor starts on row 2 instead -- otherwise
+# hotkey-Enter is a ~1.3s no-op re-enter of where you already are. This
+# makes it behave like alt-tab. A bare/path picker (files, folders) has no
+# such row and must leave this at the default (1).
+cursor_row = 2
 action = [
   { bind = "enter", verb = "enter", after = "close", default = true },
 ]

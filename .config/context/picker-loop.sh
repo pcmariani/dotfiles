@@ -162,8 +162,52 @@ hide_panel() {
         >/dev/null 2>&1
 }
 
+# The composed command's own hide step -- see the export block below -- runs
+# INSIDE the pipeline, joined by `;`, so it fires regardless of fzf's exit
+# status. That includes a SIGTERM retirement (picker-refresh.sh refreshing a
+# background fzf's rows), which exits 130 -- byte for byte what Esc returns,
+# same ambiguity `$RETIRED` already exists to resolve for the OUTER loop
+# below. Without this check, a retirement would hide an ALREADY-HIDDEN
+# panel -- hiding TOGGLES, so that reopens it, the exact bug this project has
+# hit before. `$RETIRED` is written BEFORE the SIGTERM (picker-refresh.sh's
+# own comment explains why), so it is visible here in time; the outer loop
+# still consumes (removes) the marker afterward, unchanged.
+hide_unless_retired() {
+    [ -f "$RETIRED" ] && return 0
+    hide_panel
+}
+
 # Before the first fzf ever draws: wipe login's banner off the normal screen.
 blank_screen
+
+# THE HIDE MOVES INSIDE THE COMPOSED COMMAND (finding 3, 2026-09-04). The OLD
+# loop hid the panel BEFORE running the verb, deliberately, for the reason
+# `hide_panel`'s own comment above gives -- the macOS focus bug otherwise
+# stranded the panel, and hide-first reads as instant. `PROD | fzf | CONS` as
+# ONE pipeline only hides once the WHOLE thing exits, which lands the hide
+# AFTER `context enter`'s ~1.3s ladder (aerospace focus, Chrome restore) --
+# a live regression on the most-pressed key on the machine.
+#
+# `context/picker_cli.py`'s `compose()` reads these two env vars, and when
+# BOTH are set it splits the pipeline as `fzf … > "$SEL" ; HIDE ; CONS <
+# "$SEL"` instead of piping fzf straight into the consumer. Decision 1 still
+# holds -- the host still runs one opaque string, it just has a `;` in it.
+# Exported ONCE, here, alongside the default composition below -- not per
+# keypress.
+#
+# hide_panel and hide_unless_retired are shell FUNCTIONS, not binaries: the
+# composed command runs in its OWN `/bin/bash -c` (below), a separate
+# process that does not inherit functions or variables unless they are
+# explicitly exported. Both functions, and everything they read ($HS,
+# $RETIRED), must be exported, or the composed command's "HIDE" stage would
+# fail with "command not found" -- or worse, silently never defer to a
+# retirement -- and never hide anything correctly.
+export HS
+export RETIRED
+export -f hide_panel
+export -f hide_unless_retired
+export PICKER_SEL="$OUT"
+export PICKER_HIDE=hide_unless_retired
 
 # Composed ONCE, before the loop, never inside it: a Python interpreter start
 # is ~190ms, sanctioned here because it happens once at startup, forbidden on
@@ -191,8 +235,20 @@ while :; do
         /bin/mv -f "$OVERRIDE" "$consuming"
         command=$(/bin/cat "$consuming")
         /bin/rm -f "$consuming"
+        # An override is opaque per Decision 1 -- it came from whatever wrote
+        # to the FIFO, not from the `pick-command` this loop just ran with
+        # PICKER_SEL/PICKER_HIDE exported -- so the loop cannot know whether
+        # ITS composer also embedded a hide. Treated as NOT self-hiding, so
+        # it gets hidden below exactly as every command used to.
+        self_hides=0
     else
         command="$default_command"
+        # The default was just composed (below, and after a failed-
+        # composition retry) with PICKER_SEL/PICKER_HIDE exported, so
+        # compose() is guaranteed to have embedded the hide -- see
+        # context/picker_cli.py. Hiding it AGAIN below would TOGGLE the
+        # panel back open.
+        self_hides=1
     fi
 
     if [ -z "$command" ]; then
@@ -223,11 +279,17 @@ while :; do
     # which anything left here would be visible.
     blank_screen
 
-    # Hide on EVERY path, including a failed command. The panel must never
-    # depend on what the consumer does -- it used to rely on `context enter`
-    # moving focus away so autohide would fire, and whenever enter's focus
-    # landed nowhere the panel just sat there.
-    hide_panel
+    # Hide on every path the LOOP is responsible for, including a failed
+    # command. The panel must never depend on what the consumer does -- it
+    # used to rely on `context enter` moving focus away so autohide would
+    # fire, and whenever enter's focus landed nowhere the panel just sat
+    # there. Skipped only when the command that just ran already hid the
+    # panel itself ($self_hides, set above): hiding TOGGLES, and calling it
+    # a second time here would reopen a panel the composed command already
+    # closed.
+    if [ "$self_hides" -eq 0 ]; then
+        hide_panel
+    fi
 
     # RESIDENT loop: a hot spin would burn a core forever. Eight instant
     # empty iterations inside two seconds is not a human pressing Esc.
