@@ -70,6 +70,30 @@ if [ ! -p "$FIFO" ]; then
     /usr/bin/mkfifo -m 600 "$FIFO"
 fi
 
+READER_PID_FILE="$STATE/picker.reader.pid"
+
+# REAP AN ORPHANED READER BEFORE OPENING fd 9. The EXIT trap below kills the
+# reader on a normal exit, but SIGKILL -- Force Quit, OOM, a crash -- bypasses
+# traps entirely, and nothing else would ever notice a stray reader left
+# holding this FIFO open. A FIFO with two readers splits writes between them
+# unpredictably, so an orphan here would silently swallow some future loop's
+# override -- "the picker sometimes ignores me", hours to diagnose.
+#
+# The bare pid is not enough: it can be recycled onto some unrelated process
+# by the time we check it, and killing THAT would be a much worse bug than
+# the one this guards against. Verified the way picker-refresh.sh verifies
+# fzf before killing it -- matched on the command, not trusted by number
+# alone. `comm=` alone would just say "bash" here (this is a shell subshell,
+# not a distinct binary), so the full command line is matched instead: a
+# stray reader's argv is this script's own invocation, inherited by the
+# subshell fork below.
+stale_reader=$(/bin/cat "$READER_PID_FILE" 2>/dev/null)
+if [ -n "${stale_reader:-}" ] && /bin/kill -0 "$stale_reader" 2>/dev/null; then
+    case "$(/bin/ps -o args= -p "$stale_reader" 2>/dev/null)" in
+        *picker-loop.sh*) /bin/kill "$stale_reader" 2>/dev/null ;;
+    esac
+fi
+
 # Requirement 1: our own writer fd, so the channel never reaches EOF.
 exec 9<>"$FIFO"
 
@@ -95,7 +119,8 @@ OVERRIDE="$STATE/picker.override"
     done
 ) &
 reader_pid=$!
-trap '/bin/kill "$reader_pid" 2>/dev/null' EXIT
+echo "$reader_pid" >"$READER_PID_FILE"
+trap '/bin/kill "$reader_pid" 2>/dev/null; /bin/rm -f "$READER_PID_FILE"' EXIT
 
 # So the refresh script can retire the fzf that is holding stale rows. It
 # walks down from here rather than matching on the command line, because
