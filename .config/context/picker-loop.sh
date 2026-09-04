@@ -7,11 +7,19 @@
 # so no rc files load. That same `login` wrapper RESETS cwd to $HOME, which is
 # why every path here is absolute and nothing relies on the working directory.
 #
-# The loop knows nothing about producers, fields or verbs: it reads a
-# complete shell command off the channel and runs it, then hides the panel.
-# `context pick-command <name>` builds that command from `pickers.toml`
-# elsewhere -- this script never sees a producer name, only the finished
-# command line.
+# The loop knows nothing about producers, fields or verbs: it runs a complete
+# shell command and hides the panel afterwards. `context pick-command <name>`
+# builds that command from `pickers.toml` elsewhere -- this script never sees
+# a producer name, only the finished command line, and PICKER_DEFAULT below
+# is the only picker NAME it ever mentions.
+#
+# NOTHING WRITES TO THE FIFO TODAY. No hotkey, no Hammerspoon binding, no
+# refresh script sends a command down it -- it exists for a future control
+# channel (paneld) that can hand this loop a DIFFERENT picker for one show.
+# So the loop cannot simply block reading it, or ctrl-shift-space would show
+# an empty panel forever. Instead it composes ONE default pipeline at
+# startup and runs THAT every iteration, checking without blocking whether
+# something has since arrived on the channel to override it for that show.
 #
 # THE CHANNEL DISCIPLINE IS A CORRECTNESS REQUIREMENT, NOT STYLE:
 #   1. The loop holds its OWN writer fd open (fd 9, opened <>) so it never sees
@@ -22,11 +30,30 @@
 #      writer were Hammerspoon, that would freeze its entire runloop, taking
 #      ctrl-space, contextPicker, the space-tab wrapper and doctor's probe
 #      with it.
+#   3. The MAIN loop's own check of the channel must not block either, for the
+#      same reason -- but it does NOT use `read -t 0`. Ghostty invokes this
+#      script under macOS's stock /bin/bash (3.2.57, frozen pre-GPLv3), and
+#      that version's `read -t 0` is not the bash-4+ "is input ready?" poll:
+#      measured here, it returns failure in single-digit milliseconds whether
+#      or not data is waiting, so it can never actually see a write -- a
+#      literal `read -t 0 -u 9` would compile, never block, and never work.
+#      The equivalent that DOES work on this bash: a persistent background
+#      reader (below) holds the blocking read on fd 9 -- which functions
+#      normally, exactly as the original single-command loop's did -- and
+#      drops whatever it reads into $OVERRIDE via the write-temp-then-rename
+#      pattern picker-refresh.sh already uses for the same reason (no reader
+#      ever sees a half-written file). The main loop's own check is then just
+#      `[ -f "$OVERRIDE" ]`, a stat() call, never a wait.
 
 set -u
 
 : "${STATE:=/Users/petermariani/.local/state/context}"
 : "${HS:=/opt/homebrew/bin/hs}"
+: "${CTX:=/Users/petermariani/projects/context-based-mac/bin/context}"
+# The ONLY picker name this script ever mentions. It knows nothing about
+# producers, fields or verbs -- `context pick-command` resolves the name into
+# a full pipeline, once, below.
+: "${PICKER_DEFAULT:=contexts}"
 
 FIFO="$STATE/picker.trigger"
 
@@ -48,10 +75,27 @@ exec 9<>"$FIFO"
 
 OUT="$STATE/picker.selection"
 RETIRED="$STATE/picker.retired"
+OVERRIDE="$STATE/picker.override"
 
 # Never inherit one from a previous run: a stale marker would swallow the
-# user's next real dismissal.
-/bin/rm -f "$RETIRED"
+# user's next real dismissal, and a stale override would run a command from
+# a process that no longer exists.
+/bin/rm -f "$RETIRED" "$OVERRIDE" "$OVERRIDE.tmp"
+
+# THE BACKGROUND READER. Its blocking `read -u 9` is the same call the main
+# loop used before this change -- correct and unremarkable on its own, which
+# is exactly why it is safe to park here instead of in the hot path. It never
+# sees EOF for the same reason the rest of this file doesn't: fd 9 stays open
+# for both ends, inherited across the fork below. Nothing writes to the FIFO
+# today, so in practice this sits blocked forever, at zero cost, until a
+# future control channel (paneld) starts using it.
+(
+    while IFS= read -r -u 9 line; do
+        printf '%s' "$line" >"$OVERRIDE.tmp" && /bin/mv -f "$OVERRIDE.tmp" "$OVERRIDE"
+    done
+) &
+reader_pid=$!
+trap '/bin/kill "$reader_pid" 2>/dev/null' EXIT
 
 # So the refresh script can retire the fzf that is holding stale rows. It
 # walks down from here rather than matching on the command line, because
@@ -96,6 +140,13 @@ hide_panel() {
 # Before the first fzf ever draws: wipe login's banner off the normal screen.
 blank_screen
 
+# Composed ONCE, before the loop, never inside it: a Python interpreter start
+# is ~190ms, sanctioned here because it happens once at startup, forbidden on
+# a per-keypress path. The loop knows nothing about producers, fields or
+# verbs before or after this line -- PICKER_DEFAULT is the only name it reads,
+# and this is the only place it reads it.
+default_command=$("$CTX" pick-command "$PICKER_DEFAULT" 2>/dev/null)
+
 fast=0
 burst_start=$SECONDS
 while :; do
@@ -103,12 +154,31 @@ while :; do
     # the whole contract: `context pick-command <name>` built this string from
     # pickers.toml, and the loop's job is to run it and hide afterwards.
     #
-    # Channel discipline is unchanged and is a correctness requirement:
-    # fd 9 keeps a writer open so `read` never sees EOF, and writers must open
-    # NON-BLOCKING and treat ENXIO as "picker not ready" -- the loop is a
-    # reader only while it sits here, not while a picker is on screen.
-    IFS= read -r -u 9 command || continue
-    [ -n "$command" ] || continue
+    # NON-BLOCKING: `[ -f "$OVERRIDE" ]` is a stat() call, never a wait -- see
+    # the background reader above for why this isn't `read -t 0` on fd 9
+    # directly. A command that HAS arrived overrides the default for this one
+    # iteration only; it is consumed (renamed away) below, so the loop reverts
+    # to the default again immediately afterwards.
+    if [ -f "$OVERRIDE" ]; then
+        # Moved away, not just read, before the reader can land a NEXT write
+        # on the same name in the gap between the check and the read.
+        consuming="$OVERRIDE.reading.$$"
+        /bin/mv -f "$OVERRIDE" "$consuming"
+        command=$(/bin/cat "$consuming")
+        /bin/rm -f "$consuming"
+    else
+        command="$default_command"
+    fi
+
+    if [ -z "$command" ]; then
+        # Composition failed -- e.g. no pickers.toml yet, or `context` itself
+        # is broken -- and nothing is waiting on the FIFO to fix that. Do NOT
+        # spin: back off and retry composing, so a misconfigured machine
+        # burns a sleep instead of a core.
+        /bin/sleep 1
+        default_command=$("$CTX" pick-command "$PICKER_DEFAULT" 2>/dev/null)
+        continue
+    fi
 
     /bin/bash -c "$command" >"$OUT" 2>/dev/null
 

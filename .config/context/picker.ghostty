@@ -74,7 +74,7 @@ quick-terminal-animation-duration = 0
 # | Today there is no channel, so focus-loss is harmless -- and it is how   |
 # | the panel hides after `context enter` moves focus to another workspace. |
 # +-------------------------------------------------------------------------+
-quick-terminal-autohide = true
+quick-terminal-autohide = false
 
 # The loop is the `command`, so no interactive shell is in the hot path.
 # Ghostty launches it via `/usr/bin/login -flp <user> /bin/bash --noprofile

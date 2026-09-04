@@ -1,0 +1,22 @@
+# ~/.config/context/pickers.toml
+#
+# A picker is a producer, a consumer and a set of keybind -> verb actions.
+# `context pick-command <name>` turns an entry here into the shell pipeline
+# the picker loop runs. The loop never reads this file.
+#
+# NOT in contexts.toml: the pm project plans to read that as its registry, so
+# its schema stays frozen.
+
+[[picker]]
+name     = "contexts"
+# The producer is `cat`, not the CLI: Decision 6 keeps picker.prerendered as
+# this producer's cache, written by picker-refresh.sh on every workspace
+# change. A producer is a command line and nothing else -- so a producer that
+# reads a cache is just a different command line, with no code behind it.
+producer = "/bin/cat /Users/petermariani/.local/state/context/picker.prerendered"
+consumer = "/Users/petermariani/projects/context-based-mac/bin/context pick-accept contexts"
+fields   = "value-tab-display"
+multi    = false
+action = [
+  { bind = "enter", verb = "enter", after = "close", default = true },
+]
