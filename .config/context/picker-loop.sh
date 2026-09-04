@@ -26,9 +26,10 @@
 
 set -u
 
-CTX=/Users/petermariani/projects/context-based-mac/bin/context
-FZF=/opt/homebrew/bin/fzf
-STATE=/Users/petermariani/.local/state/context
+: "${CTX:=/Users/petermariani/projects/context-based-mac/bin/context}"
+: "${FZF:=/opt/homebrew/bin/fzf}"
+: "${STATE:=/Users/petermariani/.local/state/context}"
+: "${HS:=/opt/homebrew/bin/hs}"
 
 FIFO="$STATE/picker.trigger"
 MODE_FILE="$STATE/picker.mode"     # "prerender" (default) | "ondemand"
@@ -122,7 +123,7 @@ FZF_COLORS=(
 blank_screen() { printf '\033[2J\033[3J\033[H\033[?25l'; }
 
 hide_panel() {
-    /opt/homebrew/bin/hs -c \
+    "$HS" -c \
         'hs.eventtap.keyStroke({"cmd","ctrl","alt","shift"}, "p", 0); return "hidden"' \
         >/dev/null 2>&1
 }

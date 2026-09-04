@@ -13,8 +13,9 @@
 
 set -u
 
-CTX=/Users/petermariani/projects/context-based-mac/bin/context
-STATE=/Users/petermariani/.local/state/context
+: "${CTX:=/Users/petermariani/projects/context-based-mac/bin/context}"
+: "${STATE:=/Users/petermariani/.local/state/context}"
+: "${AEROSPACE:=/opt/homebrew/bin/aerospace}"
 PRE="$STATE/picker.prerendered"
 LOCK="$STATE/picker.refresh.lock"
 
@@ -65,7 +66,7 @@ if "$CTX" pick --rows --source contexts >"$TMP" 2>/dev/null && [ -s "$TMP" ]; th
     # itself -- and retiring fzf on each of those was both pointless churn and
     # the thing that made the panel pop open on alt-tab. The rows only go stale
     # when the workspace moves, so that is the only time this fires.
-    focused=$(/opt/homebrew/bin/aerospace list-workspaces --focused 2>/dev/null)
+    focused=$("$AEROSPACE" list-workspaces --focused 2>/dev/null)
     rendered_for=$(/bin/cat "$STATE/picker.rendered-for" 2>/dev/null || echo "")
     printf '%s' "$focused" > "$STATE/picker.rendered-for"
 
