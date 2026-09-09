@@ -64,35 +64,33 @@
          :rules  [[:##caps_lock :left_control nil {:alone :escape}]]
          }
 
-        ; Placed before the mod-tap layers so ctrl-space is claimed here rather
-        ; than falling through to the plain-spacebar space-mode trigger. Since
-        ; caps_lock is already left_control (rule above), this is caps+space:
-        ; one chord rather than a mode-hold, which matters for the key that
-        ; gets pressed most.
+        ; THE CONTEXT PICKER RULE IS GONE, 2026-09-05. Both halves of it are.
         ;
-        ; Emits F18 rather than shelling out. Hammerspoon binds F18 and shows
-        ; the picker in-process, which skips the `hs -c` round trip — that
-        ; round trip measured 60-70ms of the ~130ms total, because it waits for
-        ; the runloop and the panel activation. F18 is unused by macOS and by
-        ; anything else here. The rule still claims ctrl-space exactly as it
-        ; did, so the ordering comment above still holds.
+        ; ctrl-shift-space went first: it rewrote to hyper-P for the Ghostty
+        ; instance's private global keybind, and Karabiner rewrites BELOW the
+        ; layer Carbon registers against -- so paneld's registration succeeded
+        ; and the chord never arrived.
         ;
-        ; bin/context-pick remains the terminal entry point and the fallback
-        ; for when Hammerspoon is not running.
+        ; ctrl-space now goes STRAIGHT THROUGH to paneld, which registers it
+        ; itself with Carbon's RegisterEventHotKey -- no rewrite here, no
+        ; Hammerspoon, and no `hs -c` round trip to skip, because there is no
+        ; hs.chooser left to call.
         ;
-        ; ctrl-SHIFT-space is the TERMINAL picker, and it is a direct chord for
-        ; exactly the reason given above. space-shift-P still works, but it
-        ; goes through the space mod-tap layer, whose `:held` action does not
-        ; fire until `to_if_held_down_threshold_milliseconds` (160) has
-        ; elapsed -- so 160ms passes before shift-P even means hyper-P. That
-        ; is the whole of the "slight hiccup" against ctrl-space, and none of
-        ; it is Ghostty or fzf: by then fzf is already running and waiting on
-        ; the hidden panel.
-        {
-         :des "context picker"
-         :rules [[:!Tspacebar :f18]
-                 [:!TSspacebar :!!p]]
-         }
+        ; Nothing below claims it: the mod-tap `:spacebar` rules carry no
+        ; optional modifiers, so ctrl-space cannot fall into the space-mode
+        ; layer or pay its 160ms `to_if_held_down_threshold`. Verified in the
+        ; generated karabiner.json.
+        ;
+        ; IF ctrl-space DOES NOT REACH THE PANEL: macOS binds it to "select
+        ; the previous input source" by default. It is disabled on this machine
+        ; (symbolichotkeys 60 and 61, both enabled=0), but if something else
+        ; claims it, put the old F18 hop back --
+        ;
+        ;   {:des "context picker" :rules [[:!Tspacebar :f18]]}
+        ;
+        ; -- and set `hotkey = "f18"` in ~/.config/paneld/paneld.toml. F18 is
+        ; unused by macOS and by everything else here, which is why the
+        ; chooser used it for months. `paneld toggle picker` works regardless.
 
         ; note: When adding a new layer, if you want it to be able to cross with an old one, you must add the name negated (:!new_name) to all other mod-tap layer conditions
         {
@@ -243,7 +241,9 @@
                  ;; Karabiner drives this, not Hammerspoon, so the picker's
                  ;; driver is never also its observer -- the contention that
                  ;; made two earlier latency harnesses unusable.
-                 [:!Sp [:!!p]] ;; terminal context picker (hyper-P)
+                 ;; [:!Sp [:!!p]] -- retired 2026-09-05 with the Ghostty
+                 ;; picker instance that owned hyper-P. paneld answers
+                 ;; ctrl-space directly, which is one chord and no layer.
 
                  ]
 
