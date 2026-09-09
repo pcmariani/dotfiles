@@ -401,6 +401,22 @@
             "key_code" : "t"
           },
           "to" : [ {
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context terminal"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "t",
+            "modifiers" : {
+              "mandatory" : [ "left_shift" ]
+            }
+          },
+          "to" : [ {
             "key_code" : "t",
             "modifiers" : [ "left_command", "left_control", "left_option", "left_shift" ]
           } ],
