@@ -1,19 +1,40 @@
 # paneld. One panel per [[panel]] block.
 [[panel]]
 name    = "picker"
-# cmd-esc, trialled 2026-09-09. NOT YET PROVEN -- two things could break it,
-# and pressing it is the only way to find out:
+# cmd-esc, replacing ctrl-space on 2026-09-09. VERIFIED by hand with both the
+# physical Esc key and caps_lock.
 #
-#   1. caps_lock is CTRL in combination and ESC only when tapped alone
-#      (karabiner.edn: `[:##caps_lock :left_control nil {:alone :escape}]`),
-#      so cmd+capslock may emit cmd+ctrl (nothing) rather than cmd+escape.
-#      The physical Esc key is unaffected either way.
-#   2. a Karabiner-synthesized chord has failed to reach paneld's Carbon
-#      registration before -- see karabiner.edn's note on ctrl-shift-space.
+# caps_lock works even though karabiner.edn maps it to left_control in
+# combination and escape only when tapped alone
+# (`[:##caps_lock :left_control nil {:alone :escape}]`): the `##` prefix
+# passes the held cmd through, so the tap emits cmd+escape.
 #
-# To revert: put this back to "ctrl-space" and restart the daemon.
+# And that chord is Karabiner-SYNTHESIZED, yet it reaches paneld's Carbon
+# registration -- which narrows karabiner.edn's note about Karabiner rewriting
+# below the layer Carbon registers against. That failure was specific to
+# ctrl-shift-space -> hyper-P; it is not a general rule.
+#
+# A plain chord on purpose, not a space-mode layer entry: a layer would have to
+# shell out to `paneld toggle picker`, paying a round trip plus space-mode's
+# ~160ms hold threshold on the key pressed most often.
+#
+# CHANGING A HOTKEY NEEDS A DAEMON RESTART, not `paneld reload`:
+# registerHotkey runs only in the daemon's startup loop (Daemon.swift:81), and
+# `paneld status` prints the CONFIG's hotkey rather than the registered one --
+# so it will confidently report a hotkey that Carbon does not hold.
+#     launchctl kickstart -k "gui/$(id -u)/dev.paneld.paneld"
 hotkey  = "cmd-esc"
 compose = "context pick-command contexts"
+width   = 900
+height  = 420
+arm     = true
+
+[[panel]]
+name    = "move"
+# shift-cmd-esc, next door to the picker's cmd-esc. A plain chord, so paneld
+# registers it with Carbon itself -- see the note on the picker's hotkey above.
+hotkey  = "shift-cmd-esc"
+compose = "context pick-command move"
 width   = 900
 height  = 420
 arm     = true
