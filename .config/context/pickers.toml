@@ -14,7 +14,11 @@ name     = "contexts"
 # change. A producer is a command line and nothing else -- so a producer that
 # reads a cache is just a different command line, with no code behind it.
 producer = "/bin/cat /Users/petermariani/.local/state/context/picker.prerendered"
-consumer = "/Users/petermariani/projects/context-based-mac/bin/context pick-accept contexts"
+# --notify so `enter`'s empty-workspace note reaches the screen. The panel
+# discards stdout, and main() only notifies a SUCCESS message when asked.
+# Costs nothing in the common case: `enter` returns "" when the workspace
+# has a window, and main() will not pop an empty string (there is a test).
+consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept contexts"
 fields   = "value-tab-display"
 multi    = false
 # The current context sorts to row 1 (context_records passes
@@ -62,4 +66,18 @@ fields   = "bare"
 multi    = false
 # Row 1, the top match. Only the workspace pickers start on row 2, where row 1
 # is the workspace you are already in.
+cursor_row = 1
+
+[[picker]]
+name     = "config-files"
+# Fixed scope, so this needs nothing from the tool: `fd` IS the producer. The
+# workspace-scoped `files` picker goes through `context pick --rows` only
+# because it has to resolve the focused workspace's root first.
+#
+# ~/.config measured 1,505 files in 26ms. (~ was the tempting alternative:
+# 857,374 files and 7.6s.)
+producer = "/opt/homebrew/bin/fd --type f -0 . /Users/petermariani/.config"
+consumer = "/usr/bin/xargs -0 /usr/bin/open"
+fields   = "bare"
+multi    = false
 cursor_row = 1

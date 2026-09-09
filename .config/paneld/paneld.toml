@@ -55,3 +55,14 @@ compose = "context pick-command files"
 width   = 900
 height  = 420
 arm     = true
+
+[[panel]]
+name    = "config-files"
+# Summoned by space-shift-c via `paneld toggle`, like the files picker -- so
+# this hotkey is never pressed and is set explicitly only to avoid the f18
+# default. See the files panel above.
+hotkey  = "hyper-f19"
+compose = "context pick-command config-files"
+width   = 900
+height  = 420
+arm     = true

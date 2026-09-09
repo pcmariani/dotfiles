@@ -681,6 +681,22 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "c",
+            "modifiers" : {
+              "mandatory" : [ "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle config-files"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "b",
             "modifiers" : {
               "mandatory" : [ "left_shift" ]

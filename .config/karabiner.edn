@@ -284,6 +284,14 @@
                  ;; key pressed far less often than ctrl-space was.
                  [:!Sf [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle files"]]
 
+                 ;; The CONFIG files picker -- ~/.config, fixed scope, from
+                 ;; wherever you are. Separate from space-shift-f because that
+                 ;; one is scoped to the focused workspace, so reaching
+                 ;; contexts.toml through it means leaving what you were doing,
+                 ;; landing on whichever monitor the workspace gets, and coming
+                 ;; back. This needs no workspace switch at all.
+                 [:!Sc [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle config-files"]]
+
                  [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
                  [:return_or_enter [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
 
