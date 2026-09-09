@@ -76,8 +76,8 @@ on-focus-changed = [
 ]
 
 # Keep the terminal picker's pre-rendered rows in step with reality, and let
-# `context record-focus` note the workspace you just left, for the picker's
-# recency order.
+# `context record-focus` note the workspace you just arrived in, for the
+# picker's recency order.
 #
 # THIS IS THE RIGHT HOOK, and it was on `on-focus-changed` until 2026-09-04.
 # That one fires on every WINDOW focus change -- alt-tab, a click, an app
