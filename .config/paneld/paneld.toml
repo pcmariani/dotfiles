@@ -1,0 +1,19 @@
+# paneld. One panel per [[panel]] block.
+[[panel]]
+name    = "picker"
+# cmd-esc, trialled 2026-09-09. NOT YET PROVEN -- two things could break it,
+# and pressing it is the only way to find out:
+#
+#   1. caps_lock is CTRL in combination and ESC only when tapped alone
+#      (karabiner.edn: `[:##caps_lock :left_control nil {:alone :escape}]`),
+#      so cmd+capslock may emit cmd+ctrl (nothing) rather than cmd+escape.
+#      The physical Esc key is unaffected either way.
+#   2. a Karabiner-synthesized chord has failed to reach paneld's Carbon
+#      registration before -- see karabiner.edn's note on ctrl-shift-space.
+#
+# To revert: put this back to "ctrl-space" and restart the daemon.
+hotkey  = "cmd-esc"
+compose = "context pick-command contexts"
+width   = 900
+height  = 420
+arm     = true
