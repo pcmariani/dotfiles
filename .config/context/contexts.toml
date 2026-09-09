@@ -26,8 +26,6 @@
 #         capped at 50 bytes here — macOS limits a unix socket path to 104, and
 #         ~/.config/herdr/sessions/<name>/herdr.sock has to fit. The cap is
 #         computed from $HOME, so it differs on another machine.
-# org   — who the work is for. Display and search only, so free text: real
-#         capitalisation and spaces are fine.
 #
 # Reserved names live in context/model.py (herdr's "default", AeroSpace's
 # grammar tokens, the ambient workspace names). `context doctor` additionally
@@ -65,11 +63,10 @@ selection_bg  = "000000"                  # see note below
 # Resident (Hammerspoon) backend only. It colours ALL text with one colour and
 # has no match colour, so match_color above does not reach it — wiring them
 # together turned every row cyan, which is what made it ugly.
-# One aligned line per row: ● org name path, each column its own colour.
+# One aligned line per row: ● name path, each column its own colour.
 text_color    = "C8D3D5"                  # the name
 subtext_color = "5F7377"                  # the path, and the current context
 accent_color  = "00FFAA"                  # the ● on a live context
-org_color     = "C678DD"                  # the org column
 monospace     = true                      # Menlo via styledtext
 
 # Where to look for undeclared contexts. Every direct child of these roots —
@@ -116,7 +113,6 @@ roots = [
 ]
 
 
-# No org: this is personal tooling, not client work.
 [[context]]
 name = "context-based-mac"
 path = "~/projects/context-based-mac"
