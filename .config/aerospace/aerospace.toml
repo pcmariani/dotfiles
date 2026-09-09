@@ -76,7 +76,8 @@ on-focus-changed = [
 ]
 
 # Keep the terminal picker's pre-rendered rows in step with reality, and let
-# `context record-focus` heal the outgoing context's Chrome snapshot.
+# `context record-focus` note the workspace you just left, for the picker's
+# recency order.
 #
 # THIS IS THE RIGHT HOOK, and it was on `on-focus-changed` until 2026-09-04.
 # That one fires on every WINDOW focus change -- alt-tab, a click, an app
@@ -85,10 +86,10 @@ on-focus-changed = [
 # file purely to work out whether the workspace had actually changed. This
 # callback fires only when it has.
 #
-# It also exports AEROSPACE_PREV_WORKSPACE and AEROSPACE_FOCUSED_WORKSPACE.
-# `context record-focus` reads the first, which is authoritative -- it used to
-# infer the outgoing workspace from the MRU's head, which assumed the previous
-# focus event had not been dropped by the debounce.
+# It also exports AEROSPACE_PREV_WORKSPACE and AEROSPACE_FOCUSED_WORKSPACE,
+# unread by anything here now: `context record-focus` asks AeroSpace directly
+# for the focused workspace instead of trusting an env var, so a dropped or
+# stale export cannot feed it a wrong name.
 #
 # Note the shape: this takes a command and its arguments as a LIST, not an
 # `exec-and-forget` string like the callback above.
