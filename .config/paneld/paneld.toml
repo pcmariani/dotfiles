@@ -54,7 +54,22 @@ hotkey  = "hyper-f20"
 compose = "context pick-command files"
 width   = 900
 height  = 420
-arm     = true
+# NOT armed, unlike every other panel. Arming RUNS the composed command so the
+# surface is drawn and ready -- and this producer's rows depend on WHICH
+# WORKSPACE IS FOCUSED, which at daemon-start time is whatever it happens to
+# be. If that workspace has no root the producer correctly says "nowhere to
+# look", so the first invocation drew an empty list and only the second worked
+# (reported 2026-09-09).
+#
+# The alternative was rearming this panel from picker-refresh.sh on every
+# workspace change, like `picker`. Rejected: that runs `fd` over the workspace
+# on every focus change, and a client root is ~2,652 files -- paying a
+# directory walk constantly for a picker opened occasionally.
+#
+# So the producer runs at invocation instead. `fd` is fast (89 files in this
+# repo, 2,652 in a client root) and the rows are correct by construction
+# rather than correct-if-rearmed.
+arm     = false
 
 [[panel]]
 name    = "config-files"
