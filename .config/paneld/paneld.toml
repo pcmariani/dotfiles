@@ -38,3 +38,20 @@ compose = "context pick-command move"
 width   = 900
 height  = 420
 arm     = true
+
+[[panel]]
+name    = "files"
+# Summoned by space-shift-f, which Karabiner routes to `paneld toggle files`
+# over the control socket -- a space-mode layer cannot hand Carbon a chord it
+# did not receive itself.
+#
+# So this hotkey is NEVER PRESSED, and it is set explicitly because the field
+# defaults to `f18` when omitted -- and karabiner.edn's retired "context
+# picker" rule used f18, so inheriting that default would re-grab a key with
+# history. hyper-f20 needs all four modifiers plus a key most keyboards do not
+# have.
+hotkey  = "hyper-f20"
+compose = "context pick-command files"
+width   = 900
+height  = 420
+arm     = true

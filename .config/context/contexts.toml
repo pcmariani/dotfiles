@@ -188,3 +188,15 @@ name      = "code"
 argv      = ["/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"]
 path_args = ["--new-window", "{path}"]
 app_name  = "Code"
+
+# The config tree itself, so the files picker can reach it. Not discovered:
+# ~/.config is under none of the [discover] roots, and adding it as a root
+# would make every direct child (~/.config/nvim, ~/.config/herdr, ...) its own
+# workspace. One declared entry is the whole of what was wanted.
+#
+# NOT `~`: a files picker over home is 857,374 files and 7.6s of `fd`, against
+# 1,505 files and 26ms here. And config.py refuses two contexts with the same
+# path, so `~` could only ever belong to one workspace anyway.
+[[context]]
+name = "config"
+path = "~/.config"

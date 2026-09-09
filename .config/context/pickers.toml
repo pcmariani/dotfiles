@@ -43,3 +43,23 @@ cursor_row = 2
 action = [
   { bind = "enter", verb = "move", after = "close", default = true },
 ]
+
+[[picker]]
+name     = "files"
+# Scoped to the CURRENT workspace's root by resolve_scope, and `fd` respects
+# .gitignore -- which is what keeps a client root at ~2,652 records instead of
+# 63,346. A rootless workspace correctly gets "nowhere to look".
+producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source files"
+# NO action block, and therefore no tool code at all. Actions exist to name a
+# VERB for `context pick-accept` to dispatch; this picker pipes the selection
+# straight to macOS `open`, which does whatever the file's own default handler
+# does. `xargs -0` because fzf --print0 emits the selection NUL-terminated.
+consumer = "/usr/bin/xargs -0 /usr/bin/open"
+# `bare`: one path per record, no name<TAB>display split. The contexts
+# pickers use value-tab-display because they act on a NAME while showing a
+# path; here the path IS the value.
+fields   = "bare"
+multi    = false
+# Row 1, the top match. Only the workspace pickers start on row 2, where row 1
+# is the workspace you are already in.
+cursor_row = 1

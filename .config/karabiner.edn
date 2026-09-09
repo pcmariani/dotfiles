@@ -266,6 +266,24 @@
                  ;; Ghostty moved off shift-T 2026-09-01 to free that key for
                  ;; the coming tab picker. space-enter reads well for "open a
                  ;; terminal here" and was unbound.
+                 ;; The FILES picker, scoped to the focused workspace's root.
+                 ;; `fd` respects .gitignore, so a project root is ~89 records
+                 ;; and a client root ~2,652 rather than 63,346. Selecting a
+                 ;; file hands it to macOS `open`, which does whatever that
+                 ;; file type's own default handler does.
+                 ;;
+                 ;; A rootless workspace correctly gets "nowhere to look":
+                 ;; unlike `terminal`, a files picker genuinely needs a root.
+                 ;;
+                 ;; `:run paneld toggle`, NOT a chord paneld registers. The two
+                 ;; workspace pickers are plain chords (cmd-esc,
+                 ;; shift-cmd-esc) so Carbon gets them directly, but this one
+                 ;; is a space-mode entry -- and a layer cannot hand Carbon a
+                 ;; chord it did not itself receive, so it drives paneld over
+                 ;; its control socket instead. Costs a shell round trip on a
+                 ;; key pressed far less often than ctrl-space was.
+                 [:!Sf [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle files"]]
+
                  [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
                  [:return_or_enter [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
 
