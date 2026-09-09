@@ -107,6 +107,7 @@ monospace     = true                      # Menlo via styledtext
 roots = [
   "~/projects",
   "~/clients",
+  "~/projects-boomi-internal/",
   # A container exactly like ~/clients: it holds projects rather than being
   # one, and is not a git repo. Its B_H is declared below, because
   # ~/clients/B_H derives the same `b-h` and a derived-name collision blocks
@@ -114,55 +115,6 @@ roots = [
   "~/projects/boomi-projects",
 ]
 
-# exclude = drops a path AND everything under it.
-#
-# `exclude_self` (drop a directory, keep its children) existed ONLY to say
-# that ~/clients/SCS and ~/clients/SportsBasement were containers rather than
-# places work happens. At depth 1 those ARE the contexts and their children
-# are not, so the setting inverted -- what it dropped is now exactly what is
-# wanted. Spec 1 (2026-09-03) deleted its parsing and its tests along with
-# `max_depth`, not just this config: there is nothing left in the code to
-# revert to without writing it again.
-
-[[context]]
-name = "apollo"
-org  = "Apollo"
-path = "~/clients/Apollo"
-
-# WORKSTREAM entries, kept deliberately through the root trial.
-#
-# Both point INSIDE a client root, which is exactly the conflation the trial
-# exists to remove -- so they were briefly deleted on 2026-09-02 and restored
-# the same day, for a reason worth recording.
-#
-# Removing them did not just hide two picker rows. The name is the join key, so
-# `context enter scs-jnl-parse` stopped resolving while the herdr session of
-# that name kept running with a live Claude session inside it. Entering the new
-# `scs` root created a SECOND, empty session and opened a terminal at the
-# 23-folder junk drawer, which read as "my work is gone". It was not gone; it
-# was in a session that no longer had a route in. (`herdr --session <name>`
-# still reaches one directly, which is how they came back.)
-#
-# So the rule the trial taught: a context may be retired once its work is
-# genuinely idle, never while a session is live.
-#
-# RETIRED 2026-09-03: `sb-sales-analysis` and `scs.claude` are gone, in the
-# right order -- both herdr sessions were stopped FIRST, then these blocks
-# removed, so neither was ever an orphan. Every context name now equals its
-# herdr session name, both derived from the client root. `scs-jnl-parse`
-# remains because it is still declared work.
-#
-# Retiring them leaves two large Claude memory stores unowned, since those are
-# keyed by working directory: SportsBasement/sales-test-anlysis has 77 files
-# and SCS/claude has 23, against roots holding 0 and 1. Entering the root now
-# gets the cold store, and doctor's memory-store check reports exactly this
-# until those stores go quiet.
-[[context]]
-name = "scs-jnl-parse"
-org  = "SCS"
-path = "~/clients/SCS/jnl-parse-consolidated"
-
-# No org: this is personal tooling, not client work.
 
 # No org: this is personal tooling, not client work.
 [[context]]
