@@ -206,16 +206,31 @@
                  ;; AeroSpace - windows
                  ;; Cycle the windows of this workspace. dfs-next walks the
                  ;; layout tree, so it reaches every window regardless of how
-                 ;; the splits are nested; --wrap-around makes the last one
-                 ;; return to the first instead of stopping.
+                 ;; the splits are nested.
                  ;;
-                 ;; TEMPORARILY wrapped in cycle-window.sh to log an
-                 ;; intermittent bug where focus lands in a DIFFERENT
-                 ;; workspace. Costs ~100ms extra per press. Once
-                 ;; `grep ANOMALY ~/.local/state/context/space-tab.log`
-                 ;; has caught one, put this back to:
-                 ;;   [:tab [:aerospace "focus dfs-next --wrap-around"]]
-                 [:tab [:run "/Users/petermariani/.config/aerospace/cycle-window.sh"]]
+                 ;; BUG FOUND AND FIXED 2026-09-09. cycle-window.sh instrumented
+                 ;; this key from 2026-09-02 to catch focus landing in a
+                 ;; DIFFERENT workspace. It caught it 12 times, and the pattern
+                 ;; was unambiguous: every single one crossed to the workspace
+                 ;; visible on the OTHER MONITOR, e.g.
+                 ;;   before=[2|<ws-here>|Slack] after=[1|<ws-there>|Chrome]
+                 ;; (real workspace names elided: this file is pushed to a
+                 ;; public remote. The log has the unredacted lines.)
+                 ;;
+                 ;; Cause: plain `--wrap-around` leaves --boundaries at its
+                 ;; default of all-monitors-outer-frame, so when the focused
+                 ;; workspace runs out of windows in DFS order the wrap crosses
+                 ;; the monitor boundary instead of returning to this
+                 ;; workspace's first window. Every anomaly was a workspace
+                 ;; holding one or two windows.
+                 ;;
+                 ;; So this is NOT `focus dfs-next --wrap-around`, which is what
+                 ;; cycle-window.sh's own comment said to revert to -- that is
+                 ;; the buggy form. Bounding to `workspace` with
+                 ;; wrap-around-the-workspace is what --wrap-around was always
+                 ;; meant to express here, and it matches the deliberate
+                 ;; boundary handling on j/k below.
+                 [:tab [:aerospace "focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-next"]]
 
                  ;; j/k cross the monitor boundary; h/l deliberately do not.
                  ;; The monitors are stacked vertically (1 = LG HDR WQHD above

@@ -499,7 +499,7 @@
             "key_code" : "tab"
           },
           "to" : [ {
-            "shell_command" : "/Users/petermariani/.config/aerospace/cycle-window.sh"
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-next"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
