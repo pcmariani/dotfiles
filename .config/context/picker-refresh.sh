@@ -96,7 +96,11 @@ if [ -x "$PANELD" ]; then
     # line its rows freeze until its next use, and cmd-tab rotates among
     # whichever few workspaces happened to be recent at each arm rather than
     # going to the previous one. Found by hand; nothing tests it.
-    for panel in picker switcher; do
+    #
+    # `move` added 2026-09-10 for the same reason, found by re-reading rather
+    # than by being bitten: its producer is `cat picker.prerendered` too, so
+    # it had been showing rows frozen at its own last use all along.
+    for panel in picker switcher move; do
         "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
 fi
