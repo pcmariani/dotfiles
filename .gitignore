@@ -10,3 +10,11 @@ Library/**
 .local/state/context/chrome/**
 # The retired pinned-tab store, same reasoning. Stage 3 deletes the feature.
 .config/context/tabs/**
+
+# Agent browser credentials. Same reasoning as the Chrome state above, and the
+# same repo: these are SECRETS, not just private data. Both are mode 0600 and
+# were untracked -- but `yadm status -uall` reports 432,640 untracked files in
+# $HOME, so a single `yadm add -A` would have staged a GitHub token into a
+# public repository. Nothing was exposed; this closes the door.
+# Found 2026-09-10 while committing the workspace switcher.
+.agent-browser/**

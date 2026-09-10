@@ -57,29 +57,47 @@ fi
 # nothing restarts it and the current row is a switch behind until the
 # second open.
 #
-# SIGTERM is the signal precisely so the loop can tell this from a user
-# dismissal and not toggle the hidden panel back on. The panel is hidden
-# while this runs, so the restart is invisible.
+# RETIRED 2026-09-05, with the Ghostty terminal picker itself. What stood here
+# read $STATE/picker.loop.pid, touched a retirement marker, and walked two
+# levels of pgrep to SIGTERM the loop's fzf without ever matching on a command
+# line -- fzf-lua runs fzf inside nvim and killing that would be a real loss.
 #
-# Walked down from the loop's own pid, NEVER matched on the command line:
-# fzf-lua runs fzf inside nvim and killing that would be a real loss.
-# Unconditional now: this script only runs from exec-on-workspace-change, so
-# AeroSpace itself already guarantees the workspace changed by the time we
-# get here -- there is nothing left to compare against.
-loop_pid=$(/bin/cat "$STATE/picker.loop.pid" 2>/dev/null)
-if [ -n "${loop_pid:-}" ]; then
-    # Written BEFORE the kill: fzf traps SIGTERM and exits 130, exactly as
-    # it does for Esc, so the loop cannot tell them apart by status.
-    /usr/bin/touch "$STATE/picker.retired"
-    for kid in $(/usr/bin/pgrep -P "$loop_pid" 2>/dev/null); do
-        # Both levels: fzf is a direct child while the loop pipes straight
-        # into it, but a grandchild under any shell that adds a subshell.
-        # And `ps -o comm=` gives the FULL PATH, so match on the basename.
-        for cand in "$kid" $(/usr/bin/pgrep -P "$kid" 2>/dev/null); do
-            case "$(/bin/ps -o comm= -p "$cand" 2>/dev/null)" in
-                */fzf|fzf) /bin/kill -TERM "$cand" 2>/dev/null ;;
-            esac
-        done
+# paneld needs none of it. It owns its child, so a rearm's surface rebuild
+# takes the whole process group by SIGHUP on pty close -- measured against a
+# forked grandchild. There is no pid to read, no marker to write, and no
+# ambiguity between a SIGTERM and an Esc for the marker to resolve, because
+# the generation on the exit notification says which arm it belongs to.
+#
+# The lesson the walk encoded is not retired, only its mechanism: never match
+# a kill on a command line. paneld cannot, having no kill to make.
+
+# paneld holds its OWN armed fzf, and that fzf read these rows with `cat` at
+# arm time -- so rewriting the file changes nothing it can see. Without this
+# call the panel shows the MRU as it stood at paneld's last arm, which is the
+# same staleness this whole script exists to prevent for the predecessor.
+#
+# It cannot interrupt anything: paneld defers a rearm while a verb is in
+# flight and while the panel is visible, and fires it on the next exit. That
+# matters here specifically, because `context enter` CHANGES THE WORKSPACE and
+# so triggers this script mid-ladder.
+#
+# Non-fatal by construction: paneld may not be installed or running, and the
+# rows above are still worth rendering either way -- `context record-focus`
+# and the prerender are the parts nothing else does.
+PANELD="${PANELD:-$HOME/Applications/paneld.app/Contents/MacOS/paneld}"
+if [ -x "$PANELD" ]; then
+    # EVERY panel whose producer reads picker.prerendered needs telling, not
+    # just the picker. Rearming re-runs the producer, and the producer here is
+    # `cat picker.prerendered` -- so a panel that is not rearmed keeps the rows
+    # it captured whenever it last armed.
+    #
+    # `switcher` added 2026-09-10 and it is not cosmetic there: its whole
+    # premise is that row 2 is the workspace you were just in. Without this
+    # line its rows freeze until its next use, and cmd-tab rotates among
+    # whichever few workspaces happened to be recent at each arm rather than
+    # going to the previous one. Found by hand; nothing tests it.
+    for panel in picker switcher; do
+        "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
 fi
 

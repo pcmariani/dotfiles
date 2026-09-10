@@ -81,3 +81,26 @@ compose = "context pick-command config-files"
 width   = 900
 height  = 420
 arm     = true
+
+[[panel]]
+name    = "switcher"
+# cmd-tab, taken from the Dock by karabiner.edn and rewritten to cmd-f18.
+# The `to` binding KEEPS cmd deliberately: release-to-commit depends on the
+# modifier still being physically down and visible to a local NSEvent
+# monitor. A bare f18 would drop it and the panel would never commit.
+#
+# CHANGING A HOTKEY NEEDS A DAEMON RESTART, not `paneld reload` -- and note
+# that `cycle` now has the same requirement for a different reason: the
+# hotkey's branch reads the controller's live config, but the CHORD itself is
+# registered once at startup.
+hotkey         = "cmd-f18"
+hotkey_reverse = "cmd-shift-f18"
+cycle          = true
+# TODO: switch to `context pick-command switcher` once the live-only producer
+# lands in ~/projects/context-based-mac. `contexts` is the full ~40-workspace
+# list and is the wrong list for cycling -- but it is real rows, which is what
+# the mechanism needs to be exercised against.
+compose        = "context pick-command contexts"
+width          = 900
+height         = 420
+arm            = true

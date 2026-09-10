@@ -1,20 +1,24 @@
 -- ~/.hammerspoon/init.lua
 
 -- Command-line bridge, so `hs -c "..."` can talk to this running instance.
--- Used by the context picker; also how `context doctor` probes the backend.
+-- Used by `context doctor` and other tooling to probe this instance.
 require("hs.ipc")
 
--- Resident context picker. ctrl-space reaches this through bin/context-pick.
--- A global, not a local: `hs -c` evaluates in the global environment, and
--- bin/context-pick probes for this name.
-contextPicker = require("context-picker")
-contextPicker.setup()
-
--- Karabiner maps ctrl-space (caps+space) to F18 and this shows the picker.
--- Going through F18 rather than having Karabiner run bin/context-pick avoids
--- the `hs -c` round trip, which was 60-70ms of the ~130ms total. Karabiner
--- still claims the chord, so it cannot fall through to the space-mode layer.
-hs.hotkey.bind({}, "f18", function() contextPicker.show() end)
+-- THE CONTEXT PICKER LIVES IN paneld NOW, 2026-09-05.
+--
+-- What stood here was `contextPicker` (context-picker.lua, an hs.chooser) on
+-- F18, plus a hyper-P binding that forwarded to paneld. Both are retired.
+--
+-- paneld registers ctrl-space itself through Carbon's RegisterEventHotKey, so
+-- there is nothing for Karabiner to rewrite, nothing for Hammerspoon to catch,
+-- and no `hs -c` round trip to skip. The chooser was measurably the faster
+-- picker and the fzf panel is the one that gets used.
+--
+-- `hs.ipc` above STAYS: `context doctor` and other tooling talk to this
+-- instance through it. context-picker.lua is kept on disk, unloaded.
+--
+-- To roll back: init.lua.bak2-prechooser, and restore the karabiner.edn
+-- "context picker" rule from karabiner.edn.bak2-prechooser.
 
 -----------------------------------------------------------
 -- Microphone mute

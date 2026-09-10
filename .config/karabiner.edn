@@ -64,6 +64,53 @@
          :rules  [[:##caps_lock :left_control nil {:alone :escape}]]
          }
 
+        ;; THE WORKSPACE SWITCHER, 2026-09-10. cmd-tab switches AeroSpace
+        ;; workspaces instead of apps: hold cmd, tap tab to cycle, release to
+        ;; commit. Backup before this rule: karabiner.edn.bak-preswitcher
+        ;;
+        ;; Carbon CANNOT have cmd-tab. RegisterEventHotKey accepts it with
+        ;; OSStatus 0 and then it fires ZERO times, because the Dock's app
+        ;; switcher consumes it first -- measured 2026-09-09, and a reminder
+        ;; that a successful registration is not evidence the chord works.
+        ;; Karabiner sits below the Dock and can take it; the rewritten chord
+        ;; then reaches paneld's Carbon registration, 9 fires out of 9.
+        ;;
+        ;; The `to` KEEPS cmd deliberately. Release-to-commit reads the
+        ;; modifier through a local NSEvent monitor, which needs no
+        ;; Accessibility grant because paneld's panel holds key. A bare f18
+        ;; would drop the modifier and nothing would ever commit.
+        ;;
+        ;; `!C` is LEFT command in goku, so right-cmd-tab still reaches the
+        ;; Dock. That is the escape hatch if this misbehaves.
+        ;;
+        ;; To revert: delete this rule (goku reapplies on save) and the
+        ;; [[panel]] named `switcher` in ~/.config/paneld/paneld.toml, then
+        ;;     launchctl kickstart -k "gui/$(id -u)/dev.paneld.paneld"
+        {
+         :des "workspace switcher: cmd-tab -> paneld"
+         ;; `:!CStab`, NOT `:!C!Stab`. goku takes ONE `!` followed by all the
+         ;; modifier letters -- the same shape as `:!Stab` and `:!Cspacebar`
+         ;; elsewhere in this file. The two-bang form compiled without
+         ;; complaint and silently did not match, so shift-cmd-tab reached
+         ;; nothing. Found by hand 2026-09-10; the forward chord was correct
+         ;; from the start, which is what made the difference visible.
+         ;; THREE rules, not two. goku's `S` is LEFT shift and `R` is RIGHT
+         ;; shift -- verified by reading the compiled karabiner.json, not
+         ;; assumed. With cmd held by the left thumb, shift-tab is a natural
+         ;; right-shift reach, and the left-only rule simply did not match:
+         ;; the chord fell through to the Dock and opened the macOS app
+         ;; switcher. That is the correct symptom for "no rule matched", and
+         ;; it looks nothing like a paneld bug.
+         ;;
+         ;; Both map to the SAME cmd-shift-f18, because paneld parses
+         ;; "cmd-shift-f18" into Carbon's generic shiftKey, which is
+         ;; side-agnostic. Right COMMAND is deliberately not handled: the
+         ;; forward chord works, which proves left cmd is the one in use.
+         :rules [[:!Ctab  :!Cf18]
+                 [:!CStab :!CSf18]
+                 [:!CRtab :!CSf18]]
+         }
+
         ; THE CONTEXT PICKER RULE IS GONE, 2026-09-05. Both halves of it are.
         ;
         ; ctrl-shift-space went first: it rewrote to hyper-P for the Ghostty
@@ -175,6 +222,7 @@
                  ;; unconditionally on a non-zero exit), so pressing this in an
                  ;; ambient workspace says so instead of doing nothing visible.
                  [:t [:context "terminal"]]
+                 [:!St [:open "Ghostty"]]
 
                  ;; Ghostty's quick terminal, moved off space-t 2026-09-09 to
                  ;; make room for the above. Ghostty's own config is unchanged:

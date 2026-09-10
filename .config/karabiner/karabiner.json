@@ -28,6 +28,45 @@
           "type" : "basic"
         } ]
       }, {
+        "description" : "workspace switcher: cmd-tab -> paneld",
+        "manipulators" : [ {
+          "from" : {
+            "key_code" : "tab",
+            "modifiers" : {
+              "mandatory" : [ "left_command" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f18",
+            "modifiers" : [ "left_command" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "tab",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f18",
+            "modifiers" : [ "left_command", "left_shift" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "tab",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "right_shift" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f18",
+            "modifiers" : [ "left_command", "left_shift" ]
+          } ],
+          "type" : "basic"
+        } ]
+      }, {
         "description" : "mod-tap layers",
         "manipulators" : [ {
           "to_if_alone" : [ {
@@ -402,6 +441,22 @@
           },
           "to" : [ {
             "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context terminal"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "t",
+            "modifiers" : {
+              "mandatory" : [ "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "open -a \"Ghostty\""
           } ],
           "conditions" : [ {
             "name" : "space-mode",
