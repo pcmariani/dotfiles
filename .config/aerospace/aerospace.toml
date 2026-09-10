@@ -71,8 +71,14 @@ persistent-workspaces = ["work", "ai", "browser", "personal"]
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
 on-mode-changed = []
 
+# The second entry records which window just took focus, for `context enter`'s
+# _focus_target. Absolute path: AeroSpace gives children
+# PATH=/usr/bin:/bin:/usr/sbin:/sbin. Entries are independent exec-and-forget
+# strings, so it cannot disturb the borders toggle. See Spec 8 in
+# context-based-mac. Comments stay OUTSIDE this array -- see the handoff.
 on-focus-changed = [
-    'exec-and-forget [ $(/opt/homebrew/bin/aerospace list-windows --workspace focused --count) -eq 1 ] && /opt/homebrew/bin/borders width=0 || /opt/homebrew/bin/borders width=4'
+    'exec-and-forget [ $(/opt/homebrew/bin/aerospace list-windows --workspace focused --count) -eq 1 ] && /opt/homebrew/bin/borders width=0 || /opt/homebrew/bin/borders width=4',
+    'exec-and-forget /Users/petermariani/.config/context/record-window-focus.sh'
 ]
 
 # Keep the terminal picker's pre-rendered rows in step with reality, and let
