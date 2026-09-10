@@ -29,6 +29,20 @@ width   = 900
 height  = 420
 arm     = true
 
+# At reveal, paneld presses F12 in this panel's live pty. compose() binds F12 to
+# `reload-sync(picker-rows.sh)`, so the agent-status cell refreshes ~200ms into
+# the open -- while you are already reading -- and the keypress itself still
+# only reveals a pre-drawn surface.
+#
+# F12 and not ctrl-n: ctrl-n is one of fzf's own defaults for `down`. f12
+# resolves to macOS keycode 0x6F in libghostty's pinned table, so sendKey will
+# not take its silent false path.
+#
+# IDEMPOTENT POKES ONLY. A late press lands in whatever pty is live when it
+# arrives, so nothing with side effects may ever be bound here -- no verb, no
+# execute-silent, nothing that writes. A reload is safe because running it
+# twice is harmless.
+on_reveal_key = "f12"
 [[panel]]
 name    = "move"
 # shift-cmd-esc, next door to the picker's cmd-esc. A plain chord, so paneld
@@ -39,6 +53,20 @@ width   = 900
 height  = 420
 arm     = true
 
+# At reveal, paneld presses F12 in this panel's live pty. compose() binds F12 to
+# `reload-sync(picker-rows.sh)`, so the agent-status cell refreshes ~200ms into
+# the open -- while you are already reading -- and the keypress itself still
+# only reveals a pre-drawn surface.
+#
+# F12 and not ctrl-n: ctrl-n is one of fzf's own defaults for `down`. f12
+# resolves to macOS keycode 0x6F in libghostty's pinned table, so sendKey will
+# not take its silent false path.
+#
+# IDEMPOTENT POKES ONLY. A late press lands in whatever pty is live when it
+# arrives, so nothing with side effects may ever be bound here -- no verb, no
+# execute-silent, nothing that writes. A reload is safe because running it
+# twice is harmless.
+on_reveal_key = "f12"
 [[panel]]
 name    = "files"
 # Summoned by space-shift-f, which Karabiner routes to `paneld toggle files`

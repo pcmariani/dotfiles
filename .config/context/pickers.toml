@@ -13,7 +13,15 @@ name     = "contexts"
 # this producer's cache, written by picker-refresh.sh on every workspace
 # change. A producer is a command line and nothing else -- so a producer that
 # reads a cache is just a different command line, with no code behind it.
-producer = "/bin/cat /Users/petermariani/.local/state/context/picker.prerendered"
+# The join, not `cat`: it reads that same cache and prepends a live
+# agent-status cell. The cache itself is unchanged and still knows nothing
+# about agents, which is what keeps this removable -- point this back at
+# /bin/cat, restart paneld, and the feature is gone.
+producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
+# Emits the F12 reload-sync bind that paneld pokes at reveal. NOT --track
+# --id-nth: measured 2026-09-10 to make fzf discard keystrokes, Enter and
+# Esc included, for the producer's whole duration. See Spec 7 Risk 6.
+refresh  = true
 # --notify so `enter`'s empty-workspace note reaches the screen. The panel
 # discards stdout, and main() only notifies a SUCCESS message when asked.
 # Costs nothing in the common case: `enter` returns "" when the workspace
@@ -36,7 +44,15 @@ name     = "move"
 # The SAME producer as `contexts`, deliberately: the destinations for a window
 # are exactly the workspaces you can enter, so this needs no second cache and
 # no second refresh path. picker-refresh.sh already keeps it current.
-producer = "/bin/cat /Users/petermariani/.local/state/context/picker.prerendered"
+# The join, not `cat`: it reads that same cache and prepends a live
+# agent-status cell. The cache itself is unchanged and still knows nothing
+# about agents, which is what keeps this removable -- point this back at
+# /bin/cat, restart paneld, and the feature is gone.
+producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
+# Emits the F12 reload-sync bind that paneld pokes at reveal. NOT --track
+# --id-nth: measured 2026-09-10 to make fzf discard keystrokes, Enter and
+# Esc included, for the producer's whole duration. See Spec 7 Risk 6.
+refresh  = true
 consumer = "/Users/petermariani/projects/context-based-mac/bin/context pick-accept move"
 fields   = "value-tab-display"
 multi    = false
