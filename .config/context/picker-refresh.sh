@@ -100,7 +100,13 @@ if [ -x "$PANELD" ]; then
     # `move` added 2026-09-10 for the same reason, found by re-reading rather
     # than by being bitten: its producer is `cat picker.prerendered` too, so
     # it had been showing rows frozen at its own last use all along.
-    for panel in picker switcher move; do
+    # SWITCHER FIRST, deliberately. Its producer is a cached `cat` (~0ms)
+    # while picker's and move's each run the agent-status join (100-210ms at
+    # 9 herdr sessions, 2026-09-10). cmd-tab is the fast toggle and the one
+    # whose latency is felt, so it should not be asked to rebuild between the
+    # two slow ones. paneld does its panel work on the main queue, so this can
+    # only help or be neutral -- it is a mitigation, not a proven fix.
+    for panel in switcher picker move; do
         "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
 fi
