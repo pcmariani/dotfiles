@@ -16,11 +16,23 @@ set -u
 # `context` is not on it.
 : "${CTX:=/Users/petermariani/projects/context-based-mac/bin/context}"
 
-# `context current --path` is a clean three-way contract and needs no parsing:
-# a rooted context prints its directory and exits 0; a context with no
-# directory and a workspace that is not a context both exit non-zero, and
-# `__main__.py` sends non-OK output to STDERR. So stdout is either a real path
-# or empty, and 2>/dev/null discards the explanation we do not need here.
+# `context current --path` is a three-way contract and needs no parsing:
+#
+#   rooted context        -> directory on STDOUT, exit 0
+#   context with no path  -> exit non-zero, message on STDERR
+#   not a context at all  -> exit non-zero, NOTHING on either stream
+#
+# The third case really is silent: cmd_current returns an empty message, and
+# __main__.py only prints `if output`. So 2>/dev/null suppresses a message
+# that exists on one failure branch and not the other -- do not add
+# diagnostics here that assume stderr says why.
+#
+# THE LOAD-BEARING HALF IS THE EMPTY STDOUT, not the exit code. If either
+# failure branch ever printed to stdout, this script would root a Finder
+# window at whatever it printed, with no error anywhere -- just the wrong
+# directory. cmd_current's docstring says an empty string "would leave a
+# caller walking its own cwd"; this is that caller. Pinned upstream by
+# tests/test_cli.py:366-384.
 DIR="$("$CTX" current --path 2>/dev/null)"
 
 # HOME for rootless (the ambient workspaces -- work, ai, browser, personal)
