@@ -17,11 +17,20 @@ name     = "contexts"
 # agent-status cell. The cache itself is unchanged and still knows nothing
 # about agents, which is what keeps this removable -- point this back at
 # /bin/cat, restart paneld, and the feature is gone.
-producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
+# --bare at ARM, the full join at REVEAL. The arm-time producer gates
+# `load:down`, and so gates the cursor reaching row 2 -- and row 1 here is the
+# workspace you are already in, so until it finishes Enter is a no-op. Reported
+# 2026-09-10: "I see the picker, then .25-.5s later the selection moves to the
+# second row". The join measured 100-210ms at 9 herdr sessions; --bare ~30ms.
+# The reveal poke brings the real glyphs in a moment later, into a panel already
+# on screen. Columns cannot shift between the two -- emit_bare PADS the status
+# cell rather than omitting it, which Spec 7 built in for exactly this.
+producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --bare"
 # Emits the F12 reload-sync bind that paneld pokes at reveal. NOT --track
 # --id-nth: measured 2026-09-10 to make fzf discard keystrokes, Enter and
 # Esc included, for the producer's whole duration. See Spec 7 Risk 6.
 refresh  = true
+refresh_producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
 # --notify so `enter`'s empty-workspace note reaches the screen. The panel
 # discards stdout, and main() only notifies a SUCCESS message when asked.
 # Costs nothing in the common case: `enter` returns "" when the workspace
@@ -48,11 +57,20 @@ name     = "move"
 # agent-status cell. The cache itself is unchanged and still knows nothing
 # about agents, which is what keeps this removable -- point this back at
 # /bin/cat, restart paneld, and the feature is gone.
-producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
+# --bare at ARM, the full join at REVEAL. The arm-time producer gates
+# `load:down`, and so gates the cursor reaching row 2 -- and row 1 here is the
+# workspace you are already in, so until it finishes Enter is a no-op. Reported
+# 2026-09-10: "I see the picker, then .25-.5s later the selection moves to the
+# second row". The join measured 100-210ms at 9 herdr sessions; --bare ~30ms.
+# The reveal poke brings the real glyphs in a moment later, into a panel already
+# on screen. Columns cannot shift between the two -- emit_bare PADS the status
+# cell rather than omitting it, which Spec 7 built in for exactly this.
+producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --bare"
 # Emits the F12 reload-sync bind that paneld pokes at reveal. NOT --track
 # --id-nth: measured 2026-09-10 to make fzf discard keystrokes, Enter and
 # Esc included, for the producer's whole duration. See Spec 7 Risk 6.
 refresh  = true
+refresh_producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
 consumer = "/Users/petermariani/projects/context-based-mac/bin/context pick-accept move"
 fields   = "value-tab-display"
 multi    = false
