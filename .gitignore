@@ -18,3 +18,9 @@ Library/**
 # public repository. Nothing was exposed; this closes the door.
 # Found 2026-09-10 while committing the workspace switcher.
 .agent-browser/**
+
+# AeroSpace per-workspace layout prefs: machine-local, and it accretes
+# workspace names as you use them -- including client ones. This repo is
+# PUBLIC (github.com/pcmariani/dotfiles), same reasoning as the Chrome state
+# above. The file stays on disk; it is simply not ours to publish.
+.config/aerospace/layout-preferences
