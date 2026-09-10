@@ -97,3 +97,38 @@ consumer = "/usr/bin/xargs -0 /usr/bin/open"
 fields   = "bare"
 multi    = false
 cursor_row = 1
+
+# cmd-tab's workspace switcher. IDENTICAL to `contexts` except for the
+# producer, and that difference is the whole point.
+#
+# WHY THIS EXISTS. The switcher used to compose `contexts` directly. Spec 7
+# changed that picker's producer from this cached `cat` to the agent-status
+# join, and the switcher inherited it. Measured 2026-09-10 at 9 herdr
+# sessions: `cat picker.prerendered` ~0ms, `scripts/picker-rows.sh` 100-210ms
+# -- and the join's cost SCALES WITH SESSION COUNT, so it degrades as sessions
+# accumulate. That is why the problem came and went.
+#
+# It bites here far harder than on cmd-esc, because of `cursor_row = 2`. That
+# emits `load:down+unbind(load)`, which fires on fzf's LOAD event -- i.e. only
+# once the producer has finished. cmd-tab's entire premise is landing on row
+# 2, so a slow producer means releasing the chord commits row 1, the workspace
+# you are already in. It reads as "cmd-tab does nothing", with no error on
+# either side.
+#
+# The cache is not stale: picker-refresh.sh rewrites it on every workspace
+# change, which is exactly when this picker's contents change.
+#
+# THE TRADE, stated so nobody "fixes" it back: this picker shows the live dot
+# but NOT the agent status glyphs, because picker.prerendered does not carry
+# them. That is deliberate. cmd-esc is where status is read, and it keeps the
+# live join plus `on_reveal_key` for freshness. cmd-tab is a fast toggle.
+[[picker]]
+name     = "switcher"
+producer = "/bin/cat /Users/petermariani/.local/state/context/picker.prerendered"
+consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept switcher"
+fields   = "value-tab-display"
+multi    = false
+cursor_row = 2
+action = [
+  { bind = "enter", verb = "enter", after = "close", default = true },
+]

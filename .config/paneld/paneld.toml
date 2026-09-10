@@ -128,7 +128,7 @@ cycle          = true
 # lands in ~/projects/context-based-mac. `contexts` is the full ~40-workspace
 # list and is the wrong list for cycling -- but it is real rows, which is what
 # the mechanism needs to be exercised against.
-compose        = "context pick-command contexts"
+compose        = "context pick-command switcher"
 width          = 900
 height         = 420
 arm            = true
