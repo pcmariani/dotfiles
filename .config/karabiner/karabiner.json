@@ -99,6 +99,10 @@
             "value" : 1,
             "type" : "variable_unless"
           }, {
+            "name" : "f-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
             "name" : "s-mode",
             "value" : 1,
             "type" : "variable_unless"
@@ -151,6 +155,10 @@
             "value" : 1,
             "type" : "variable_unless"
           }, {
+            "name" : "f-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
             "name" : "v-mode",
             "value" : 1,
             "type" : "variable_unless"
@@ -192,6 +200,10 @@
           },
           "conditions" : [ {
             "name" : "a-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "f-mode",
             "value" : 1,
             "type" : "variable_unless"
           }, {
@@ -247,7 +259,63 @@
             "value" : 1,
             "type" : "variable_unless"
           }, {
+            "name" : "f-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
             "name" : "s-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "cmd-space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          } ],
+          "type" : "basic"
+        }, {
+          "to_if_alone" : [ {
+            "key_code" : "f",
+            "halt" : true
+          } ],
+          "to_if_held_down" : [ {
+            "set_variable" : {
+              "name" : "f-mode",
+              "value" : 1
+            },
+            "repeat" : false
+          } ],
+          "to_after_key_up" : [ {
+            "set_variable" : {
+              "name" : "f-mode",
+              "value" : 0
+            }
+          } ],
+          "to_delayed_action" : {
+            "to_if_canceled" : [ {
+              "key_code" : "f"
+            } ]
+          },
+          "from" : {
+            "key_code" : "f"
+          },
+          "conditions" : [ {
+            "name" : "a-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "d-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "s-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "v-mode",
             "value" : 1,
             "type" : "variable_unless"
           }, {
@@ -292,6 +360,10 @@
             "type" : "variable_unless"
           }, {
             "name" : "d-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "f-mode",
             "value" : 1,
             "type" : "variable_unless"
           }, {
@@ -345,6 +417,10 @@
             "type" : "variable_unless"
           }, {
             "name" : "d-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "f-mode",
             "value" : 1,
             "type" : "variable_unless"
           }, {
@@ -441,22 +517,6 @@
           },
           "to" : [ {
             "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context terminal"
-          } ],
-          "conditions" : [ {
-            "name" : "space-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "t",
-            "modifiers" : {
-              "mandatory" : [ "left_shift" ]
-            }
-          },
-          "to" : [ {
-            "shell_command" : "open -a \"Ghostty\""
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -772,6 +832,19 @@
           },
           "to" : [ {
             "shell_command" : "/Users/petermariani/.config/aerospace/new-ghostty.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "n"
+          },
+          "to" : [ {
+            "shell_command" : "/Users/petermariani/.config/aerospace/new-finder.sh"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -1303,6 +1376,69 @@
           } ],
           "conditions" : [ {
             "name" : "v-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        } ]
+      }, {
+        "description" : "f-mode: scrolling",
+        "manipulators" : [ {
+          "from" : {
+            "key_code" : "j"
+          },
+          "to" : [ {
+            "mouse_key" : {
+              "vertical_wheel" : -64
+            }
+          } ],
+          "conditions" : [ {
+            "name" : "f-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "k"
+          },
+          "to" : [ {
+            "mouse_key" : {
+              "vertical_wheel" : 64
+            }
+          } ],
+          "conditions" : [ {
+            "name" : "f-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "h"
+          },
+          "to" : [ {
+            "mouse_key" : {
+              "horizontal_wheel" : 64
+            }
+          } ],
+          "conditions" : [ {
+            "name" : "f-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "l"
+          },
+          "to" : [ {
+            "mouse_key" : {
+              "horizontal_wheel" : -64
+            }
+          } ],
+          "conditions" : [ {
+            "name" : "f-mode",
             "value" : 1,
             "type" : "variable_if"
           } ],

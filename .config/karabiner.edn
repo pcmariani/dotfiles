@@ -144,34 +144,46 @@
          :des "mod-tap layers"
          :rules [
                  ;chrome mode
-                 [:a nil [:!d-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
+                 [:a nil [:!d-mode :!f-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :a :halt true} :delayed {:canceled {:key :a}} :held {:set ["a-mode" 1] :repeat false} :afterup {:set ["a-mode" 0]}
                    ;:params {:alone 199 :held 200 :delay 200} 
                    }]
 
                  ;special-characters-mode
-                 [:s nil [:!a-mode :!d-mode :!v-mode :!space-mode :!cmd-space-mode]
+                 [:s nil [:!a-mode :!d-mode :!f-mode :!v-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :s :halt true} 
                    :delayed {:canceled {:key :s}} 
                    :held {:set ["s-mode" 1] :repeat false} 
                    :afterup {:set ["s-mode" 0]}}]
 
                  ;digits-mode
-                 [:d nil [:!a-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
+                 [:d nil [:!a-mode :!f-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :d :halt true} 
                    :delayed {:canceled {:key :d}} 
                    :held {:set ["d-mode" 1] :repeat false} 
                    :afterup {:set ["d-mode" 0]}}]
 
                  ;vim-mode
-                 [:v nil [:!a-mode :!d-mode :!s-mode :!space-mode :!cmd-space-mode]
+                 [:v nil [:!a-mode :!d-mode :!f-mode :!s-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :v :halt true} 
                    :delayed {:canceled {:key :v}} 
                    :held {:set ["v-mode" 1] :repeat false} 
                    :afterup {:set ["v-mode" 0]}}]
 
+                 ;scroll-mode. `f` because it sits under the pointer finger and
+                 ; is easy to hold. It is a HIGHER-FREQUENCY letter than the
+                 ; other mod-tap keys and is doubled in ordinary words ("off",
+                 ; "buffer"), so if it misfires while typing, the knob is the
+                 ; commented-out `:params {:alone 199 :held 200 :delay 200}` in
+                 ; chrome-mode above, not a different key.
+                 [:f nil [:!a-mode :!d-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
+                  {:alone {:key :f :halt true}
+                   :delayed {:canceled {:key :f}}
+                   :held {:set ["f-mode" 1] :repeat false}
+                   :afterup {:set ["f-mode" 0]}}]
+
                  ;space-mode
-                 [:spacebar nil [:!a-mode :!d-mode :!s-mode :!space-mode :!cmd-space-mode]
+                 [:spacebar nil [:!a-mode :!d-mode :!f-mode :!s-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :spacebar :halt true} 
                    :delayed {:canceled {:key :spacebar}} 
                    :held {:set ["space-mode" 1] :repeat false} 
@@ -180,7 +192,7 @@
                  ;cmd-space-mode
                  ; note: :modi re-emits the command so a tap still reaches
                  ; Spotlight. Beware :modifiers, which goku silently drops.
-                 [:!Cspacebar nil [:!a-mode :!d-mode :!s-mode :!space-mode :!cmd-space-mode]
+                 [:!Cspacebar nil [:!a-mode :!d-mode :!f-mode :!s-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :spacebar :modi :left_command :halt true}
                    :delayed {:canceled {:key :spacebar :modi :left_command}}
                    :held {:set ["cmd-space-mode" 1] :repeat false}
@@ -222,7 +234,7 @@
                  ;; unconditionally on a non-zero exit), so pressing this in an
                  ;; ambient workspace says so instead of doing nothing visible.
                  [:t [:context "terminal"]]
-                 [:!St [:open "Ghostty"]]
+                 ; [:!St [:open "Ghostty"]]
 
                  ;; Ghostty's quick terminal, moved off space-t 2026-09-09 to
                  ;; make room for the above. Ghostty's own config is unchanged:
@@ -342,6 +354,12 @@
 
                  [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
                  [:return_or_enter [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
+                 ;; New Finder WINDOW. Deliberately not modelled on Finder's
+                 ;; own ⇧⌘N, which is New Folder and writes to disk; the script
+                 ;; asks for a window. Plain space-n, not space-shift-n: `:n`
+                 ;; is unused in this layer (the only other `[:n ...]` is in
+                 ;; chrome-mode, a different layer).
+                 [:n [:run "/Users/petermariani/.config/aerospace/new-finder.sh"]]
 
                  ;; space-shift-P was `context pin --add`, freed when a
                  ;; context's Chrome state became RECORDED on leaving rather
@@ -447,6 +465,34 @@
                  [:j :down_arrow]
                  [:k :up_arrow]
                  [:l :right_arrow]
+                 ]
+         }
+
+        {
+         ;; hjkl to match vim-mode above and the ctrl-hjkl pane navigation, so
+         ;; the finger positions are already trained. vim-mode sends ARROWS;
+         ;; this sends WHEEL events, which is why both can own hjkl.
+         ;;
+         ;; `:mkey` is goku's shorthand for Karabiner's `mouse_key`, and the
+         ;; FIELD names are goku's own, not Karabiner's: `:vwheel` and
+         ;; `:hwheel`, not `:vertical_wheel` / `:horizontal_wheel`. Writing
+         ;; Karabiner's names fails the build with "invalid mouse key keyword"
+         ;; -- loudly, and without overwriting karabiner.json, so a wrong
+         ;; keyword here cannot reach the keyboard. The full set is
+         ;; `:x :y :vwheel :hwheel :speed`.
+         ;;
+         ;; The sign convention was NOT derived -- it is a guess, and macOS
+         ;; natural scrolling flips the felt direction on top of it. If a
+         ;; direction is inverted, negate that pair rather than swapping keys.
+         ;;
+         ;; 64 is a starting rate, not a measured one.
+         :des "f-mode: scrolling"
+         :rules [
+                 :f-mode
+                 [:j {:mkey {:vwheel -64}}]
+                 [:k {:mkey {:vwheel 64}}]
+                 [:h {:mkey {:hwheel 64}}]
+                 [:l {:mkey {:hwheel -64}}]
                  ]
          }
 

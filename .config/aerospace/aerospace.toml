@@ -76,9 +76,22 @@ on-mode-changed = []
 # PATH=/usr/bin:/bin:/usr/sbin:/sbin. Entries are independent exec-and-forget
 # strings, so it cannot disturb the borders toggle. See Spec 8 in
 # context-based-mac. Comments stay OUTSIDE this array -- see the handoff.
+#
+# The third entry puts the POINTER on the focused window, added 2026-09-10 for
+# karabiner's f-mode scrolling. macOS delivers scroll wheel events to whatever
+# window is under the pointer, NOT to the focused window, so a keyboard scroll
+# would otherwise scroll whatever the mouse was last left on. This is the fix
+# for that, and it is why the entry exists -- do not remove it without also
+# retiring f-mode in karabiner.edn.
+#
+# `lazy` and not `force`: it only moves the pointer when it is not already
+# inside the target window, so it stays still in the common case. Safe against
+# a feedback loop because focus-follows-mouse.enabled is false below; with that
+# true, this would fight it.
 on-focus-changed = [
     'exec-and-forget [ $(/opt/homebrew/bin/aerospace list-windows --workspace focused --count) -eq 1 ] && /opt/homebrew/bin/borders width=0 || /opt/homebrew/bin/borders width=4',
-    'exec-and-forget /Users/petermariani/.config/context/record-window-focus.sh'
+    'exec-and-forget /Users/petermariani/.config/context/record-window-focus.sh',
+    'exec-and-forget /opt/homebrew/bin/aerospace move-mouse window-lazy-center'
 ]
 
 # Keep the terminal picker's pre-rendered rows in step with reality, and let
