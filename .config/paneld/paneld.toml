@@ -135,21 +135,55 @@ cycle          = true
 # genuinely shorter cycling list is UNBUILT and belongs to context-based-mac.
 compose        = "context pick-command switcher"
 
-# DO NOT ADD `on_reveal_key` TO THIS PANEL. The picker gets live agent glyphs by
-# pressing F12 on reveal to trigger a `reload-sync`; this panel deliberately has
-# no glyph column instead. Asked for explicitly by the context-based-mac session
-# 2026-09-11, as the row owner, for two reasons:
+# AGENT STATUS GLYPHS, via the arm/refresh split. Added 2026-09-11 at the
+# user's explicit request -- "I'd really like to have that" -- REVERSING a
+# prohibition this file carried for about an hour. The prohibition's reasoning
+# is kept below because it is the thing most likely to be re-derived and
+# re-applied by someone reading only the first half of it.
 #
-#   1. A glyph baked into picker.prerendered would be refreshed only on a
-#      WORKSPACE CHANGE, so it would be accurate only for agents whose state
-#      happened to change with your last switch. A confidently wrong glyph is
-#      worse than an absent one.
-#   2. An on-reveal reload-sync puts a producer back between reveal and
-#      `load:down` -- which is exactly the 100-210ms that made cmd-tab commit
-#      row 1 (context-based-mac `50eea1b`, `b9ceaf5`). Wiring it here would
-#      re-break the bug that was just fixed.
+# WHAT WAS WRONG: that an on-reveal reload-sync puts a producer back between
+# reveal and `load:down`, re-breaking the row-1 commit bug. It does not.
+# `load:down+unbind(load)` fires on the ARM-TIME producer's load, and the
+# `unbind(load)` half means no later reload's load event can re-fire it.
+# Verified here rather than taken on faith: that bind is already present in
+# this panel's composed flags today, and `picker_cli.py:158` emits it
+# UNCONDITIONALLY and says why -- `load` re-fires on every reload and
+# BASE_FLAGS carries `--cycle`, so without the unbind the cursor walks a row on
+# every refresh (measured 5/5). The guard for exactly this change was
+# deliberately armed in advance.
 #
-# cmd-esc is where agent status is read. Cycling is muscle memory.
+# WHAT STILL STANDS, and is a different argument: a glyph BAKED into
+# picker.prerendered would be stale, because picker-refresh.sh rewrites that
+# cache only on a workspace change -- so it would be as old as your last
+# switch. That rules out baking the column into the arm-time producer. It says
+# nothing against refreshing on reveal, which is what this does.
+#
+# THE NUMBERS, re-measured 2026-09-11 at 10 herdr sessions. The
+# 100-210ms this file used to quote is STALE:
+#   cat picker.prerendered   ~0ms
+#   picker-rows.sh --bare    ~10-15ms   <- arms fast enough to reach row 2
+#   picker-rows.sh full      ~70-80ms   <- arrives into a panel already up
+# `--bare` PADS the status cell, so there is no column shift when the full
+# join replaces it. Spec 7 built that in and verified it byte-for-byte.
+#
+# INERT UNTIL THE SIBLING'S HALF LANDS. This needs `refresh = true` and
+# `refresh_producer` on `switcher` in ~/.config/context/pickers.toml. Until
+# then f12 is unbound in the composed command and this poke is a harmless
+# no-op -- which is why this side goes first.
+#
+# *** UNVERIFIED AND THE ONE THAT WOULD BITE SILENTLY: the reveal poke has
+# *** NEVER been tested on a CYCLING panel. The hazard is this panel's own
+# *** documented one -- a client can discard the keys paneld presses, and on a
+# *** cycling panel a discarded keystroke can be the COMMIT. Hold the chord,
+# *** release quickly, the reload eats the release's Enter, the watchdog
+# *** dismisses, and cmd-tab silently does nothing while `sendKey` returns
+# *** TRUE, so nothing in paneld.log can see it. That hazard was attributed to
+# *** `--track --id-nth=1`, now deleted, and reload-sync was measured to keep
+# *** the cursor index without them 3/3 -- but "those flags were the only
+# *** cause" is an INFERENCE, and cmd-esc is not a cycling panel so this path
+# *** has never been exercised. NEEDS A HOLD-THEN-RELEASE-QUICKLY HAND CHECK.
+# *** If cmd-tab ever "does nothing" intermittently, remove this line first.
+on_reveal_key = "f12"
 width          = 900
 height         = 420
 arm            = true
