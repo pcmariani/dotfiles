@@ -133,16 +133,65 @@ cursor_row = 1
 # you are already in. It reads as "cmd-tab does nothing", with no error on
 # either side.
 #
-# The cache is not stale: picker-refresh.sh rewrites it on every workspace
-# change, which is exactly when this picker's contents change.
+# THE TRADE THIS PARAGRAPH USED TO DESCRIBE IS OVER -- corrected 2026-09-11.
+# It said cmd-tab shows the live dot but NOT the status glyphs, "deliberate,
+# do not fix it back". The user then asked for the glyphs, and the technical
+# objection behind that trade was simply WRONG: it claimed a reveal refresh
+# would put a producer between reveal and `load:down`. It does not --
+# `load:down` fires on the ARM producer and `unbind(load)` stops the reload
+# re-firing it. So the arm/refresh split gives BOTH the fast row-2 landing
+# and the glyphs, and that is what this picker now does. See below.
 #
-# THE TRADE, stated so nobody "fixes" it back: this picker shows the live dot
-# but NOT the agent status glyphs, because picker.prerendered does not carry
-# them. That is deliberate. cmd-esc is where status is read, and it keeps the
-# live join plus `on_reveal_key` for freshness. cmd-tab is a fast toggle.
+# What remains true from the analysis above: the join's cost scales with
+# herdr session count, `cursor_row = 2` makes a slow ARM producer commit row
+# 1, and baking glyphs into picker.prerendered would make them as stale as
+# your last workspace change -- picker-refresh.sh only rewrites that cache on
+# a workspace change, which is why the cache alone can never carry live
+# status. That last point is why this uses a reveal poke and not a fatter
+# cache.
 [[picker]]
 name     = "switcher"
-producer = "/bin/cat /Users/petermariani/.local/state/context/picker.prerendered"
+# AGENT STATUS GLYPHS ON cmd-tab, via the arm/refresh split -- the same
+# mechanism cmd-esc uses, which the user endorsed on 2026-09-10: "the list
+# populates and the selection is on the 2nd line almost instantly before the
+# agent status appear. That's the right tradeoff."
+#
+# Re-measured 2026-09-11 at 9-10 herdr sessions, and corroborated
+# independently by the paneld session. BOTH HANDOFFS QUOTED 100-210ms FOR THE
+# JOIN AND THAT IS STALE:
+#   cat picker.prerendered  ~0ms
+#   picker-rows.sh --bare   10-15ms   <- arm; gates load:down, so it gates
+#                                        the cursor reaching row 2
+#   picker-rows.sh (join)   70-80ms   <- reveal poke; glyphs land here
+#   agent-status.sh alone   40-140ms  <- the herdr fan-out IS the cost,
+#                                        and it is noisy; awk is not
+#
+# WHY THIS DOES NOT REGRESS 50eea1b. `load:down+unbind(load)` fires on the
+# ARM producer's load, and the unbind stops the reload-sync's own load from
+# re-firing it -- so the cursor reaches row 2 off the 10ms producer, not the
+# 70ms one. That unbind is emitted UNCONDITIONALLY by picker_cli.py, for an
+# unrelated reason (load re-fires on every reload and BASE_FLAGS carries
+# --cycle, so without it the cursor walks a row per refresh, 5/5). The guard
+# for this change was already armed before the change existed.
+#
+# THE HAZARD THAT NEARLY KILLED THIS, and it is measured, not reasoned:
+# `--track --id-nth=1` once made fzf discard every keystroke for a reload's
+# whole duration, Enter included. On a CYCLING panel the discarded key is the
+# COMMIT -- hold the chord, release fast, the poke's reload eats the release's
+# Enter, the watchdog dismisses, and cmd-tab silently does nothing, because
+# paneld's sendKey returns TRUE when a key is delivered and then thrown away.
+# Those flags are deleted, but "the flags were the only cause" was an
+# INFERENCE and cmd-esc is not a cycling panel, so that path was untested.
+# Measured against real fzf 0.74.3 with a 450ms refresh producer and Enter
+# sent 50/150/300ms into the reload: committed on row 2, 4/4, nothing eaten.
+# Permanent checks 4 and 5 in scripts/smoke-picker-no-input.sh.
+#
+# STILL UNTESTED and owned by paneld: sendKey, the watchdog, and the physical
+# chord release. The measurement above drives fzf through a pty and does not
+# exercise that layer.
+producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --bare"
+refresh  = true
+refresh_producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
 consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept switcher"
 fields   = "value-tab-display"
 multi    = false
