@@ -171,17 +171,29 @@ compose        = "context pick-command switcher"
 # then f12 is unbound in the composed command and this poke is a harmless
 # no-op -- which is why this side goes first.
 #
-# *** UNVERIFIED AND THE ONE THAT WOULD BITE SILENTLY: the reveal poke has
-# *** NEVER been tested on a CYCLING panel. The hazard is this panel's own
-# *** documented one -- a client can discard the keys paneld presses, and on a
-# *** cycling panel a discarded keystroke can be the COMMIT. Hold the chord,
-# *** release quickly, the reload eats the release's Enter, the watchdog
-# *** dismisses, and cmd-tab silently does nothing while `sendKey` returns
-# *** TRUE, so nothing in paneld.log can see it. That hazard was attributed to
-# *** `--track --id-nth=1`, now deleted, and reload-sync was measured to keep
-# *** the cursor index without them 3/3 -- but "those flags were the only
-# *** cause" is an INFERENCE, and cmd-esc is not a cycling panel so this path
-# *** has never been exercised. NEEDS A HOLD-THEN-RELEASE-QUICKLY HAND CHECK.
+# THE KEYSTROKE HAZARD: fzf's half is MEASURED CLEAR, paneld's half is NOT.
+# Keep that split straight, because the two layers fail differently.
+#
+# The hazard is this panel's own documented one -- a client can discard the
+# keys paneld presses, and on a CYCLING panel a discarded keystroke can be the
+# COMMIT. Hold the chord, release quickly, the reload eats the release's Enter,
+# the watchdog dismisses, and cmd-tab silently does nothing while `sendKey`
+# returns TRUE, so nothing in paneld.log can see it.
+#
+# MEASURED AND CLEAR (sibling session 2026-09-11, real fzf 0.74.3 in a pty, a
+# deliberately slow 450ms refresh producer, Enter sent INTO the reload at 50ms,
+# 150ms, 300ms and a 900ms control): committed on row 2, 4/4, nothing eaten. So
+# without `--track --id-nth=1` a `reload-sync` does not discard the commit --
+# which was an INFERENCE before that run and is now a measurement. Also
+# asserted: `--no-input` does not break a f12 bind. Both are permanent checks 4
+# and 5 in the sibling's `scripts/smoke-picker-no-input.sh`.
+#
+# *** STILL UNTESTED, and it is the layer this repo owns: that run drove fzf
+# *** DIRECTLY through a pty. It did not exercise paneld's `sendKey`, the
+# *** commit watchdog, or a real chord release. So the fzf-level answer does
+# *** not settle the paneld-level question, and this is exactly the layer where
+# *** `sendKey` returns TRUE on a key the client threw away.
+# *** NEEDS A HOLD-THEN-RELEASE-QUICKLY HAND CHECK ON THE REAL HOTKEY.
 # *** If cmd-tab ever "does nothing" intermittently, remove this line first.
 on_reveal_key = "f12"
 width          = 900
