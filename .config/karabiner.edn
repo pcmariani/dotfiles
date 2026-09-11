@@ -348,6 +348,23 @@
                  [:k [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
                  [:l [:aerospace "focus right"]]
 
+                 ;; The arrows are ALIASES for hjkl above, added 2026-09-11, and
+                 ;; they repeat the same deliberate asymmetry: left/right take
+                 ;; AeroSpace's default boundaries, up/down cross the monitor
+                 ;; boundary with `stop`. Copied rather than factored out
+                 ;; because goku's :rules take literal vectors -- if these ever
+                 ;; drift from hjkl, that is a bug, not a preference.
+                 ;;
+                 ;; Arrows are bound HERE and not under ctrl: macOS holds
+                 ;; ctrl-left and ctrl-right for Spaces switching
+                 ;; (symbolichotkeys 79 and 81, both enabled=1 on this machine,
+                 ;; plus 80/82 for the shift variants). ctrl-hjkl is free
+                 ;; because no system chord wants it; ctrl-arrows are not.
+                 [:left_arrow  [:aerospace "focus left"]]
+                 [:down_arrow  [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action stop down"]]
+                 [:up_arrow    [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
+                 [:right_arrow [:aerospace "focus right"]]
+
                  [:hyphen [:aerospace "resize smart -200"]]
                  [:equal_sign [:aerospace "resize smart +200"]]
 

@@ -23,7 +23,10 @@ macos-option-as-alt = true
 macos-non-native-fullscreen = visible-menu
 # window-decoration = false
 
-# window-save-state = always
+# NEVER, not the default: unset, this follows the macOS "close windows when
+# quitting an app" setting, and Ghostty was reopening the previous layout on
+# start. Workspaces own window layout here, so a restored one is always wrong.
+window-save-state = never
 # window-vsync = true
 # window-colorspace = display-p3
 # quick-terminal-screen = macos-menu-bar

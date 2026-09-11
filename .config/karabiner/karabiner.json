@@ -739,6 +739,58 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "left_arrow"
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus left"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "down_arrow"
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries all-monitors-outer-frame --boundaries-action stop down"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "up_arrow"
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries all-monitors-outer-frame --boundaries-action stop up"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "right_arrow"
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus right"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "hyphen"
           },
           "to" : [ {
