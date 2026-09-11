@@ -27,29 +27,42 @@ previous_tab                 = ["prefix+ctrl+h", "prefix+h" ]
 next_tab                     = ["prefix+ctrl+l", "prefix+l" ]
 rename_tab                   = "prefix+,"
 
+# NAVIGATION: one key across three layers -- nvim splits, herdr panes, then
+# AeroSpace windows. These were `type = "plugin_action"` calling
+# herdr-splits.nav-<dir>; they now go through nav-fallthrough.sh, which does
+# what the plugin action did and adds the AeroSpace hop at a herdr edge.
+#
+# The plugin is NOT bypassed for nvim panes -- the script forwards the chord
+# into nvim and herdr-splits.nvim owns it from there, reaching AeroSpace via
+# the `at_edge` function in ~/.config/nvim/plugin/herdr-splits-nvim.lua. Both
+# halves are needed; see the header comment in nav-fallthrough.sh for why.
+#
+# `nav_at_edge` in the plugin's generated herdr-splits.conf no longer has any
+# effect on these keys: the script decides what happens at an edge, and it
+# never wraps.
 [[keys.command]]
 key                          = "ctrl+h"
-type                         = "plugin_action"
-command                      = "herdr-splits.nav-left"
-description                  = "move left"
+type                         = "shell"
+command                      = "/Users/petermariani/.config/herdr/nav-fallthrough.sh left"
+description                  = "move left (nvim -> herdr -> aerospace)"
 
 [[keys.command]]
 key                          = "ctrl+j"
-type                         = "plugin_action"
-command                      = "herdr-splits.nav-down"
-description                  = "move down"
+type                         = "shell"
+command                      = "/Users/petermariani/.config/herdr/nav-fallthrough.sh down"
+description                  = "move down (nvim -> herdr -> aerospace)"
 
 [[keys.command]]
 key                          = "ctrl+k"
-type                         = "plugin_action"
-command                      = "herdr-splits.nav-up"
-description                  = "move up"
+type                         = "shell"
+command                      = "/Users/petermariani/.config/herdr/nav-fallthrough.sh up"
+description                  = "move up (nvim -> herdr -> aerospace)"
 
 [[keys.command]]
 key                          = "ctrl+l"
-type                         = "plugin_action"
-command                      = "herdr-splits.nav-right"
-description                  = "move right"
+type                         = "shell"
+command                      = "/Users/petermariani/.config/herdr/nav-fallthrough.sh right"
+description                  = "move right (nvim -> herdr -> aerospace)"
 
 [[keys.command]]
 key                          = "alt+h"
@@ -108,7 +121,7 @@ hide_tab_bar_when_single_tab = true
 status_indicators            = "symbols"
 
 [ui.toast]
-delivery                     = "terminal"
+delivery = "system"
 herdr.position               = "top-right"
 clipboard.enabled            = false
 
