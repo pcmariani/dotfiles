@@ -67,6 +67,69 @@
           "type" : "basic"
         } ]
       }, {
+        "description" : "ctrl-hjkl navigates windows outside the terminal",
+        "manipulators" : [ {
+          "from" : {
+            "key_code" : "h",
+            "modifiers" : {
+              "mandatory" : [ "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries-action fail left"
+          } ],
+          "conditions" : [ {
+            "type" : "frontmost_application_unless",
+            "bundle_identifiers" : [ "^com\\.mitchellh\\.ghostty$", "^com\\.neovide\\.neovide$" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "j",
+            "modifiers" : {
+              "mandatory" : [ "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries-action fail down"
+          } ],
+          "conditions" : [ {
+            "type" : "frontmost_application_unless",
+            "bundle_identifiers" : [ "^com\\.mitchellh\\.ghostty$", "^com\\.neovide\\.neovide$" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "k",
+            "modifiers" : {
+              "mandatory" : [ "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries-action fail up"
+          } ],
+          "conditions" : [ {
+            "type" : "frontmost_application_unless",
+            "bundle_identifiers" : [ "^com\\.mitchellh\\.ghostty$", "^com\\.neovide\\.neovide$" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "l",
+            "modifiers" : {
+              "mandatory" : [ "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries-action fail right"
+          } ],
+          "conditions" : [ {
+            "type" : "frontmost_application_unless",
+            "bundle_identifiers" : [ "^com\\.mitchellh\\.ghostty$", "^com\\.neovide\\.neovide$" ]
+          } ],
+          "type" : "basic"
+        } ]
+      }, {
         "description" : "mod-tap layers",
         "manipulators" : [ {
           "to_if_alone" : [ {

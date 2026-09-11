@@ -55,6 +55,14 @@
                 :chrome ["^com\\.google\\.Chrome$"]
                 :chrome-canary [ "^com\\.google\\.Chrome\\.canary$"]
                 :chromes ["^com\\.google\\.Chrome$" "^com\\.google\\.Chrome\\.canary$"]
+                ;; Apps that OWN ctrl-hjkl and must never have it taken away.
+                ;; Ghostty holds herdr, whose own binding walks panes and then
+                ;; hands off to AeroSpace; Neovide is nvim in its own window
+                ;; and walks splits the same way. Anything NOT here has no
+                ;; navigation of its own, which is what `:!terminals` below
+                ;; keys on. Add a terminal here before using it, or ctrl-hjkl
+                ;; will start moving windows out from under it.
+                :terminals ["^com\\.mitchellh\\.ghostty$" "^com\\.neovide\\.neovide$"]
                 }
 
  :main [
@@ -109,6 +117,39 @@
          :rules [[:!Ctab  :!Cf18]
                  [:!CStab :!CSf18]
                  [:!CRtab :!CSf18]]
+         }
+
+        ;; CTRL-HJKL, THE OUTSIDE HALF, 2026-09-10. One key navigates
+        ;; everywhere: nvim splits -> herdr panes -> macOS windows.
+        ;;
+        ;; The first two layers are handled INSIDE the terminal --
+        ;; ~/.config/herdr/nav-fallthrough.sh, bound to ctrl-hjkl in
+        ;; ~/.config/herdr/config.toml, and the `at_edge` hook in
+        ;; ~/.config/nvim/plugin/herdr-splits-nvim.lua. Neither can help
+        ;; anywhere else: they are herdr and nvim keybindings, so they only
+        ;; exist while one of those has keyboard focus. That is why navigation
+        ;; was ONE-WAY before this rule -- you could leave Ghostty for a Chrome
+        ;; window and nothing could bring you back, because no part of the
+        ;; system was listening for ctrl-hjkl in Chrome.
+        ;;
+        ;; `:!terminals` and not `:!chrome`: the rule must be off in every app
+        ;; that owns these keys, and on in every app that does not. Inverting
+        ;; that -- listing where it SHOULD fire -- would silently fail to
+        ;; navigate in each new app until it was added.
+        ;;
+        ;; `:!T` is LEFT control, which is what CAPSLOCK emits (see the rule
+        ;; above). Right control is deliberately unhandled, matching how the
+        ;; switcher leaves right command to the Dock.
+        ;;
+        ;; `--boundaries-action fail` makes "no window that way" a silent
+        ;; no-op instead of a wrap, so a direction key never sends you
+        ;; backwards -- the same rule the other two layers follow.
+        {
+         :des "ctrl-hjkl navigates windows outside the terminal"
+         :rules [[:!Th [:aerospace "focus --boundaries-action fail left"]  [:!terminals]]
+                 [:!Tj [:aerospace "focus --boundaries-action fail down"]  [:!terminals]]
+                 [:!Tk [:aerospace "focus --boundaries-action fail up"]    [:!terminals]]
+                 [:!Tl [:aerospace "focus --boundaries-action fail right"] [:!terminals]]]
          }
 
         ; THE CONTEXT PICKER RULE IS GONE, 2026-09-05. Both halves of it are.
