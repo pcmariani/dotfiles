@@ -198,13 +198,17 @@ compose        = "context pick-command switcher"
 # asserted: `--no-input` does not break a f12 bind. Both are permanent checks 4
 # and 5 in the sibling's `scripts/smoke-picker-no-input.sh`.
 #
-# *** STILL UNTESTED, and it is the layer this repo owns: that run drove fzf
-# *** DIRECTLY through a pty. It did not exercise paneld's `sendKey`, the
-# *** commit watchdog, or a real chord release. So the fzf-level answer does
-# *** not settle the paneld-level question, and this is exactly the layer where
-# *** `sendKey` returns TRUE on a key the client threw away.
-# *** NEEDS A HOLD-THEN-RELEASE-QUICKLY HAND CHECK ON THE REAL HOTKEY.
-# *** If cmd-tab ever "does nothing" intermittently, remove this line first.
+# PANELD'S HALF IS NOW MEASURED TOO, by the only instrument that could reach
+# it: the user's hand. Confirmed 2026-09-11 -- "glyphs show up and enter
+# works", on a real hold-then-release of the chord. So `sendKey`, the commit
+# watchdog and the physical chord release are all clear for ENTER on this path,
+# not just fzf's pty-level behaviour. The hazard flagged here is discharged.
+#
+# ONE THING NEVER EXPLICITLY CONFIRMED: **Esc dismissing** during a refresh.
+# fzf's half is asserted in the sibling's smoke check 2; paneld's half is
+# untested. Low risk now that Enter is known not to be eaten -- both travel
+# the same `sendKey` path -- but it is untested, not verified.
+# If cmd-tab ever "does nothing" intermittently, remove this line first.
 on_reveal_key = "f12"
 width          = 900
 height         = 420
