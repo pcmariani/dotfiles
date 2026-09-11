@@ -147,6 +147,22 @@ consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify 
 fields   = "value-tab-display"
 multi    = false
 cursor_row = 2
+# No search bar. cmd-tab cycles by muscle memory and never reads rows, let
+# alone types at them -- the query line was only ever noise here. cmd-esc
+# KEEPS its search bar, which is where you find a workspace by name among ~40.
+#
+# Verified against real fzf 0.74.3 in a pty, not reasoned about:
+# scripts/smoke-picker-no-input.sh asserts Enter still commits onto row 2,
+# Esc still aborts with exit 130, and typed text is ignored -- with a control
+# proving the harness can commit without the flag. That care is because
+# `--track --id-nth=1` once made fzf discard Enter and Esc silently, and
+# paneld's sendKey returns TRUE in that failure so nothing logs it.
+#
+# Side benefit: with no query, the ASCII-glyph hazard cannot fire here.
+#
+# REVERT: delete this line, then
+#   launchctl kickstart -k "gui/$(id -u)/dev.paneld.paneld"
+no_input = true
 action = [
   { bind = "enter", verb = "enter", after = "close", default = true },
 ]
