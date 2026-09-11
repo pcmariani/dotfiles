@@ -124,11 +124,32 @@ name    = "switcher"
 hotkey         = "cmd-f18"
 hotkey_reverse = "cmd-shift-f18"
 cycle          = true
-# TODO: switch to `context pick-command switcher` once the live-only producer
-# lands in ~/projects/context-based-mac. `contexts` is the full ~40-workspace
-# list and is the wrong list for cycling -- but it is real rows, which is what
-# the mechanism needs to be exercised against.
+# The TODO that was here is DONE and its premise was also wrong. Corrected
+# 2026-09-11 by the context-based-mac session, which owns this producer.
+#
+# `switcher` is NOT a shorter list. Its producer is `cat picker.prerendered`:
+# the same ~40 workspaces `contexts` shows, same rows, minus the agent-status
+# glyph column. What it buys is producer LATENCY -- ~0ms against 100-210ms at
+# nine herdr sessions -- not a smaller list. Do not "fix" this comment by
+# claiming switcher is the right, shorter list; that is a new wrong fact. A
+# genuinely shorter cycling list is UNBUILT and belongs to context-based-mac.
 compose        = "context pick-command switcher"
+
+# DO NOT ADD `on_reveal_key` TO THIS PANEL. The picker gets live agent glyphs by
+# pressing F12 on reveal to trigger a `reload-sync`; this panel deliberately has
+# no glyph column instead. Asked for explicitly by the context-based-mac session
+# 2026-09-11, as the row owner, for two reasons:
+#
+#   1. A glyph baked into picker.prerendered would be refreshed only on a
+#      WORKSPACE CHANGE, so it would be accurate only for agents whose state
+#      happened to change with your last switch. A confidently wrong glyph is
+#      worse than an absent one.
+#   2. An on-reveal reload-sync puts a producer back between reveal and
+#      `load:down` -- which is exactly the 100-210ms that made cmd-tab commit
+#      row 1 (context-based-mac `50eea1b`, `b9ceaf5`). Wiring it here would
+#      re-break the bug that was just fixed.
+#
+# cmd-esc is where agent status is read. Cycling is muscle memory.
 width          = 900
 height         = 420
 arm            = true
