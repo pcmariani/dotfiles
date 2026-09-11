@@ -127,12 +127,22 @@ cycle          = true
 # The TODO that was here is DONE and its premise was also wrong. Corrected
 # 2026-09-11 by the context-based-mac session, which owns this producer.
 #
-# `switcher` is NOT a shorter list. Its producer is `cat picker.prerendered`:
-# the same ~40 workspaces `contexts` shows, same rows, minus the agent-status
-# glyph column. What it buys is producer LATENCY -- ~0ms against 100-210ms at
-# nine herdr sessions -- not a smaller list. Do not "fix" this comment by
-# claiming switcher is the right, shorter list; that is a new wrong fact. A
-# genuinely shorter cycling list is UNBUILT and belongs to context-based-mac.
+# `switcher` is NOT a shorter list -- it is the same ~40 workspaces `contexts`
+# shows, same rows. What it buys is producer LATENCY, not a smaller list. Do
+# not "fix" this comment by claiming switcher is the right, shorter list; that
+# is a new wrong fact. A genuinely shorter cycling list is UNBUILT and belongs
+# to context-based-mac.
+#
+# TWICE-CORRECTED, same day, and both errors are worth seeing. This comment
+# said the producer is `cat picker.prerendered` and cost "~0ms against
+# 100-210ms at nine herdr sessions". Both are now wrong:
+#   - The producer is `picker-rows.sh --bare` since the glyph work below
+#     landed, and the prerendered cache is no longer on the switcher's path.
+#   - 100-210ms was STALE. Re-measured at 9-10 sessions by both sessions
+#     independently: `--bare` ~10-15ms, the full join ~70-80ms.
+# The stale figure survived here for an hour while the block 30 lines down
+# correctly called it stale -- one file disagreeing with itself, which is what
+# a number with no date attached buys you. The sibling session caught it.
 compose        = "context pick-command switcher"
 
 # AGENT STATUS GLYPHS, via the arm/refresh split. Added 2026-09-11 at the
