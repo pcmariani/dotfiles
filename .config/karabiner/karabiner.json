@@ -91,7 +91,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries-action fail down"
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries all-monitors-outer-frame --boundaries-action fail down"
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_unless",
@@ -106,7 +106,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries-action fail up"
+            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries all-monitors-outer-frame --boundaries-action fail up"
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_unless",

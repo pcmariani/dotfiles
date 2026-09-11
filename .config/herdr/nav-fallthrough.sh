@@ -38,6 +38,23 @@ case "$dir" in
     *) echo "nav-fallthrough.sh: unknown direction: $dir" >&2; exit 2 ;;
 esac
 
+# j/k CROSS THE MONITOR BOUNDARY, h/l DELIBERATELY DO NOT. Added 2026-09-11 to
+# match space-hjkl and the ctrl-hjkl rule in ~/.config/karabiner.edn, which
+# this script has to agree with: the reported symptom was "space-j focuses a
+# window below even if it is on another workspace on another monitor, but
+# ctrl-j does not". Directional `focus` defaults --boundaries to `workspace`,
+# so without this flag the hand-off stopped at the workspace edge. The monitors
+# are stacked vertically, so only up/down ever needs to leave the workspace.
+#
+# A PLAIN STRING, EXPANDED UNQUOTED, and not an array: the shebang is
+# /bin/bash, which on macOS is 3.2, where "${arr[@]}" on an EMPTY array under
+# `set -u` aborts with "unbound variable". The word splitting here is the point
+# and is safe because the value is a fixed literal with no input in it.
+case "$dir" in
+    down|up) BOUNDS="--boundaries all-monitors-outer-frame" ;;
+    *)       BOUNDS="" ;;
+esac
+
 # HERDR_ACTIVE_PANE_ID, not `--current`. A keybind's shell command does NOT run
 # inside a pane, so it gets no HERDR_PANE_ID and `--current` cannot resolve.
 # Herdr injects HERDR_ACTIVE_PANE_ID for exactly this case (see the custom
@@ -47,7 +64,7 @@ PANE="${HERDR_ACTIVE_PANE_ID:-}"
 # No pane to reason about -- go straight out to the window manager rather than
 # doing nothing.
 if [ -z "$PANE" ]; then
-    exec "$AEROSPACE" focus --boundaries-action fail "$dir"
+    exec "$AEROSPACE" focus $BOUNDS --boundaries-action fail "$dir"
 fi
 
 # A pane running vim/nvim owns its own navigation. Forward the chord and stop:
@@ -78,7 +95,7 @@ fi
 if printf '%s' "$edges" | grep -q "\"$dir\":true"; then
     # At the herdr edge. Hand off to the window manager; if there is no window
     # that way either, `fail` makes it a no-op rather than a wrap.
-    exec "$AEROSPACE" focus --boundaries-action fail "$dir"
+    exec "$AEROSPACE" focus $BOUNDS --boundaries-action fail "$dir"
 fi
 
 exec "$HERDR" pane focus --direction "$dir" --pane "$PANE"

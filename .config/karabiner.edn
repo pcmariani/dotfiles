@@ -144,11 +144,27 @@
         ;; `--boundaries-action fail` makes "no window that way" a silent
         ;; no-op instead of a wrap, so a direction key never sends you
         ;; backwards -- the same rule the other two layers follow.
+        ;; j/k CROSS THE MONITOR BOUNDARY, h/l DELIBERATELY DO NOT, matching
+        ;; space-hjkl below. Added 2026-09-11: the two disagreed, and the
+        ;; symptom the user reported was "space-j focuses a window below even
+        ;; if it is on another workspace on another monitor, but ctrl-j does
+        ;; not". Directional `focus` defaults `--boundaries` to `workspace`, so
+        ;; without the flag ctrl-j stops at the workspace edge. The monitors
+        ;; are stacked vertically (1 = LG HDR WQHD above 2 = Built-in Retina),
+        ;; so only up/down ever needs to leave the workspace -- putting the
+        ;; flag on h/l too would let a sideways press jump monitors wherever
+        ;; the frames overlap.
+        ;;
+        ;; THE SAME CHANGE IS NEEDED IN TWO MORE PLACES, because this rule is
+        ;; off inside terminals: ~/.config/herdr/nav-fallthrough.sh and the
+        ;; `at_edge` function in ~/.config/nvim/plugin/herdr-splits-nvim.lua.
+        ;; All three must agree or ctrl-j behaves differently depending on
+        ;; which app happens to hold focus.
         {
          :des "ctrl-hjkl navigates windows outside the terminal"
          :rules [[:!Th [:aerospace "focus --boundaries-action fail left"]  [:!terminals]]
-                 [:!Tj [:aerospace "focus --boundaries-action fail down"]  [:!terminals]]
-                 [:!Tk [:aerospace "focus --boundaries-action fail up"]    [:!terminals]]
+                 [:!Tj [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action fail down"]  [:!terminals]]
+                 [:!Tk [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action fail up"]    [:!terminals]]
                  [:!Tl [:aerospace "focus --boundaries-action fail right"] [:!terminals]]]
          }
 
@@ -324,6 +340,24 @@
                  ;; the monitor boundary instead of returning to this
                  ;; workspace's first window. Every anomaly was a workspace
                  ;; holding one or two windows.
+                 ;;
+                 ;; THE OBSERVATION ABOVE IS SOLID; THAT STATED CAUSE IS NOT.
+                 ;; Corrected 2026-09-11. The AeroSpace binary contains the
+                 ;; string "(dfs-next|dfs-prev) only supports --boundaries
+                 ;; workspace", so --boundaries CANNOT have defaulted to
+                 ;; all-monitors-outer-frame on a dfs-next call -- that value
+                 ;; is rejected for this subcommand. `--wrap-around` is its own
+                 ;; flag, and the likelier mechanism is that it selects a
+                 ;; wrap-across-all-monitors ACTION rather than changing
+                 ;; --boundaries. NOT PROVEN, deliberately left as a question:
+                 ;; the 12 logged crossings are real and the fix below is
+                 ;; verified in use, so only the explanation is in doubt.
+                 ;; Recorded because the wrong cause would send the next reader
+                 ;; hunting a --boundaries default that does not apply here.
+                 ;;
+                 ;; The directional default IS `workspace`, separately: adding
+                 ;; --boundaries all-monitors-outer-frame to ctrl-j/k is what
+                 ;; made them reach another monitor's workspace at all.
                  ;;
                  ;; So this is NOT `focus dfs-next --wrap-around`, which is what
                  ;; cycle-window.sh's own comment said to revert to -- that is
