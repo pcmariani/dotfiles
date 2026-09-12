@@ -374,6 +374,62 @@ hs.hotkey.bind(
 )
 
 
+-- Break the active tab out into its own window, so it can then be thrown
+-- at a workspace like any other window.
+--
+-- Uses Chrome's OWN Tab-menu command, and deliberately NOT AppleScript's
+-- `move`. Measured 2/2 on Chrome 152.0.7977.84 (2026-09-11):
+-- `move tab 1 of window id A to end of tabs of window id B` returns exit 0
+-- with no error and delivers a blank chrome://newtab/ carrying a FRESH tab
+-- id -- the URL, the back/forward history and all page state are gone. It
+-- looks exactly like success. The menu item runs the same internal code as
+-- dragging a tab out, so everything survives: verified tab id identical
+-- before and after, with `go back` still walking the real history.
+--
+-- Chrome disables the item when the window holds a single tab, so
+-- `enabled` is Chrome's own answer to "is there anything to break out"
+-- rather than a count we would have to keep in step. The whole lookup is
+-- 2-3ms in-process (7 trials), against 210-246ms for the same click driven
+-- through osascript -- which is also the bridge that can wedge.
+local BREAK_OUT_TAB_PATH = { "Tab", "Move Tab to New Window" }
+
+local function breakOutChromeTab()
+  local chrome = hs.application.get("Google Chrome")
+
+  if not chrome then
+    hs.alert.show("🌐 Chrome is not running")
+    return false
+  end
+
+  -- The menu acts on the frontmost window's active tab. Acting while
+  -- something else holds focus would silently break out a tab the user
+  -- cannot see.
+  if not chrome:isFrontmost() then
+    return false
+  end
+
+  local item = chrome:findMenuItem(BREAK_OUT_TAB_PATH)
+
+  if not item then
+    -- The path is matched by its ENGLISH name, so a Chrome rename or a
+    -- UI-language change lands here. Say so out loud: a key that silently
+    -- does nothing is the expensive failure, not the noisy one.
+    hs.alert.show("🌐 Chrome has no 'Move Tab to New Window' menu item")
+    return false
+  end
+
+  -- Single-tab window: nothing to break out. Silent, like `space-t`.
+  if not item.enabled then
+    return false
+  end
+
+  return chrome:selectMenuItem(BREAK_OUT_TAB_PATH)
+end
+
+-- ⌘⇧⌃⌥D → break the active Chrome tab into its own window ("detach")
+hs.hotkey.bind({ "cmd", "shift", "ctrl", "alt" }, "d", breakOutChromeTab)
+
+
 
 
 

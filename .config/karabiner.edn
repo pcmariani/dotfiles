@@ -265,6 +265,11 @@
                  ;; commands
                  [:m :!!m] ;; hammerspoon hyper M: toggle mute mic
                  [:!Sr :!!r] ;; hammerspoon hyper R: reload hammerspoon
+                 ;; Break the active Chrome tab into its own window, so it can
+                 ;; then be moved to a workspace like any other window. Silent
+                 ;; no-op unless Chrome is frontmost with 2+ tabs -- Chrome's
+                 ;; own menu item reports whether there is anything to do.
+                 [:d :!!d] ;; hammerspoon hyper D: detach chrome tab to a window
 
                  ;; applications
                  [:g :!!g] ;; hammerspoon hyper G: focus chrome Boomi Gmail
