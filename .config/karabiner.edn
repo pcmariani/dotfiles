@@ -270,6 +270,14 @@
                  ;; no-op unless Chrome is frontmost with 2+ tabs -- Chrome's
                  ;; own menu item reports whether there is anything to do.
                  [:d :!!d] ;; hammerspoon hyper D: detach chrome tab to a window
+                 ;; Same, then immediately open the move picker so the new
+                 ;; window can be placed -- the two-key flow as one key.
+                 ;;
+                 ;; Sends hyper MINUS shift, not hyper-shift-D, because hyper
+                 ;; already CONTAINS shift: hyper-D and hyper-shift-D are the
+                 ;; same chord and Hammerspoon cannot tell them apart. Dropping
+                 ;; shift keeps this in the `d` family while staying distinct.
+                 [:!Sd :!CTOd] ;; hammerspoon cmd-ctrl-alt D: detach and move
 
                  ;; applications
                  [:g :!!g] ;; hammerspoon hyper G: focus chrome Boomi Gmail

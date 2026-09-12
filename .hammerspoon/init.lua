@@ -430,6 +430,44 @@ end
 hs.hotkey.bind({ "cmd", "shift", "ctrl", "alt" }, "d", breakOutChromeTab)
 
 
+-- Detach the active tab AND immediately offer to place the new window,
+-- which is the two-key flow (space-d then shift-cmd-esc) as one key.
+--
+-- `paneld show` is a direct IPC call to the daemon and deliberately NOT a
+-- synthesized shift-cmd-esc: synthesized keystrokes have been observed
+-- silently ceasing mid-session, and this composition is exactly what they
+-- would break, invisibly.
+--
+-- No settle delay is needed. Focus is ALREADY on the new window by the
+-- time selectMenuItem returns -- measured at +0ms, with
+-- `aerospace list-windows --focused` agreeing -- so `move`, which acts on
+-- the focused window, acts on the window we just made.
+--
+-- Absolute path because Hammerspoon does not inherit the Homebrew PATH.
+-- hs.task rather than hs.execute so this never blocks the main thread.
+local PANELD_BIN =
+  "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld"
+
+local function detachChromeTabToWorkspace()
+  -- Only offer the picker if a tab actually left. Otherwise this key on a
+  -- single-tab window would pop the picker and move the window you were
+  -- already in -- not what the key says it does.
+  if not breakOutChromeTab() then
+    return false
+  end
+
+  hs.task.new(PANELD_BIN, nil, { "show", "move" }):start()
+  return true
+end
+
+-- ⌘⌃⌥D (hyper MINUS shift) → detach the tab, then pick its workspace.
+-- It cannot be hyper-shift-D: hyper already CONTAINS shift, so hyper-D and
+-- hyper-shift-D are the same chord and Hammerspoon cannot tell them apart.
+-- Dropping shift is what keeps this in the same `d` mnemonic family while
+-- staying a distinct binding.
+hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "d", detachChromeTabToWorkspace)
+
+
 
 
 
