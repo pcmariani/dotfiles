@@ -15,6 +15,7 @@ set -u
 
 : "${CTX:=/Users/petermariani/projects/context-based-mac/bin/context}"
 : "${STATE:=/Users/petermariani/.local/state/context}"
+: "${AEROSPACE:=/opt/homebrew/bin/aerospace}"
 PRE="$STATE/picker.prerendered"
 LOCK="$STATE/picker.refresh.lock"
 
@@ -28,6 +29,11 @@ if ! /bin/mkdir "$LOCK" 2>/dev/null; then
     exit 0
 fi
 trap '/bin/rmdir "$LOCK" 2>/dev/null' EXIT
+
+# WHERE FOCUS IS AS WE START RENDERING. Compared against live focus at the end
+# of the script to decide whether our render is still describing reality -- see
+# the COALESCE block at the bottom, which is the whole reason this is captured.
+FOCUS_BEFORE=$("$AEROSPACE" list-workspaces --focused 2>/dev/null)
 
 # Note where focus actually is BEFORE rendering, so the rows we render already
 # reflect it. `enter` used to be the MRU's only writer, which made the picker's
@@ -114,3 +120,49 @@ fi
 # Hold the lock a moment longer than the render, so a burst of focus events
 # collapses into one refresh rather than a queue of them.
 /bin/sleep 0.4
+
+# COALESCE. THE DEBOUNCE ABOVE DROPS REFRESHES, IT DOES NOT QUEUE THEM -- a
+# hook that cannot take the lock exits 0 and is gone. That is correct for the
+# case the debounce was written for (space-tab cycling WINDOWS inside one
+# workspace, where every event would render identical rows) and WRONG for a
+# workspace change, whose whole point is that the rows must change.
+#
+# THE BUG IT CAUSED, 2026-09-12, reported as "cmd-tab gets stuck on its own
+# workspace after the first 2,3,4 presses". The lock is held ~0.9s but the
+# render FINISHES AT ~0.3s -- the tail is the three rearms plus the sleep
+# above. So there is a ~0.3-0.5s stretch in which the cache has ALREADY been
+# written for the workspace you just left and the lock is STILL held, and a
+# switch landing there is dropped after the damage is done. Measured: stale at
+# gaps of 0.3s and 0.5s, clean at 0.0, 0.2, 0.7, 0.9 and 1.2s. (Too EARLY is
+# harmless -- the render reads focus live at ~120ms and simply picks up the
+# newer workspace. Too late and the lock is free.)
+#
+# AND IT IS A ONE-WAY TRAPDOOR, WHICH IS WHY IT "STICKS" RATHER THAN
+# FLICKERING. A stale cache puts the workspace you are standing in on ROW 2,
+# which is where cmd-tab's cursor starts (`load:down`), so Enter re-enters the
+# workspace you are already in -- and AeroSpace fires NO
+# `exec-on-workspace-change` for a no-op switch (verified: "Workspace 'x' is
+# already focused", cache mtime unchanged). So nothing ever rewrites the cache
+# and every subsequent cmd-tab self-switches, until you change workspace by
+# some other means.
+#
+# So: if focus moved while we held the lock, that change's own hook was
+# dropped and we are the only one who can still act on it. Release and run
+# again. Releasing FIRST is deliberate -- if a real hook beats us to the lock
+# it does exactly the work we were about to do, and our re-exec then exits 0
+# at the lock, which is the right outcome either way.
+#
+# Bounded at 3 total passes so a user holding down a switch key cannot pin the
+# lock indefinitely. Exhausting the bound needs ~3s of continuous switching,
+# and the next settled workspace change refreshes normally.
+#
+# The reproducer is `docs/experiments/2026-09-12-picker-cache-staleness.sh` in
+# the context-based-mac repo. RE-RUN IT AFTER ANY CHANGE TO THIS FILE: the
+# failure is invisible at the keyboard, because the list is drawn, the cursor
+# is on row 2, Enter is delivered and a workspace IS entered. Nothing errors.
+FOCUS_AFTER=$("$AEROSPACE" list-workspaces --focused 2>/dev/null)
+if [ "$FOCUS_BEFORE" != "$FOCUS_AFTER" ] && [ "${REFRESH_DEPTH:-0}" -lt 2 ]; then
+    /bin/rmdir "$LOCK" 2>/dev/null
+    trap - EXIT
+    REFRESH_DEPTH=$(( ${REFRESH_DEPTH:-0} + 1 )) exec "$0"
+fi
