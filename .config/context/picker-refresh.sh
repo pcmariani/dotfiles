@@ -18,21 +18,66 @@ set -u
 : "${AEROSPACE:=/opt/homebrew/bin/aerospace}"
 PRE="$STATE/picker.prerendered"
 LOCK="$STATE/picker.refresh.lock"
+PENDING="$STATE/picker.refresh.pending"
 
 /bin/mkdir -p "$STATE"
+
+# DIAGNOSTIC LOG, kept deliberately while the cmd-tab fix is on probation.
+#
+# NO SCRIPTED REPRODUCER REACHES THIS FAILURE -- three were written and all
+# three passed against code that was provably broken, because the real gesture
+# goes cmd-tab -> paneld -> fzf -> `context enter`, and that fires this hook
+# mid-ladder with a verb in flight. The keyboard is the only oracle, so the
+# script has to say what it did or a recurrence is undiagnosable.
+#
+# Costs four `date` forks per workspace change, inside a script that already
+# starts Python twice. It is off the hotkey path entirely.
+#
+# TO REMOVE once this has been quiet for a while: delete this block, the `dbg`
+# calls, and $STATE/picker-refresh.debug.log.
+DBG="$STATE/picker-refresh.debug.log"
+# Self-capping, so an always-on log cannot become an unbounded file. Checked
+# once per invocation, which is once per workspace change.
+if [ -f "$DBG" ] && [ "$(/usr/bin/wc -l < "$DBG")" -gt 2000 ]; then
+    /usr/bin/tail -n 500 "$DBG" > "$DBG.trim" 2>/dev/null && /bin/mv -f "$DBG.trim" "$DBG"
+fi
+dbg() { printf '%s pid=%-6s %s\n' "$(date +%H:%M:%S.%N | cut -c1-12)" "$$" "$*" >> "$DBG"; }
+
+# How long this refresh chain may keep re-running before it gives up, as an
+# absolute epoch second inherited across re-execs. TIME, not a pass count: a
+# count of 3 was tried on 2026-09-12 and a human toggling cmd-tab exhausted it
+# in under three seconds, at which point the chain exited KNOWING the cache was
+# stale -- which is the one outcome that must never happen (see the trapdoor
+# note at the bottom). Exhausting this needs ~25s of continuous switching.
+: "${REFRESH_DEADLINE:=$(( $(date +%s) + 25 ))}"
 
 # DEBOUNCE. on-focus-changed fires on every window focus change, not just
 # workspace changes, and each refresh is a ~120ms Python start. Cycling windows
 # with space-tab would otherwise spawn one per keypress. mkdir is the atomic
 # test-and-set; the trap releases it even if the render fails.
+#
+# A DENIED HOOK MUST LEAVE A TRACE, AND THIS IS THE WHOLE FIX. Until 2026-09-12
+# it just `exit 0`d, so the workspace change it was reporting was lost outright
+# -- and because the holder had already written the cache for the PREVIOUS
+# workspace, the loss was silent and permanent. Now it records that work
+# remains and the holder refuses to leave while the flag is set. This costs a
+# waiter one file touch: no Python, no render, no fan-out.
 if ! /bin/mkdir "$LOCK" 2>/dev/null; then
+    : > "$PENDING"
+    dbg "LOCK-DENIED -> PENDING set (work preserved)"
     exit 0
 fi
 trap '/bin/rmdir "$LOCK" 2>/dev/null' EXIT
+dbg "LOCK-ACQUIRED deadline_in=$(( REFRESH_DEADLINE - $(date +%s) ))s"
+
+# CLEAR THE FLAG BEFORE READING FOCUS, NEVER AFTER. Anything that arrives from
+# here on must survive into the settle check below; clearing it later would
+# swallow exactly the hooks this exists to catch.
+/bin/rm -f "$PENDING"
 
 # WHERE FOCUS IS AS WE START RENDERING. Compared against live focus at the end
 # of the script to decide whether our render is still describing reality -- see
-# the COALESCE block at the bottom, which is the whole reason this is captured.
+# the SETTLE block at the bottom, which is the whole reason this is captured.
 FOCUS_BEFORE=$("$AEROSPACE" list-workspaces --focused 2>/dev/null)
 
 # Note where focus actually is BEFORE rendering, so the rows we render already
@@ -121,48 +166,62 @@ fi
 # collapses into one refresh rather than a queue of them.
 /bin/sleep 0.4
 
-# COALESCE. THE DEBOUNCE ABOVE DROPS REFRESHES, IT DOES NOT QUEUE THEM -- a
-# hook that cannot take the lock exits 0 and is gone. That is correct for the
-# case the debounce was written for (space-tab cycling WINDOWS inside one
-# workspace, where every event would render identical rows) and WRONG for a
-# workspace change, whose whole point is that the rows must change.
+# SETTLE, OR RUN AGAIN. THE DEBOUNCE ABOVE USED TO DROP REFRESHES OUTRIGHT --
+# a hook that could not take the lock exited 0 and the workspace change it was
+# reporting was lost. That is correct for the case the debounce was written for
+# (space-tab cycling WINDOWS inside one workspace, where every event renders
+# identical rows) and WRONG for a workspace change, whose whole point is that
+# the rows must change.
 #
 # THE BUG IT CAUSED, 2026-09-12, reported as "cmd-tab gets stuck on its own
 # workspace after the first 2,3,4 presses". The lock is held ~0.9s but the
 # render FINISHES AT ~0.3s -- the tail is the three rearms plus the sleep
-# above. So there is a ~0.3-0.5s stretch in which the cache has ALREADY been
-# written for the workspace you just left and the lock is STILL held, and a
-# switch landing there is dropped after the damage is done. Measured: stale at
-# gaps of 0.3s and 0.5s, clean at 0.0, 0.2, 0.7, 0.9 and 1.2s. (Too EARLY is
-# harmless -- the render reads focus live at ~120ms and simply picks up the
-# newer workspace. Too late and the lock is free.)
+# above. So a switch landing in that stretch was dropped AFTER the cache had
+# already been written for the workspace just left.
 #
-# AND IT IS A ONE-WAY TRAPDOOR, WHICH IS WHY IT "STICKS" RATHER THAN
-# FLICKERING. A stale cache puts the workspace you are standing in on ROW 2,
-# which is where cmd-tab's cursor starts (`load:down`), so Enter re-enters the
-# workspace you are already in -- and AeroSpace fires NO
-# `exec-on-workspace-change` for a no-op switch (verified: "Workspace 'x' is
-# already focused", cache mtime unchanged). So nothing ever rewrites the cache
-# and every subsequent cmd-tab self-switches, until you change workspace by
-# some other means.
+# AND IT IS A ONE-WAY TRAPDOOR, WHICH IS WHY IT STICKS RATHER THAN FLICKERING.
+# A stale cache puts the workspace you are standing in on ROW 2, which is where
+# cmd-tab's cursor starts (`load:down`), so Enter re-enters the workspace you
+# are already in -- and AeroSpace fires NO `exec-on-workspace-change` for a
+# no-op switch (verified: "Workspace 'x' is already focused", cache mtime
+# unchanged). Nothing else ever rewrites the cache, so every subsequent cmd-tab
+# self-switches until you change workspace by some other means. THAT is why
+# ending a pass stale is unacceptable rather than merely untidy: there is no
+# next event to clean up after us.
 #
-# So: if focus moved while we held the lock, that change's own hook was
-# dropped and we are the only one who can still act on it. Release and run
-# again. Releasing FIRST is deliberate -- if a real hook beats us to the lock
-# it does exactly the work we were about to do, and our re-exec then exits 0
-# at the lock, which is the right outcome either way.
+# RELEASE THE LOCK BEFORE DECIDING, AND THIS ORDER IS LOAD-BEARING. The first
+# attempt at this fix kept the lock until after the check, and the instrumented
+# log showed the decisive hook arriving 2ms into that window and being denied:
 #
-# Bounded at 3 total passes so a user holding down a switch key cannot pin the
-# lock indefinitely. Exhausting the bound needs ~3s of continuous switching,
-# and the next settled workspace change refreshes normally.
+#   47.808 depth=2  focus moved under us     <- we knew the cache was stale
+#   47.838 depth=2  exited anyway            <- pass budget exhausted
+#   47.840 pid=74611 LOCK-DENIED -> dropped  <- the hook that would have fixed it
 #
-# The reproducer is `docs/experiments/2026-09-12-picker-cache-staleness.sh` in
-# the context-based-mac repo. RE-RUN IT AFTER ANY CHANGE TO THIS FILE: the
-# failure is invisible at the keyboard, because the list is drawn, the cursor
-# is on row 2, Enter is delivered and a workspace IS entered. Nothing errors.
+# Releasing first means a concurrent hook can win the lock and do exactly the
+# work we were about to do; our own re-exec then finds the lock taken, records
+# PENDING and exits, and that winner picks it up. Either way the work survives.
+/bin/rmdir "$LOCK" 2>/dev/null
+trap - EXIT
+
+# Two independent reasons to go round again, and BOTH are needed. PENDING
+# catches a hook that fired and was denied. The focus comparison catches a
+# change that produced no usable hook at all -- belt and braces, because the
+# whole failure mode here is a lost notification.
 FOCUS_AFTER=$("$AEROSPACE" list-workspaces --focused 2>/dev/null)
-if [ "$FOCUS_BEFORE" != "$FOCUS_AFTER" ] && [ "${REFRESH_DEPTH:-0}" -lt 2 ]; then
-    /bin/rmdir "$LOCK" 2>/dev/null
-    trap - EXIT
-    REFRESH_DEPTH=$(( ${REFRESH_DEPTH:-0} + 1 )) exec "$0"
+dbg "SETTLE-CHECK pending=$([ -e "$PENDING" ] && echo yes || echo no) before=$FOCUS_BEFORE after=$FOCUS_AFTER cache=$(tr '\0' '\n' < "$PRE" 2>/dev/null | head -1 | awk -F'\t' '{print $1}')"
+if [ -e "$PENDING" ] || [ "$FOCUS_BEFORE" != "$FOCUS_AFTER" ]; then
+    if [ "$(date +%s)" -lt "$REFRESH_DEADLINE" ]; then
+        dbg "RE-EXEC (work remains)"
+        REFRESH_DEADLINE="$REFRESH_DEADLINE" exec "$0"
+    fi
+    dbg "!!! DEADLINE EXHAUSTED WHILE STALE -- this is the trapdoor"
 fi
+dbg "SETTLED cache=$(tr '\0' '\n' < "$PRE" 2>/dev/null | head -1 | awk -F'\t' '{print $1}') live=$FOCUS_AFTER"
+
+# The reproducer and regression check is
+# docs/experiments/2026-09-12-picker-cache-staleness.sh in context-based-mac.
+# RE-RUN IT AFTER ANY CHANGE TO THIS FILE, and note it drives switches with
+# `aerospace workspace` -- the FIRST fix passed it while the real gesture still
+# failed, because cmd-tab goes through `context enter`, which fires this hook
+# mid-ladder while paneld holds a verb in flight. A green sweep is necessary
+# and NOT sufficient: press the key as well.
