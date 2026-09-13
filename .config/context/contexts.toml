@@ -223,3 +223,27 @@ name = "browser"
 
 [[context]]
 name = "personal"
+
+
+# The monitor fallbacks (backlog #3). A monitor with nothing live on it would
+# otherwise show whatever was last there -- and an empty non-persistent
+# workspace evaporates, so on two monitors one could be left showing nothing.
+#
+# `hidden` keeps them out of the picker WHILE THEY HOLD NO WINDOWS, which is
+# their normal state. Put a window in one and its row appears like any other.
+# They stay reachable when empty: type the name and press the create key,
+# which ENTERS a workspace that already resolves rather than creating a room.
+#
+# NOT named `default` -- that is herdr's own unnamed session, and a workspace
+# by that name aliases the user's main session.
+#
+# Which one appears is DETERMINISTIC because they are force-assigned in
+# aerospace.toml, not because AeroSpace picks sensibly. THAT HALF IS NOT DONE:
+# it needs the LG attached to read its monitor-name pattern. See HANDOFF.md.
+[[context]]
+name = "workspace-1"
+hidden = true
+
+[[context]]
+name = "workspace-2"
+hidden = true

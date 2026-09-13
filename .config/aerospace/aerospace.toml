@@ -68,7 +68,7 @@ automatically-unhide-macos-hidden-apps = false
 # ~/.config/context/contexts.toml -- `context doctor` reports either file
 # disagreeing with the other, in BOTH directions. The old wording pointed at
 # an `ambient` key that has not existed since 2026-08-31.
-persistent-workspaces = ["work", "ai", "browser", "personal"]
+persistent-workspaces = ["work", "ai", "browser", "personal", "workspace-1", "workspace-2"]
 
 # A callback that runs every time binding mode changes
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
