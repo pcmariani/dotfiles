@@ -62,8 +62,12 @@ automatically-unhide-macos-hidden-apps = false
 # partitioned per project (Slack, Messages) plus unfiled-but-persistent
 # browser and AI windows. Project contexts are created on demand by
 # `context enter` and are deliberately NOT persistent, so an empty one
-# evaporates. Keep this list in sync with `ambient` in
-# ~/.config/context/contexts.toml — `context doctor` checks.
+# evaporates.
+#
+# Keep this list in sync with the ROOTLESS [[context]] entries in
+# ~/.config/context/contexts.toml -- `context doctor` reports either file
+# disagreeing with the other, in BOTH directions. The old wording pointed at
+# an `ambient` key that has not existed since 2026-08-31.
 persistent-workspaces = ["work", "ai", "browser", "personal"]
 
 # A callback that runs every time binding mode changes

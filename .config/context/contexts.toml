@@ -200,3 +200,26 @@ app_name  = "Code"
 [[context]]
 name = "config"
 path = "~/.config"
+
+
+# The four workspaces that used to be "ambient" -- a parallel tuple of strings
+# read from aerospace.toml and threaded through six call sites in Python.
+# Spec 11 collapsed them into ordinary ROOTLESS contexts: no path, so no files
+# picker and no `open`, but a plain terminal (Spec 2 Decision 1a) and a normal
+# place in the picker's recency ordering, which is where every picker already
+# put them.
+#
+# Their names must ALSO appear in aerospace.toml's persistent-workspaces --
+# AeroSpace evaporates an empty non-persistent workspace. `context doctor`
+# reports either file disagreeing with the other, in both directions.
+[[context]]
+name = "work"
+
+[[context]]
+name = "ai"
+
+[[context]]
+name = "browser"
+
+[[context]]
+name = "personal"
