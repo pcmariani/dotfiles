@@ -8,7 +8,15 @@
 # its schema stays frozen.
 
 [[picker]]
-name     = "contexts"
+name     = "workspaces"
+# ONE entry for both doors. `contexts` and `move` were identical in producer,
+# refresh, refresh_producer, fields, multi, cursor_row and no_input, and
+# differed only in which object their verbs acted on (going THERE vs sending
+# the window there) -- so as of Task 7 there is one entry with the full 2x2
+# of actions below, and the two panels (cmd-esc's `picker`, shift-cmd-esc's
+# `move`) differ only in which action Enter aliases via `--default`, written
+# into the consumer by compose() (see paneld.toml).
+#
 # The producer is `cat`, not the CLI: Decision 6 keeps picker.prerendered as
 # this producer's cache, written by picker-refresh.sh on every workspace
 # change. A producer is a command line and nothing else -- so a producer that
@@ -34,19 +42,30 @@ refresh_producer = "/Users/petermariani/projects/context-based-mac/scripts/picke
 # --notify so `enter`'s empty-workspace note reaches the screen. The panel
 # discards stdout, and main() only notifies a SUCCESS message when asked.
 # Costs nothing in the common case: `enter` returns "" when the workspace
-# has a window, and main() will not pop an empty string (there is a test).
-consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept contexts"
+# has a window, and main() will not pop an empty string (there is a test);
+# `move`'s handler is the same shape (`cmd_move` also returns "" on success),
+# so keeping this consumer for both doors costs nothing there either.
+consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept workspaces"
 fields   = "value-tab-display"
 multi    = false
 # The current context sorts to row 1 (context_records passes
 # current_first=True), so the cursor starts on row 2 instead -- otherwise
 # hotkey-Enter is a ~1.3s no-op re-enter of where you already are. This
-# makes it behave like alt-tab. A bare/path picker (files, folders) has no
-# such row and must leave this at the default (1).
+# makes it behave like alt-tab, and the same reasoning holds for `move`:
+# moving a window to where it already is is a no-op. A bare/path picker
+# (files, folders) has no such row and must leave this at the default (1).
 cursor_row = 2
+#
+# ctrl- takes YOU somewhere, alt- sends the WINDOW there, and `t` means "a new
+# temp workspace" in both halves.
+#
+# NOTE THE RELEARN, agreed 2026-09-13: --default overrides only Enter, so
+# ctrl-t means `room` on BOTH doors. shift-cmd-esc then ctrl-t used to create
+# a room and move the window into it; that gesture is alt-t now, and ctrl-t
+# there will take you to a new room and leave the window behind.
 action = [
-  { bind = "enter", verb = "enter", after = "close", default = true },
-  # CREATE A TEMP WORKSPACE from what you typed. Spec 10.
+  { bind = "enter",  verb = "enter",     after = "close", default = true },
+  # CREATE A TEMP WORKSPACE from what you typed and go there. Spec 10.
   #
   # `from_query` means this action receives the QUERY, not the row under the
   # cursor: type a name that matches nothing, press ctrl-t, and you land in
@@ -67,57 +86,21 @@ action = [
   #
   # NOT on `switcher`: cmd-tab has no_input = true, so there is no query to
   # create from, and load_pickers refuses that combination outright.
-  { bind = "ctrl-t", verb = "room", after = "close", from_query = true },
-]
-
-[[picker]]
-name     = "move"
-# The SAME producer as `contexts`, deliberately: the destinations for a window
-# are exactly the workspaces you can enter, so this needs no second cache and
-# no second refresh path. picker-refresh.sh already keeps it current.
-# The join, not `cat`: it reads that same cache and prepends a live
-# agent-status cell. The cache itself is unchanged and still knows nothing
-# about agents, which is what keeps this removable -- point this back at
-# /bin/cat, restart paneld, and the feature is gone.
-# --bare at ARM, the full join at REVEAL. The arm-time producer gates
-# `load:down`, and so gates the cursor reaching row 2 -- and row 1 here is the
-# workspace you are already in, so until it finishes Enter is a no-op. Reported
-# 2026-09-10: "I see the picker, then .25-.5s later the selection moves to the
-# second row". The join measured 100-210ms at 9 herdr sessions; --bare ~30ms.
-# The reveal poke brings the real glyphs in a moment later, into a panel already
-# on screen. Columns cannot shift between the two -- emit_bare PADS the status
-# cell rather than omitting it, which Spec 7 built in for exactly this.
-producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --bare"
-# Emits the F12 reload-sync bind that paneld pokes at reveal. NOT --track
-# --id-nth: measured 2026-09-10 to make fzf discard keystrokes, Enter and
-# Esc included, for the producer's whole duration. See Spec 7 Risk 6.
-refresh  = true
-refresh_producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
-consumer = "/Users/petermariani/projects/context-based-mac/bin/context pick-accept move"
-fields   = "value-tab-display"
-multi    = false
-# Row 1 is the CURRENT workspace (context_records passes current_first=True),
-# and moving a window to where it already is is a no-op -- the same reason
-# `contexts` starts on row 2.
-cursor_row = 2
-action = [
-  { bind = "enter", verb = "move", after = "close", default = true },
-  # CREATE A TEMP WORKSPACE and send this window to it. Backlog 3d.
-  #
-  # The same key and the same meaning as `contexts`' ctrl-t, so the create
-  # gesture does not change meaning between the two pickers you reach with
-  # cmd-esc and shift-cmd-esc. There it creates a room and ENTERS it; here it
-  # creates one and MOVES the focused window into it -- and focus follows the
-  # window, so you land beside it either way.
+  { bind = "ctrl-t", verb = "room",      after = "close", from_query = true },
+  # SEND THE WINDOW there and follow it. Task 1 confirmed 2026-09-13 that
+  # Option reaches fzf through paneld's surface -- control (ctrl-r) and test
+  # (alt-m) both fired in the same session -- so this is alt-m, not the
+  # ctrl-o fallback.
+  { bind = "alt-m",  verb = "move",      after = "close" },
+  # CREATE A TEMP WORKSPACE and send the window into it, then follow. Backlog
+  # 3d. The same key-shape as ctrl-t, so the create gesture keeps its meaning
+  # ("new temp workspace") across both halves of the 2x2 -- ctrl- goes there,
+  # alt- takes the window there too.
   #
   # A name that already resolves is MOVED TO rather than shadowed, exactly as
   # `room` enters rather than shadows. That is what makes the key safe to
-  # press by reflex, which is the whole reason it is the same key.
-  #
-  # ctrl-t and NOT ctrl-n: ctrl-n is fzf's own `down` (fzf.1:2076), and
-  # picker_cli.py already refuses it by name. Binding it would create a room
-  # every time you navigated with it.
-  { bind = "ctrl-t", verb = "move-room", after = "close", from_query = true },
+  # press by reflex, which is the whole reason it keeps the same shape.
+  { bind = "alt-t",  verb = "move-room", after = "close", from_query = true },
 ]
 
 [[picker]]
@@ -227,9 +210,23 @@ name     = "switcher"
 # STILL UNTESTED and owned by paneld: sendKey, the watchdog, and the physical
 # chord release. The measurement above drives fzf through a pty and does not
 # exercise that layer.
-producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --bare"
+# TASK 7: repointed at picker.prerendered.live on BOTH ends, not `contexts`'
+# picker.prerendered. `workspaces` now shares one cache with `move`, and
+# neither is the ~5-row filtered list this panel's `cursor_row = 2` premise
+# depends on -- filtering only the arm would let the reveal poke (which
+# always runs, per picker_cli.py:243-248) repopulate ~5 rows to ~40 with the
+# cursor still pinned at index 2, changing the row under the cursor mid-open.
+#
+# `--bare --live` at arm, `--live` alone (the full join) at reveal -- NOT a
+# bare `cat` of the live file at arm, which the mismatch between the two
+# would reintroduce: emit_bare pads a 2-char status placeholder onto the raw
+# cache row and the join replaces it with a same-width glyph, but a raw `cat`
+# has neither, so its row would be two columns narrower than the join's and
+# every column would jump the moment the reveal poke lands. `--bare --live`
+# keeps that padding while still reading the filtered cache.
+producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --bare --live"
 refresh  = true
-refresh_producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh"
+refresh_producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live"
 consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept switcher"
 fields   = "value-tab-display"
 multi    = false

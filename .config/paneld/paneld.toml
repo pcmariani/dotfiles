@@ -24,7 +24,11 @@ name    = "picker"
 # so it will confidently report a hotkey that Carbon does not hold.
 #     launchctl kickstart -k "gui/$(id -u)/dev.paneld.paneld"
 hotkey  = "cmd-esc"
-compose = "context pick-command contexts"
+# TASK 7: `contexts` and `move` merged into one `workspaces` picker entry --
+# see ~/.config/context/pickers.toml. This door's Enter still means `enter`,
+# which is that entry's own default action, so no `--default` override is
+# needed here (compare the `move` panel below).
+compose = "context pick-command workspaces"
 width   = 900
 height  = 420
 arm     = true
@@ -48,7 +52,12 @@ name    = "move"
 # shift-cmd-esc, next door to the picker's cmd-esc. A plain chord, so paneld
 # registers it with Carbon itself -- see the note on the picker's hotkey above.
 hotkey  = "shift-cmd-esc"
-compose = "context pick-command move"
+# TASK 7: composes the SAME `workspaces` picker as the panel above, with
+# `--default move` so this door's Enter means `move` instead of `enter` --
+# compose() writes that override into the consumer (picker_cli.py), and it
+# overrides ONLY the default (Enter) key. ctrl-t still means `room` here, not
+# `move-room` -- the relearn agreed 2026-09-13, see pickers.toml.
+compose = "context pick-command workspaces --default move"
 width   = 900
 height  = 420
 arm     = true

@@ -91,7 +91,14 @@ FOCUS_BEFORE=$("$AEROSPACE" list-workspaces --focused 2>/dev/null)
 # are NUL-framed, so a torn final record is a corrupt row rather than a
 # missing one.
 TMP="$PRE.$$"
-if "$CTX" pick --rows --source contexts >"$TMP" 2>/dev/null && [ -s "$TMP" ]; then
+# --also-live, added for Task 7: writes the switcher's filtered cache
+# (picker.prerendered.live) from the SAME render as the main cache below --
+# one `context pick` call producing two files rather than two renders. The
+# switcher's `workspaces`-sharing producers (pickers.toml) read that file on
+# both the arm and the reveal poke; this is the only place it is written.
+if "$CTX" pick --rows --source contexts \
+        --also-live "$STATE/picker.prerendered.live" >"$TMP" 2>/dev/null \
+        && [ -s "$TMP" ]; then
     /bin/mv -f "$TMP" "$PRE"
 else
     /bin/rm -f "$TMP"
