@@ -31,6 +31,24 @@ hotkey  = "cmd-esc"
 compose = "context pick-command workspaces"
 width   = 900
 height  = 420
+# PINNED TO THE LG, 2026-09-16. Without this the panel follows keyboard focus
+# (PanelController.swift:107 falls back to NSScreen.main), so the picker
+# appears on whichever screen you happen to be working on. Pinned, your eyes
+# always go to the same place.
+#
+# Matched against NSScreen.localizedName, EXACTLY -- not a substring and not a
+# regex, unlike aerospace.toml's monitor patterns, which are both. Checked
+# 2026-09-16 that AppKit and AeroSpace agree on the spelling of this display
+# ('LG HDR WQHD' in both), because they are two different name sources and
+# nothing guarantees they match.
+#
+# When this display is absent the code falls back to NSScreen.main
+# (`namedScreen() ?? NSScreen.main`), so a closed lid or an unplugged LG
+# degrades to the old follow-focus behaviour rather than losing the panel.
+#
+# REVERT: delete this line. CHANGE MONITOR: "Built-in Retina Display".
+# Either way: launchctl kickstart -k "gui/$(id -u)/dev.paneld.paneld"
+screen  = "LG HDR WQHD"
 arm     = true
 
 # At reveal, paneld presses F12 in this panel's live pty. compose() binds F12 to
@@ -60,6 +78,11 @@ hotkey  = "shift-cmd-esc"
 compose = "context pick-command workspaces --default move"
 width   = 900
 height  = 420
+# Same pin as the `picker` panel above -- see its comment for the mechanism.
+# These two are one surface behind two doors, so they must agree: a picker on
+# the LG and a move picker on the laptop would be the same list appearing in
+# two places depending on which key you pressed.
+screen  = "LG HDR WQHD"
 arm     = true
 
 # At reveal, paneld presses F12 in this panel's live pty. compose() binds F12 to
@@ -221,4 +244,8 @@ compose        = "context pick-command switcher"
 on_reveal_key = "f12"
 width          = 900
 height         = 420
+# Same pin as `picker` and `move` -- see the picker panel's comment. cmd-tab
+# is the one pressed most by reflex and least by reading, so a fixed location
+# matters more here than anywhere else.
+screen         = "LG HDR WQHD"
 arm            = true
