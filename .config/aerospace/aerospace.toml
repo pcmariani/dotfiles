@@ -164,14 +164,31 @@ gaps.outer.right =      4
 # behaviour. First matching pattern wins, so on a single screen this whole
 # block is a no-op -- there is only one place a workspace can be.
 #
-# Only these four can be pinned: a force-assignment's left-hand side must be a
-# LITERAL workspace name (the regex applies to the monitor pattern), and the
-# context workspaces are created on demand, 91 and counting.
+# Only a DECLARED workspace can be pinned: a force-assignment's left-hand side
+# must be a LITERAL workspace name (the regex applies only to the monitor
+# pattern), and the context workspaces are created on demand, 91 and counting.
+# That is the whole reason a per-context "which monitor do I start on" cannot
+# be expressed here, and would have to be carried by contexts.toml and applied
+# by `context enter` after the workspace exists.
+#
+# workspace-1 / workspace-2 are the hidden per-monitor fallbacks (backlog #3,
+# Spec 11 Decision 5). THE PIN IS THE HALF THAT MAKES #3 REAL: declared +
+# hidden + persistent leaves which monitor shows what entirely emergent.
+# Measured 2026-09-16 with the LG attached, before this block was added:
+# workspace-2 sat on the built-in alongside every other persistent workspace,
+# so the LG had nothing anchored to it at all -- which is the bug #3 names.
+#
+# 'lg' is a substring of 'LG HDR WQHD', matched the same case-insensitive
+# regex way as 'built-in' above, never an index. Checked rather than assumed:
+# 'Built-in Retina Display' does not contain 'lg', so the two patterns cannot
+# both match one display no matter which monitor is enumerated first.
 [workspace-to-monitor-force-assignment]
 work     = ['built-in', 'main']
 ai       = ['built-in', 'main']
 browser  = ['built-in', 'main']
 personal = ['built-in', 'main']
+workspace-1 = ['built-in', 'main']
+workspace-2 = ['lg', 'main']
 
 # The context picker is an ephemeral Ghostty window. Tiling it would reshuffle
 # the current workspace on every invocation, so float it instead. Matched on
