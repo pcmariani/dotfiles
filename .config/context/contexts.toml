@@ -212,17 +212,53 @@ path = "~/.config"
 # Their names must ALSO appear in aerospace.toml's persistent-workspaces --
 # AeroSpace evaporates an empty non-persistent workspace. `context doctor`
 # reports either file disagreeing with the other, in both directions.
+# WHICH MONITOR A WORKSPACE STARTS ON, as of 2026-09-17 (Spec C).
+#
+# `monitor` is applied by `context enter` ONLY when the workspace is EMPTY.
+# Once it holds windows, where it lives is yours and nothing here overrides a
+# move you made by hand. That is the whole difference from aerospace.toml's
+# workspace-to-monitor-force-assignment, which used to pin these four and
+# REFUSED move-workspace-to-monitor outright, exit 2 -- so `work` could not be
+# dragged to the external display by any means.
+#
+# Values: `main`, `secondary`, `focused` (= make no move), or a
+# case-insensitive substring of a monitor name such as `lg`. A pattern
+# matching no connected display means NO MOVE, not an error -- an undocked
+# laptop is the normal case, not a broken config. The six AeroSpace direction
+# words (left/right/up/down/next/prev) are REFUSED: they are grammar, not
+# names, and one of them would move the workspace to the wrong monitor at
+# exit 0.
+#
+# OPT-IN. There is no default by kind -- a workspace that says nothing stays
+# where it is. Two reasons, both measured 2026-09-17: applying a preference
+# takes two steps (enter, then move), so the workspace is born on the monitor
+# you are standing on and then leaves, and AeroSpace hands that monitor an
+# ARBITRARY replacement rather than what it was showing; and ~30 of the
+# contexts here are discovered from project folders, which cannot carry this
+# field, so any default would be one they could never decline.
+#
+# THESE FOUR ARE NEARLY FREE, which is why they opt in. They hold Slack,
+# Messages, mail and unfiled browser windows, so they are almost never empty
+# -- the gate fires at login and effectively nowhere else, which is exactly
+# when you want it and exactly when there is no carefully arranged other
+# screen to disturb. Keeping the laptop for the singleton apps so the external
+# display stays free for whatever context you are in was decided 2026-09-02;
+# this is that policy, without the movement lock.
 [[context]]
 name = "work"
+monitor = "main"
 
 [[context]]
 name = "ai"
+monitor = "main"
 
 [[context]]
 name = "browser"
+monitor = "main"
 
 [[context]]
 name = "personal"
+monitor = "main"
 
 
 # The monitor fallbacks (backlog #3). A monitor with nothing live on it would
@@ -238,8 +274,15 @@ name = "personal"
 # by that name aliases the user's main session.
 #
 # Which one appears is DETERMINISTIC because they are force-assigned in
-# aerospace.toml, not because AeroSpace picks sensibly. THAT HALF IS NOT DONE:
-# it needs the LG attached to read its monitor-name pattern. See HANDOFF.md.
+# aerospace.toml, not because AeroSpace picks sensibly. DONE 2026-09-16:
+# workspace-1 = ['built-in', 'main'], workspace-2 = ['lg', 'main'].
+#
+# THEY KEEP THE FORCE-ASSIGNMENT DELIBERATELY, where the four workspaces above
+# gave theirs up. A login anchor is the one case `context enter` cannot serve,
+# because nothing runs it at cold start -- and force-assignment places a
+# workspace atomically, without disturbing the other monitor, which the soft
+# `monitor` preference above cannot do. So do NOT give these two a `monitor`:
+# a force-assignment refuses the move, and `context doctor` reports the pair.
 [[context]]
 name = "workspace-1"
 hidden = true

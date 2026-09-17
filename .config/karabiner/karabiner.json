@@ -656,7 +656,7 @@
             "key_code" : "w"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace work"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context enter work"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -669,7 +669,7 @@
             "key_code" : "a"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace ai"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context enter ai"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -682,7 +682,7 @@
             "key_code" : "b"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace browser"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context enter browser"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -695,7 +695,7 @@
             "key_code" : "p"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace workspace personal"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context enter personal"
           } ],
           "conditions" : [ {
             "name" : "space-mode",

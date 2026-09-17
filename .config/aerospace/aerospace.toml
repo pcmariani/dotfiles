@@ -146,16 +146,39 @@ gaps.outer.bottom =     4
 gaps.outer.top =        4
 gaps.outer.right =      4
 
-# Ambient workspaces live on the LAPTOP. The external monitor is for whatever
-# context you are in, so switching contexts never disturbs Slack, Messages or
-# mail. Decided 2026-09-02; see docs/HANDOFF.md in context-based-mac for why a
-# context owns one screen rather than spanning both (AeroSpace workspaces
-# cannot span monitors at all).
+# THE AMBIENT-ON-LAPTOP POLICY MOVED OUT OF THIS FILE, 2026-09-17 (Spec C).
+# `work`, `ai`, `browser` and `personal` were force-assigned here from
+# 2026-09-02 until then. They now carry `monitor = "main"` in
+# ~/.config/context/contexts.toml, which `context enter` applies when the
+# workspace is EMPTY -- same placement, no movement lock.
 #
-# Without this, nothing pinned any workspace to any monitor, so workspaces
-# wandered to whichever screen they were last shown on -- and `aerospace
-# workspace X` focuses X on the monitor it currently lives on, dragging focus
-# across screens. That was the root cause of most multi-monitor friction.
+# WHY THEY LEFT: a force-assignment does not merely set a default, it REFUSES
+# `move-workspace-to-monitor` on that workspace (exit 2, naming itself), so
+# `work` could not be dragged to the external display by any means. That was
+# the complaint.
+#
+# WHAT WAS GIVEN UP, and it is real: a force-assignment places a workspace
+# ATOMICALLY. Measured 2026-09-17 -- switching to a pinned workspace on the
+# other monitor left the monitor you were on showing exactly what it had. The
+# soft preference takes two steps (enter, then move), so the workspace is born
+# on the monitor you are standing on and then leaves, and AeroSpace hands that
+# monitor an arbitrary replacement. For these four it almost never bites: they
+# hold Slack/Messages/mail and are hardly ever empty, so the gate fires at
+# login and little else. For anything that IS often empty, that trade is worse
+# and the preference is opt-in for exactly that reason.
+#
+# The original reasoning, still true and still the point of the policy: the
+# external monitor is for whatever context you are in, so switching contexts
+# never disturbs Slack, Messages or mail. See docs/HANDOFF.md in
+# context-based-mac for why a context owns one screen rather than spanning
+# both (AeroSpace workspaces cannot span monitors at all).
+#
+# And the hazard the block was created to fix, which the soft preference does
+# NOT re-open for these four, because they declare a monitor: with nothing
+# pinned and nothing declared, workspaces wander to whichever screen they were
+# last shown on -- and `aerospace workspace X` focuses X on the monitor it
+# currently lives on, dragging focus across screens. That was the root cause
+# of most multi-monitor friction.
 #
 # 'built-in' is a case-insensitive regex SUBSTRING of the monitor name, so it
 # survives resolution changes and display reordering in a way a 1-based index
@@ -183,10 +206,8 @@ gaps.outer.right =      4
 # 'Built-in Retina Display' does not contain 'lg', so the two patterns cannot
 # both match one display no matter which monitor is enumerated first.
 [workspace-to-monitor-force-assignment]
-work     = ['built-in', 'main']
-ai       = ['built-in', 'main']
-browser  = ['built-in', 'main']
-personal = ['built-in', 'main']
+# ONLY the two hidden login anchors remain. See the block above for why the
+# four ambient workspaces left, and contexts.toml for where they went.
 workspace-1 = ['built-in', 'main']
 workspace-2 = ['lg', 'main']
 

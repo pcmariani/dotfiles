@@ -322,10 +322,30 @@
                  ;; one-key jump rather than losing it.
                  [:!Stab [:aerospace "workspace-back-and-forth"]]
 
-                 [:w [:aerospace "workspace work"]]
-                 [:a [:aerospace "workspace ai"]]
-                 [:b [:aerospace "workspace browser"]]
-                 [:p [:aerospace "workspace personal"]]
+                 ;; THROUGH THE TOOL, not AeroSpace directly, since
+                 ;; 2026-09-17 (Spec C). Two things follow from it.
+                 ;;
+                 ;; These four now honour `monitor = "main"` in
+                 ;; contexts.toml when the workspace is EMPTY, which is what
+                 ;; replaced their force-assignment in aerospace.toml -- same
+                 ;; placement, and `work` can now be dragged to the external
+                 ;; display, which a force-assignment refused outright.
+                 ;;
+                 ;; And they gain the window MRU (Spec 8/9): `context enter`
+                 ;; focuses the window you actually used last. A bare
+                 ;; `aerospace workspace X` hands macOS the choice, so these
+                 ;; keys never had that while the picker did -- two paths that
+                 ;; disagreed.
+                 ;;
+                 ;; THE COST is latency: a direct aerospace call is ~10-20ms,
+                 ;; the tool's interpreter and config floor alone is
+                 ;; 0.09-0.17s. Accepted deliberately. To revert, put these
+                 ;; four lines back as [:aerospace "workspace <name>"] and run
+                 ;; goku -- nothing else depends on the change.
+                 [:w [:context "enter work"]]
+                 [:a [:context "enter ai"]]
+                 [:b [:context "enter browser"]]
+                 [:p [:context "enter personal"]]
 
                  ;; 1-9 are deliberately unbound. Numbered context slots were
                  ;; tried and removed 2026-08-31: pinning a number to a name
