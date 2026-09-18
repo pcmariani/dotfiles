@@ -50,6 +50,17 @@ height  = 420
 # Either way: launchctl kickstart -k "gui/$(id -u)/dev.paneld.paneld"
 screen  = "LG HDR WQHD"
 arm     = true
+# FONT. Every panel draws at 16pt unless it says otherwise (`font_size = N`,
+# points, per panel). Set 2026-09-18 -- before that the panel was NOT on
+# Ghostty.app's Iosevka 17: paneld's terminal library loads only its own
+# rendered defaults (14pt, its bundled face) and never reads ~/.config/ghostty.
+# The face is still that bundled default; only the size is ours.
+#
+# 900x420pt at 2x on the LG gives 94x19 cells at 16pt (was 105x22 at 14pt).
+# Do not derive that number; read it. The daemon logs one line per distinct
+# grid to ~/.local/state/paneld/paneld.log -- `grep grid` -- and the
+# sibling's column caps (context-based-mac Spec D) are set from that line.
+# Changing this needs a daemon restart like every other key here.
 
 # At reveal, paneld presses F12 in this panel's live pty. compose() binds F12 to
 # `reload-sync(picker-rows.sh)`, so the agent-status cell refreshes ~200ms into
