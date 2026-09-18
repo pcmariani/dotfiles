@@ -125,7 +125,13 @@ consumer = "/usr/bin/xargs -0 /usr/bin/open"
 # pickers use value-tab-display because they act on a NAME while showing a
 # path; here the path IS the value.
 fields   = "bare"
-multi    = false
+# Spec B, D5 (2026-09-18): tab toggles, Enter opens everything toggled.
+# `xargs -0 open` already takes N paths, and fzf's --print0 emits them
+# NUL-separated in list order. The `▌` marker column appears ahead of every
+# row -- fzf renders --marker only under --multi -- one dim column, and on a
+# bare path list nothing aligns against it. This is also why Spec B's held
+# cycle key is ctrl-] and not tab.
+multi    = true
 # Row 1, the top match. Only the workspace pickers start on row 2, where row 1
 # is the workspace you are already in.
 cursor_row = 1
