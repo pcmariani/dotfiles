@@ -28,7 +28,7 @@ hotkey  = "cmd-esc"
 # see ~/.config/context/pickers.toml. This door's Enter still means `enter`,
 # which is that entry's own default action, so no `--default` override is
 # needed here (compare the `move` panel below).
-compose = "context pick-command workspaces"
+compose = "context pick-command workspaces --title 'Workspaces' --socket /Users/petermariani/.local/state/context/picker.sock"
 width   = 900
 height  = 420
 # PINNED TO THE LG, 2026-09-16. Without this the panel follows keyboard focus
@@ -75,7 +75,7 @@ hotkey  = "shift-cmd-esc"
 # compose() writes that override into the consumer (picker_cli.py), and it
 # overrides ONLY the default (Enter) key. ctrl-t still means `room` here, not
 # `move-room` -- the relearn agreed 2026-09-13, see pickers.toml.
-compose = "context pick-command workspaces --default move"
+compose = "context pick-command workspaces --default move --title 'Move Window to Workspace' --socket /Users/petermariani/.local/state/context/move.sock"
 width   = 900
 height  = 420
 # Same pin as the `picker` panel above -- see its comment for the mechanism.
@@ -175,7 +175,7 @@ cycle          = true
 # The stale figure survived here for an hour while the block 30 lines down
 # correctly called it stale -- one file disagreeing with itself, which is what
 # a number with no date attached buys you. The sibling session caught it.
-compose        = "context pick-command switcher"
+compose        = "context pick-command switcher --socket /Users/petermariani/.local/state/context/switcher.sock"
 
 # AGENT STATUS GLYPHS, via the arm/refresh split. Added 2026-09-11 at the
 # user's explicit request -- "I'd really like to have that" -- REVERSING a

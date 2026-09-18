@@ -9,6 +9,12 @@
 
 [[picker]]
 name     = "workspaces"
+# NO `title` here on purpose: BOTH of this entry's doors override it, so a
+# default would only ever be shadowed. cmd-esc gets "Workspaces" and
+# shift-cmd-esc gets "Move Window to Workspace", written into the fzf flags by
+# compose() from paneld.toml's --title. That is the same route --default takes
+# and for the same reason -- one picker entry, two doors, and config cannot
+# tell them apart, so a per-door value has to come from the door.
 # ONE entry for both doors. `contexts` and `move` were identical in producer,
 # refresh, refresh_producer, fields, multi, cursor_row and no_input, and
 # differed only in which object their verbs acted on (going THERE vs sending
@@ -105,6 +111,7 @@ action = [
 
 [[picker]]
 name     = "files"
+title    = "Files"
 # Scoped to the CURRENT workspace's root by resolve_scope, and `fd` respects
 # .gitignore -- which is what keeps a client root at ~2,652 records instead of
 # 63,346. A rootless workspace correctly gets "nowhere to look".
@@ -125,6 +132,7 @@ cursor_row = 1
 
 [[picker]]
 name     = "config-files"
+title    = "Config"
 # Fixed scope, so this needs nothing from the tool: `fd` IS the producer. The
 # workspace-scoped `files` picker goes through `context pick --rows` only
 # because it has to resolve the focused workspace's root first.
@@ -244,9 +252,19 @@ cursor_row = 2
 # `--track --id-nth=1` once made fzf discard Enter and Esc silently, and
 # paneld's sendKey returns TRUE in that failure so nothing logs it.
 #
-# Side benefit: with no query, the ASCII-glyph hazard cannot fire here.
+# NOT a side benefit any more -- LOAD-BEARING as of 2026-09-18. With no query
+# the ASCII-glyph hazard cannot fire here, and the app-list column appended to
+# this surface is ASCII ("Chrome, Slack"). It lands inside field 2, which
+# --with-nth=2 makes fzf's own search text, so with a query enabled
+# --tiebreak=begin plus change:first could rank a row by its APP NAME and move
+# the cursor onto it -- the mechanism that once sent Enter into the wrong
+# workspace. See the comment at the append site in scripts/picker-rows.sh.
 #
-# REVERT: delete this line, then
+# So this picker also carries NO `title`: cmd-tab is a chord you hold, not a
+# page you read a heading on.
+#
+# REVERT: deleting this line now also requires removing the app column, or
+# re-checking that hazard. Then:
 #   launchctl kickstart -k "gui/$(id -u)/dev.paneld.paneld"
 no_input = true
 action = [
