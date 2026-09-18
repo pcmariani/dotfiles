@@ -29,7 +29,7 @@ hotkey  = "cmd-esc"
 # which is that entry's own default action, so no `--default` override is
 # needed here (compare the `move` panel below).
 compose = "context pick-command workspaces --title 'Workspaces' --socket /Users/petermariani/.local/state/context/picker.sock"
-width   = 900
+width   = 912
 height  = 420
 # PINNED TO THE LG, 2026-09-16. Without this the panel follows keyboard focus
 # (PanelController.swift:107 falls back to NSScreen.main), so the picker
@@ -90,7 +90,7 @@ hotkey  = "shift-cmd-esc"
 # overrides ONLY the default (Enter) key. ctrl-t still means `room` here, not
 # `move-room` -- the relearn agreed 2026-09-13, see pickers.toml.
 compose = "context pick-command workspaces --default move --title 'Move Window to Workspace' --socket /Users/petermariani/.local/state/context/move.sock"
-width   = 900
+width   = 912
 height  = 420
 # Same pin as the `picker` panel above -- see its comment for the mechanism.
 # These two are one surface behind two doors, so they must agree: a picker on
@@ -126,7 +126,7 @@ name    = "files"
 # have.
 hotkey  = "hyper-f20"
 compose = "context pick-command files"
-width   = 900
+width   = 912
 height  = 420
 # NOT armed, unlike every other panel. Arming RUNS the composed command so the
 # surface is drawn and ready -- and this producer's rows depend on WHICH
@@ -157,7 +157,7 @@ name    = "config-files"
 # default. See the files panel above.
 hotkey  = "hyper-f19"
 compose = "context pick-command config-files"
-width   = 900
+width   = 912
 height  = 420
 arm     = true
 
@@ -261,7 +261,7 @@ compose        = "context pick-command switcher --socket /Users/petermariani/.lo
 # the same `sendKey` path -- but it is untested, not verified.
 # If cmd-tab ever "does nothing" intermittently, remove this line first.
 on_reveal_key = "f12"
-width          = 900
+width          = 912
 height         = 420
 # Same pin as `picker` and `move` -- see the picker panel's comment. cmd-tab
 # is the one pressed most by reflex and least by reading, so a fixed location
