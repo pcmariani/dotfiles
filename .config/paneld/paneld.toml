@@ -143,6 +143,11 @@ height  = 420
 # So the producer runs at invocation instead. `fd` is fast (89 files in this
 # repo, 2,652 in a client root) and the rows are correct by construction
 # rather than correct-if-rearmed.
+# 2026-09-18: the daemon now does what this comment says. It did not before
+# -- show() armed only from idle and dismiss() always re-armed, so this panel
+# was idle exactly once and then held another workspace's rows for hours
+# (measured: armed 2311s ago). Spec B, D4: an arm = false panel never holds
+# a surface while hidden.
 arm     = false
 
 [[panel]]
