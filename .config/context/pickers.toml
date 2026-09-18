@@ -120,7 +120,14 @@ producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --ro
 # VERB for `context pick-accept` to dispatch; this picker pipes the selection
 # straight to macOS `open`, which does whatever the file's own default handler
 # does. `xargs -0` because fzf --print0 emits the selection NUL-terminated.
-consumer = "/usr/bin/xargs -0 /usr/bin/open"
+consumer = "/usr/bin/xargs -0 /usr/bin/open --"
+# Spec E (2026-09-18). The rows are RELATIVE to the focused context's root
+# and the border names it ("Files · context-based-mac"). compose() carries
+# the root from the producer to fzf's label and to the consumer through
+# ~/.local/state/context/files.root -- see picker_cli.py. `open --` is the
+# guard fd's './' prefix used to be: a top-level file named '-foo' is a
+# path, not an option.
+scoped   = true
 # `bare`: one path per record, no name<TAB>display split. The contexts
 # pickers use value-tab-display because they act on a NAME while showing a
 # path; here the path IS the value.
@@ -138,15 +145,20 @@ cursor_row = 1
 
 [[picker]]
 name     = "config-files"
-title    = "Config"
+title    = "Config · .config"
 # Fixed scope, so this needs nothing from the tool: `fd` IS the producer. The
 # workspace-scoped `files` picker goes through `context pick --rows` only
 # because it has to resolve the focused workspace's root first.
 #
 # ~/.config measured 1,505 files in 26ms. (~ was the tempting alternative:
 # 857,374 files and 7.6s.)
-producer = "/opt/homebrew/bin/fd --type f -0 . /Users/petermariani/.config"
-consumer = "/usr/bin/xargs -0 /usr/bin/open"
+producer = "/opt/homebrew/bin/fd --base-directory /Users/petermariani/.config --type f -0 --strip-cwd-prefix=always ."
+# Same look as `files` with a CONSTANT root, so it is config, not code: not
+# `scoped`. The literal `cd` is safe here only because paneld always uses
+# the split form (`... > sel ; hide ; consumer < sel`) and this picker has
+# no keep/reload action; in the piped form a cd stage would not reach xargs
+# (Spec E fact 9).
+consumer = "cd /Users/petermariani/.config && /usr/bin/xargs -0 /usr/bin/open --"
 fields   = "bare"
 multi    = false
 cursor_row = 1
