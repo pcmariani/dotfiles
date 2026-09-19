@@ -88,8 +88,9 @@ action = [
   # selectable row's text enters fzf's own search text, and
   # --tiebreak=begin plus change:first would rank it first the moment you
   # typed a `c` -- the mechanism that once sent Enter into the wrong
-  # workspace. compose() emits a --header instead: visible, unselectable,
-  # unsearchable.
+  # workspace. compose() emits a --footer hint instead (Spec J, 2026-09-19;
+  # a --header under the prompt before that): visible, unselectable,
+  # unsearchable, at the bottom of the panel.
   #
   # NOT on `switcher`: cmd-tab has no_input = true, so there is no query to
   # create from, and load_pickers refuses that combination outright.
@@ -112,7 +113,9 @@ action = [
 
 [[picker]]
 name     = "files"
-title    = "Files"
+# The input's ghost text (Spec J, 2026-09-19): what the box is for, dim until
+# you type. The root itself is in the footer ("~/projects/x/").
+title    = "Open a file under this root"
 # Scoped to the CURRENT workspace's root by resolve_scope, and `fd` respects
 # .gitignore -- which is what keeps a client root at ~2,652 records instead of
 # 63,346. A rootless workspace is an EMPTY SUCCESS (no rows, no root file,
@@ -134,8 +137,9 @@ refresh  = true
 # does. `xargs -0` because fzf --print0 emits the selection NUL-terminated.
 consumer = "/usr/bin/xargs -0 /usr/bin/open --"
 # Spec E (2026-09-18). The rows are RELATIVE to the focused context's root
-# and the border names it ("Files · context-based-mac"). compose() carries
-# the root from the producer to fzf's label and to the consumer through
+# and the footer names it ("~/projects/context-based-mac/"; the border label
+# did until Spec J, 2026-09-19). compose() carries the root from the producer
+# to fzf's footer and to the consumer through
 # ~/.local/state/context/files.root -- see picker_cli.py. `open --` is the
 # guard fd's './' prefix used to be: a top-level file named '-foo' is a
 # path, not an option.
@@ -157,7 +161,7 @@ cursor_row = 1
 
 [[picker]]
 name     = "config-files"
-title    = "Config: ~/.config/"
+title    = "Open a file under ~/.config/"
 # Fixed scope, so this needs nothing from the tool: `fd` IS the producer. The
 # workspace-scoped `files` picker goes through `context pick --rows` only
 # because it has to resolve the focused workspace's root first.
@@ -200,7 +204,7 @@ cursor_row = 1
 # app installed between the last dismissal and this reveal.
 [[picker]]
 name     = "apps"
-title    = "Applications"
+title    = "Launch an application"
 producer = "/Users/petermariani/projects/context-based-mac/scripts/app-rows.sh"
 refresh  = true
 consumer = "/usr/bin/xargs -0 -n1 /usr/bin/open -a"
@@ -232,7 +236,7 @@ cursor_row = 1
 # Re-armed on every workspace change by picker-refresh.sh, LAST in its loop.
 [[picker]]
 name     = "search"
-title    = "Search"
+title    = "Search workspaces, files and apps"
 producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source search"
 refresh  = true
 consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept search"
