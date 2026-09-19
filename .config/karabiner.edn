@@ -283,7 +283,21 @@
                  [:g :!!g] ;; hammerspoon hyper G: focus chrome Boomi Gmail
                  [:i [:open "Messages"]]
                  [:s [:open "Slack"]]
-                 ; [:q [:open "finder"]]
+                 ;; THE ATTENTION KEY (Spec G, 2026-09-19). `context attention`
+                 ;; fetches fresh agent status and enters the next workspace
+                 ;; whose agent is blocked or done, oldest need first; pressing
+                 ;; again goes to the next, wrapping. Nothing is dequeued by
+                 ;; visiting -- only by the agent's state changing (you type,
+                 ;; it goes working) or by herdr marking it seen when you work
+                 ;; in its pane. --notify so "nothing needs attention" and
+                 ;; "only X needs attention, and you are there" reach the
+                 ;; screen; failures banner regardless.
+                 ;;
+                 ;; `q` reads as queue and was free (a commented-out Finder
+                 ;; binding sat here and never shipped). Written while the user
+                 ;; slept; the key is waiting on eyes, and whether a visit
+                 ;; should mark the agent seen (spec D6) is the user's call.
+                 [:q [:context "--notify attention"]]
                  ; [:e [:open "Spotify"]]
                  ;; THE WORKSPACE TERMINAL. `context terminal` attaches this
                  ;; workspace's herdr session -- creating it if there is none --

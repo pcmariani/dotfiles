@@ -615,6 +615,19 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "q"
+          },
+          "to" : [ {
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context --notify attention"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "t"
           },
           "to" : [ {
