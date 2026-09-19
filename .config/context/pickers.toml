@@ -174,6 +174,39 @@ fields   = "bare"
 multi    = false
 cursor_row = 1
 
+# The APPLICATIONS picker -- space-shift-a, through `paneld toggle apps`.
+# Spec H (2026-09-19): the third member of the chord-summoned family
+# (shift-f files, shift-c config, shift-a apps), and config plus one producer
+# script like `config-files`: no verb, no tool code, no Python on the reveal.
+#
+# Rows are app NAMES (fd --format '{/.}' over /Applications,
+# /System/Applications and ~/Applications at depth 2, -t l for the symlinked
+# Safari, Finder appended by hand, LC_ALL=C sort -z -u -f), because the
+# consumer is `open -a`, which takes a name -- what Spotlight and this file's
+# neighbours in karabiner.edn ([:open "Messages"]) hand it. Two bundles with
+# one name collapse to one row and LaunchServices picks; here that is the two
+# Gmail shims. The list is unfiltered (installers, URL handlers and endpoint
+# agents included) until that annoys. Measured 2026-09-19: 131 rows, 20ms.
+#
+# The consumer's stderr ("Unable to find application named 'X'") lands in
+# ~/.local/state/paneld/paneld.log, not nowhere. -n1 because `open -a` takes
+# exactly one application; multi = false makes it moot.
+#
+# NOT re-armed on workspace change (picker-refresh.sh's loop stays
+# `switcher picker move files`): the rows do not depend on the workspace, and
+# paneld re-arms on every dismissal anyway. `refresh = true` reloads at
+# reveal (paneld's f12), the same shape as `files`; its real window is an
+# app installed between the last dismissal and this reveal.
+[[picker]]
+name     = "apps"
+title    = "Applications"
+producer = "/Users/petermariani/projects/context-based-mac/scripts/app-rows.sh"
+refresh  = true
+consumer = "/usr/bin/xargs -0 -n1 /usr/bin/open -a"
+fields   = "bare"
+multi    = false
+cursor_row = 1
+
 # cmd-tab's workspace switcher. IDENTICAL to `contexts` except for the
 # producer, and that difference is the whole point.
 #

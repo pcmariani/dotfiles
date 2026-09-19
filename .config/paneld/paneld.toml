@@ -167,6 +167,33 @@ height  = 420
 arm     = true
 
 [[panel]]
+name    = "apps"
+# Launch an installed application (Spec H, the sibling's
+# docs/superpowers/specs/2026-09-19-applications-picker-design.md). Summoned
+# by space-shift-a via `paneld toggle apps`, like files and config-files -- so
+# this hotkey is never pressed and is set explicitly only to avoid the f18
+# default. See the files panel above.
+hotkey  = "hyper-f17"
+# A bare `context`, like every compose line here. It is resolved ONCE, by
+# /bin/sh under the LaunchAgent's PATH (~/.local/bin first; the plist is
+# written by paneld's script/install.sh), at daemon boot and on `paneld reload
+# apps`. The pipeline it emits is absolute (app-rows.sh | fzf | xargs open -a),
+# so the reveal never searches PATH.
+compose = "context pick-command apps"
+width   = 912
+height  = 420
+# No `screen`: not pinned, unlike the three workspace panels. Armed like the
+# rest, and re-armed on every dismissal by the state machine -- but NOT by
+# picker-refresh.sh on workspace change, because the rows do not depend on the
+# workspace. `arm` is read at construction, so a change here needs a kickstart.
+arm     = true
+# The same reload-at-reveal the other pickers use: the daemon sends f12 when
+# the panel is shown, compose() binds it to reload-sync of the 20ms producer.
+# Nothing with side effects may be bound here; running a reload twice is
+# harmless.
+on_reveal_key = "f12"
+
+[[panel]]
 name    = "switcher"
 # cmd-tab, taken from the Dock by karabiner.edn and rewritten to cmd-f18.
 # The `to` binding KEEPS cmd deliberately: release-to-commit depends on the

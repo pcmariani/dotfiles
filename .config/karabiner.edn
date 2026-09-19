@@ -484,6 +484,15 @@
                  ;; back. This needs no workspace switch at all.
                  [:!Sc [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle config-files"]]
 
+                 ;; The APPLICATIONS picker (Spec H, 2026-09-19) -- the third
+                 ;; member of the shift family: shift-f files, shift-c config,
+                 ;; shift-a apps. Bare `a` above stays `enter ai`. Rows are
+                 ;; installed app names; Enter is `open -a`. Directly to
+                 ;; `paneld toggle`, like config-files and unlike files: there
+                 ;; is no rootless case to guard. Written while the user slept;
+                 ;; the key and its title are waiting on eyes.
+                 [:!Sa [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle apps"]]
+
                  [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
                  [:return_or_enter [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
                  ;; New Finder WINDOW. Deliberately not modelled on Finder's
