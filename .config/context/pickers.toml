@@ -113,9 +113,8 @@ action = [
 
 [[picker]]
 name     = "files"
-# The input's ghost text (Spec J, 2026-09-19): what the box is for, dim until
-# you type. The root itself is in the footer ("~/projects/x/").
-title    = "Open a file under this root"
+# No title (Spec J, 2026-09-19): the user wanted neither a border label nor
+# ghost text. The root shows in the footer ("~/projects/x/").
 # Scoped to the CURRENT workspace's root by resolve_scope, and `fd` respects
 # .gitignore -- which is what keeps a client root at ~2,652 records instead of
 # 63,346. A rootless workspace is an EMPTY SUCCESS (no rows, no root file,
@@ -161,7 +160,6 @@ cursor_row = 1
 
 [[picker]]
 name     = "config-files"
-title    = "Open a file under ~/.config/"
 # Fixed scope, so this needs nothing from the tool: `fd` IS the producer. The
 # workspace-scoped `files` picker goes through `context pick --rows` only
 # because it has to resolve the focused workspace's root first.
@@ -204,7 +202,6 @@ cursor_row = 1
 # app installed between the last dismissal and this reveal.
 [[picker]]
 name     = "apps"
-title    = "Launch an application"
 producer = "/Users/petermariani/projects/context-based-mac/scripts/app-rows.sh"
 refresh  = true
 consumer = "/usr/bin/xargs -0 -n1 /usr/bin/open -a"
@@ -236,7 +233,6 @@ cursor_row = 1
 # Re-armed on every workspace change by picker-refresh.sh, LAST in its loop.
 [[picker]]
 name     = "search"
-title    = "Search workspaces, files and apps"
 producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source search"
 refresh  = true
 consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept search"
