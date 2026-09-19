@@ -114,8 +114,19 @@ name     = "files"
 title    = "Files"
 # Scoped to the CURRENT workspace's root by resolve_scope, and `fd` respects
 # .gitignore -- which is what keeps a client root at ~2,652 records instead of
-# 63,346. A rootless workspace correctly gets "nowhere to look".
+# 63,346. A rootless workspace is an EMPTY SUCCESS (no rows, no root file,
+# no banner) since 2026-09-19: this producer runs in the background on every
+# workspace change now (the panel is armed), so it must not shout. The
+# keypress -- scripts/reveal-files.sh behind space-shift-f -- is what tells
+# the user there is no folder, and it keeps the panel closed.
 producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source files"
+# Armed and re-armed on every workspace change (picker-refresh.sh), so the
+# reveal is one step like cmd-esc; and RELOADED at reveal (paneld sends f12,
+# compose binds it to reload-sync of this same producer) so a file created
+# since the last workspace change is in the list. Spec E amendment,
+# 2026-09-19: the arm-at-reveal path cost a surface build plus a 400ms settle
+# before the 123ms pipeline even started, and the user called it slow.
+refresh  = true
 # NO action block, and therefore no tool code at all. Actions exist to name a
 # VERB for `context pick-accept` to dispatch; this picker pipes the selection
 # straight to macOS `open`, which does whatever the file's own default handler
@@ -145,7 +156,7 @@ cursor_row = 1
 
 [[picker]]
 name     = "config-files"
-title    = "Config · .config"
+title    = "Config: ~/.config/"
 # Fixed scope, so this needs nothing from the tool: `fd` IS the producer. The
 # workspace-scoped `files` picker goes through `context pick --rows` only
 # because it has to resolve the focused workspace's root first.

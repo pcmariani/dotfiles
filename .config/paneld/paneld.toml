@@ -128,27 +128,32 @@ hotkey  = "hyper-f20"
 compose = "context pick-command files"
 width   = 912
 height  = 420
-# NOT armed, unlike every other panel. Arming RUNS the composed command so the
-# surface is drawn and ready -- and this producer's rows depend on WHICH
-# WORKSPACE IS FOCUSED, which at daemon-start time is whatever it happens to
-# be. If that workspace has no root the producer correctly says "nowhere to
-# look", so the first invocation drew an empty list and only the second worked
-# (reported 2026-09-09).
+# ARMED, like every other panel, since 2026-09-19 (Spec E amendment). This
+# was `arm = false` from 2026-09-09 to 2026-09-18 on the argument that the
+# rows depend on which workspace is focused and rearming on every workspace
+# change would "run fd over a client root constantly". Measured 2026-09-19:
+# the whole producer (Python + fd) is 123ms, fd alone 17ms, and
+# picker-refresh.sh already runs a 150-330ms herdr fan-out on every workspace
+# change -- while the arm-at-reveal path cost a surface build plus the 400ms
+# settle timer before that 123ms even started, which the user called slow.
 #
-# The alternative was rearming this panel from picker-refresh.sh on every
-# workspace change, like `picker`. Rejected: that runs `fd` over the workspace
-# on every focus change, and a client root is ~2,652 files -- paying a
-# directory walk constantly for a picker opened occasionally.
+# So: armed here, re-armed by picker-refresh.sh on every workspace change (its
+# rearm loop names `files`), and RELOADED at reveal through on_reveal_key
+# below, so a file created since the last workspace change is in the list.
+# paneld defers a rearm while the panel is visible or a verb is running
+# (PanelStateMachine.rearmRequested), so a workspace change while this is
+# open rebuilds at dismiss, never under the user -- same as `picker`.
 #
-# So the producer runs at invocation instead. `fd` is fast (89 files in this
-# repo, 2,652 in a client root) and the rows are correct by construction
-# rather than correct-if-rearmed.
-# 2026-09-18: the daemon now does what this comment says. It did not before
-# -- show() armed only from idle and dismiss() always re-armed, so this panel
-# was idle exactly once and then held another workspace's rows for hours
-# (measured: armed 2311s ago). Spec B, D4: an arm = false panel never holds
-# a surface while hidden.
-arm     = false
+# A rootless workspace: the producer emits nothing and removes its root file
+# (no banner from a background arm); the KEYPRESS, scripts/reveal-files.sh,
+# banners and keeps the panel closed. `arm` is read at construction, so a
+# change here needs a kickstart, not `paneld reload`.
+arm     = true
+# The same reload-at-reveal `picker` and `move` use: the daemon sends this key
+# when the panel is shown, compose() binds it to reload-sync of the producer.
+# Nothing with side effects may be bound here; a reload is safe because
+# running it twice is harmless.
+on_reveal_key = "f12"
 
 [[panel]]
 name    = "config-files"

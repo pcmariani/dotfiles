@@ -940,7 +940,7 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle files"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/scripts/reveal-files.sh"
           } ],
           "conditions" : [ {
             "name" : "space-mode",

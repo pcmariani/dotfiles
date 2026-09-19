@@ -164,7 +164,10 @@ if [ -x "$PANELD" ]; then
     # whose latency is felt, so it should not be asked to rebuild between the
     # two slow ones. paneld does its panel work on the main queue, so this can
     # only help or be neutral -- it is a mitigation, not a proven fix.
-    for panel in switcher picker move; do
+    # `files` since 2026-09-19 (Spec E amendment): it is armed now, and its
+    # rows -- and the root file scripts/reveal-files.sh reads -- follow the
+    # focused workspace by this rearm, the same way the picker's rows do.
+    for panel in switcher picker move files; do
         "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
 fi

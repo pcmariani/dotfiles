@@ -460,14 +460,21 @@
                  ;; A rootless workspace correctly gets "nowhere to look":
                  ;; unlike `terminal`, a files picker genuinely needs a root.
                  ;;
-                 ;; `:run paneld toggle`, NOT a chord paneld registers. The two
-                 ;; workspace pickers are plain chords (cmd-esc,
-                 ;; shift-cmd-esc) so Carbon gets them directly, but this one
-                 ;; is a space-mode entry -- and a layer cannot hand Carbon a
-                 ;; chord it did not itself receive, so it drives paneld over
-                 ;; its control socket instead. Costs a shell round trip on a
-                 ;; key pressed far less often than ctrl-space was.
-                 [:!Sf [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle files"]]
+                 ;; `:run`, NOT a chord paneld registers. The two workspace
+                 ;; pickers are plain chords (cmd-esc, shift-cmd-esc) so Carbon
+                 ;; gets them directly, but this one is a space-mode entry --
+                 ;; and a layer cannot hand Carbon a chord it did not itself
+                 ;; receive, so it drives paneld over its control socket
+                 ;; instead. Costs a shell round trip on a key pressed far
+                 ;; less often than ctrl-space was.
+                 ;;
+                 ;; Through reveal-files.sh since 2026-09-19 (Spec E
+                 ;; amendment), not `paneld toggle files` directly: in a
+                 ;; rootless workspace the script banners "<ws> has no folder"
+                 ;; and does NOT show the panel; otherwise it is exactly
+                 ;; `paneld toggle files`. It reads the root file the panel's
+                 ;; own arm wrote, so it costs a `cat`, not a Python start.
+                 [:!Sf [:run "/Users/petermariani/projects/context-based-mac/scripts/reveal-files.sh"]]
 
                  ;; The CONFIG files picker -- ~/.config, fixed scope, from
                  ;; wherever you are. Separate from space-shift-f because that
