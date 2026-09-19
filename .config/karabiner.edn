@@ -298,7 +298,17 @@
                  ;; slept; the key is waiting on eyes, and whether a visit
                  ;; should mark the agent seen (spec D6) is the user's call.
                  [:q [:context "--notify attention"]]
-                 ; [:e [:open "Spotify"]]
+                 ;; THE SEARCH PICKER (Spec I, 2026-09-19) -- `e` for everything:
+                 ;; one query over every workspace (first, current on row 1,
+                 ;; cursor on row 2 as cmd-esc), every file under the focused
+                 ;; context's root, every installed app; Enter enters, opens or
+                 ;; launches by the row's kind. Before you type, only workspaces
+                 ;; show: it is a search box, not a browsable list. Directly to
+                 ;; `paneld toggle`, like config-files and apps. cmd-esc,
+                 ;; cmd-tab, space-shift-f and space-shift-a are untouched.
+                 ;; Written with the user at the keyboard but unseen; the door
+                 ;; and the kind glyphs (· file, ⌘ app) are the user's call.
+                 [:e [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"]]
                  ;; THE WORKSPACE TERMINAL. `context terminal` attaches this
                  ;; workspace's herdr session -- creating it if there is none --
                  ;; in a Ghostty window rooted at the workspace directory. It is

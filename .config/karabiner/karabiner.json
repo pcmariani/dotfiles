@@ -628,6 +628,19 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "e"
+          },
+          "to" : [ {
+            "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "t"
           },
           "to" : [ {

@@ -167,7 +167,12 @@ if [ -x "$PANELD" ]; then
     # `files` since 2026-09-19 (Spec E amendment): it is armed now, and its
     # rows -- and the root file scripts/reveal-files.sh reads -- follow the
     # focused workspace by this rearm, the same way the picker's rows do.
-    for panel in switcher picker move files; do
+    # `search` since 2026-09-19 (Spec I), LAST: its workspace rows (the cache
+    # written above, current first, MRU order) and its file rows (the root)
+    # both follow the focused workspace; switcher stays first because
+    # cmd-tab's latency is the one felt. NOT `apps`: its rows do not depend
+    # on the workspace and paneld re-arms it on every dismissal anyway.
+    for panel in switcher picker move files search; do
         "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
 fi

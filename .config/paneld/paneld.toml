@@ -194,6 +194,33 @@ arm     = true
 on_reveal_key = "f12"
 
 [[panel]]
+name    = "search"
+# One list of workspaces, files and apps, dispatched by row kind (Spec I, the
+# sibling's docs/superpowers/specs/2026-09-19-unified-search-picker-design.md).
+# Summoned by space-e via `paneld toggle search`, like the pickers above -- so
+# this hotkey is never pressed and is set explicitly only to avoid the f18
+# default. See the files panel.
+hotkey  = "hyper-f16"
+# A bare `context`, like the other six: resolved once by /bin/sh under the
+# LaunchAgent's PATH at boot and on `paneld reload search`; the emitted
+# pipeline is absolute (context pick --rows | fzf | context pick-accept).
+compose = "context pick-command search"
+width   = 912
+height  = 420
+# No `screen`: unpinned, like files, config-files and apps. Armed like the
+# rest, and re-armed on every workspace change by picker-refresh.sh, LAST in
+# its rearm loop, because both its workspace rows and its file rows follow the
+# focused workspace. `arm` is read at construction, so a change here needs a
+# kickstart.
+arm     = true
+# The same reload-at-reveal the other pickers use: the daemon sends f12 when
+# the panel is shown, compose() binds it to reload-sync of the ~150ms
+# producer, so the list is current at reveal even between workspace changes.
+# Nothing with side effects may be bound here; running a reload twice is
+# harmless.
+on_reveal_key = "f12"
+
+[[panel]]
 name    = "switcher"
 # cmd-tab, taken from the Dock by karabiner.edn and rewritten to cmd-f18.
 # The `to` binding KEEPS cmd deliberately: release-to-commit depends on the
