@@ -434,6 +434,10 @@
             "value" : 1,
             "type" : "variable_unless"
           }, {
+            "name" : "v-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
             "name" : "space-mode",
             "value" : 1,
             "type" : "variable_unless"
@@ -488,6 +492,10 @@
             "type" : "variable_unless"
           }, {
             "name" : "s-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          }, {
+            "name" : "v-mode",
             "value" : 1,
             "type" : "variable_unless"
           }, {

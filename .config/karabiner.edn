@@ -240,7 +240,7 @@
                    :afterup {:set ["f-mode" 0]}}]
 
                  ;space-mode
-                 [:spacebar nil [:!a-mode :!d-mode :!f-mode :!s-mode :!space-mode :!cmd-space-mode]
+                 [:spacebar nil [:!a-mode :!d-mode :!f-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :spacebar :halt true} 
                    :delayed {:canceled {:key :spacebar}} 
                    :held {:set ["space-mode" 1] :repeat false} 
@@ -249,7 +249,7 @@
                  ;cmd-space-mode
                  ; note: :modi re-emits the command so a tap still reaches
                  ; Spotlight. Beware :modifiers, which goku silently drops.
-                 [:!Cspacebar nil [:!a-mode :!d-mode :!f-mode :!s-mode :!space-mode :!cmd-space-mode]
+                 [:!Cspacebar nil [:!a-mode :!d-mode :!f-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
                   {:alone {:key :spacebar :modi :left_command :halt true}
                    :delayed {:canceled {:key :spacebar :modi :left_command}}
                    :held {:set ["cmd-space-mode" 1] :repeat false}
