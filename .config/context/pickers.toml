@@ -1,6 +1,7 @@
 # ~/.config/context/pickers.toml
 #
-# A picker is a producer, a consumer and a set of keybind -> verb actions.
+# A picker is a producer, a consumer and a set of keybind -> verb actions (or,
+# for `search`, verb-BY-KIND: a table keyed by the row's kind letter).
 # `context pick-command <name>` turns an entry here into the shell pipeline
 # the picker loop runs. The loop never reads this file.
 #
