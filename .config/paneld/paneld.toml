@@ -399,3 +399,12 @@ compose        = "context pick-command windows"
 arm            = true
 width          = 300
 height         = 420
+# Hold this long before the panel is DRAWN -- a tap, or a hammered sequence,
+# commits without it ever appearing. The user, 2026-09-21: "let's do 300ms",
+# after being told the hammering fix was the reveal-key removal rather than
+# the timing and that they might not want this at all. PER-PANEL on purpose:
+# the default is 150 and cmd-tab keeps it, because 300ms of invisibility on
+# the most-pressed key here would be a bad trade nobody asked for.
+# Read where the timer is scheduled, so `paneld reload windows` is enough to
+# change it -- unlike font_size/inset/line_height, which need a restart.
+reveal_delay_ms = 300
