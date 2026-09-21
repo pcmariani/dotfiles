@@ -172,7 +172,11 @@ if [ -x "$PANELD" ]; then
     # both follow the focused workspace; switcher stays first because
     # cmd-tab's latency is the one felt. NOT `apps`: its rows do not depend
     # on the workspace and paneld re-arms it on every dismissal anyway.
-    for panel in switcher picker move files search; do
+    # `windows` since 2026-09-20 (Spec L), LAST: its rows ARE the focused
+    # workspace's windows, so they follow it more directly than anything
+    # else here -- but it also re-produces at every reveal (`refresh` +
+    # `on_reveal_key`), so a stale arm costs it nothing and it pays last.
+    for panel in switcher picker move files search windows; do
         "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
 fi

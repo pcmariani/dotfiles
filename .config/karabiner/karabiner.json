@@ -65,6 +65,42 @@
             "modifiers" : [ "left_command", "left_shift" ]
           } ],
           "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "grave_accent_and_tilde",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_option" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f15",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "grave_accent_and_tilde",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_option", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f15",
+            "modifiers" : [ "left_command", "left_option", "left_shift" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "grave_accent_and_tilde",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_option", "right_shift" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f15",
+            "modifiers" : [ "left_command", "left_option", "left_shift" ]
+          } ],
+          "type" : "basic"
         } ]
       }, {
         "description" : "ctrl-hjkl navigates windows outside the terminal",

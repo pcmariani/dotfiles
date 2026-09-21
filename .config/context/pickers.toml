@@ -368,3 +368,30 @@ no_input = true
 action = [
   { bind = "enter", verb = "enter", after = "close", default = true },
 ]
+
+[[picker]]
+name       = "windows"
+# Spec L. The focused workspace's windows, most-recently-used first -- the
+# workspace switcher's shape one level down. option-cmd-` holds and cycles;
+# macOS keeps its own cmd-` (the user, 2026-09-20).
+producer   = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source windows"
+consumer   = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept windows"
+fields     = "value-tab-display"
+cursor_row = 2
+# The chord is HELD, not typed into -- the switcher's own setting. paneld's
+# cycle machine still delivers arrow keys and Enter to the surface.
+no_input   = true
+# Windows open, close and retitle continuously, unlike apps or workspaces, so
+# the rows are re-produced at every reveal. Without this the f12 bind is never
+# emitted (compose gates it on `refresh`) and paneld's poke lands on an
+# unbound key, silently -- a panel that lies about what is open.
+refresh    = true
+# THIS PICKER'S REVEAL RELOAD REORDERS ROWS -- the only one that does, which
+# is why this flag exists at all. Measured, not reasoned:
+# docs/experiments/2026-09-19-fzf-cursor-after-reload.py. Do NOT simplify the
+# chain to `+first+down`; that was measured and leaves the cursor exactly
+# where the bug leaves it.
+cursor_after_refresh = true
+# ONE LINE: an inline TOML table may not span lines, and a parse error here
+# takes every panel's compose down.
+action = [ { bind = "enter", verb = "focus-window", default = true } ]

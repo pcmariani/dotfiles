@@ -114,9 +114,26 @@
          ;; "cmd-shift-f18" into Carbon's generic shiftKey, which is
          ;; side-agnostic. Right COMMAND is deliberately not handled: the
          ;; forward chord works, which proves left cmd is the one in use.
+         ;; THE WINDOW SWITCHER, 2026-09-19 (Spec L). option-cmd-` cycles the
+         ;; FOCUSED WORKSPACE's windows, as cmd-tab cycles workspaces.
+         ;; Rewritten to cmd-f15 for the same reason cmd-tab is rewritten to
+         ;; cmd-f18 -- Carbon cannot register the raw chord -- and the
+         ;; rewrite KEEPS cmd deliberately: release-to-commit reads the
+         ;; physical modifier through a local NSEvent monitor, and a bare
+         ;; f15 would drop it. option-cmd rather than plain cmd (the user,
+         ;; 2026-09-20) so macOS KEEPS its own cmd-` for the frontmost app's
+         ;; windows. THREE rules for the same reason the tab chord needs
+         ;; three: `S` is LEFT shift, and ` is a left-hand reach with
+         ;; option-cmd under the left thumb, so the shifted chord is a
+         ;; natural RIGHT-shift press. Both shift rules map to the same
+         ;; cmd-opt-shift-f15, which paneld parses into Carbon's
+         ;; side-agnostic shiftKey. Fully reversible: delete these lines.
          :rules [[:!Ctab  :!Cf18]
                  [:!CStab :!CSf18]
-                 [:!CRtab :!CSf18]]
+                 [:!CRtab :!CSf18]
+                 [:!COgrave_accent_and_tilde  :!COf15]
+                 [:!COSgrave_accent_and_tilde :!COSf15]
+                 [:!CORgrave_accent_and_tilde :!COSf15]]
          }
 
         ;; CTRL-HJKL, THE OUTSIDE HALF, 2026-09-10. One key navigates

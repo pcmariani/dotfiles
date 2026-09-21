@@ -327,3 +327,35 @@ height         = 420
 # matters more here than anywhere else.
 screen         = "LG HDR WQHD"
 arm            = true
+
+# The window switcher -- option-cmd-backtick holds and cycles the FOCUSED
+# workspace's windows in MRU order, release focuses the pick. The sibling's
+# Spec L; its producer is `context pick --rows --source windows`.
+#
+# NOT PINNED, and that is the whole point of the panel. The three workspace
+# panels above pin to the LG because a reflex chord wants a fixed location.
+# This one lists the windows of the workspace you are LOOKING at, so it has
+# to appear where you are looking -- an unpinned panel lays out on
+# NSScreen.main, which is that screen. D11 of the spec said pinned; it was
+# reversed on that argument.
+#
+# `cmd-opt-f15`, not option-cmd-backtick: Carbon matches the modifier set
+# EXACTLY, so karabiner.edn rewrites the chord KEEPING both modifiers rather
+# than stripping them the way cmd-tab -> cmd-f18 does. f15 was the last
+# never-pressed function key free in both this file and karabiner.edn.
+#
+# Release-to-commit is keyed on COMMAND ONLY -- option is never consulted, so
+# a thumb slipping off option does not commit, and cmd-up commits regardless.
+# `arm = true` is effectively required for a cycle panel: the chord types into
+# the live surface, and the FIRST chord sends no step, so the producer opens
+# with the cursor already on row 2 (`load:down+unbind(load)` in the compose).
+[[panel]]
+name           = "windows"
+hotkey         = "cmd-opt-f15"
+hotkey_reverse = "cmd-opt-shift-f15"
+cycle          = true
+compose        = "context pick-command windows"
+arm            = true
+on_reveal_key  = "f12"
+width          = 912
+height         = 420
