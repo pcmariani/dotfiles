@@ -388,11 +388,65 @@
                  [:b [:context "enter browser"]]
                  [:p [:context "enter personal"]]
 
-                 ;; 1-9 are deliberately unbound. Numbered context slots were
-                 ;; tried and removed 2026-08-31: pinning a number to a name
-                 ;; needs a config edit to renumber, and the picker's fuzzy
-                 ;; match (ctrl-space, "apo", enter) is close enough in
-                 ;; keystrokes to not warrant a second mechanism.
+                 ;; NUMBERED SLOTS, back 2026-09-21 (Spec M). These were
+                 ;; tried and removed 2026-08-31 for TWO reasons, and only
+                 ;; one of them has been answered:
+                 ;;   "pinning a number to a name needs a config edit to
+                 ;;    renumber"  -- ANSWERED. space-shift-<n> pins the digit
+                 ;;    to the workspace you are in. The map is a state file
+                 ;;    (~/.local/state/context/slots.tsv), not config, and
+                 ;;    nobody edits it by hand.
+                 ;;   "the picker's fuzzy match is close enough to not
+                 ;;    warrant a second mechanism"  -- STILL TRUE, and
+                 ;;    overruled knowingly. The win is ~2 keystrokes on the
+                 ;;    3-4 hottest workspaces: the same trade the four letter
+                 ;;    keys above already make by hardcoding four names.
+                 ;; If these come out again, put this comment back with a
+                 ;; THIRD date rather than deleting the history.
+                 ;;
+                 ;; TWO SHIFT RULES PER DIGIT, and it is not belt-and-braces.
+                 ;; goku's `S` is LEFT shift only -- measured 2026-09-21
+                 ;; through `goku -d`, which writes to stdout and cannot
+                 ;; touch this file -- and 1-5 are LEFT-hand keys, so the
+                 ;; natural shift for them is the RIGHT one. `!S` alone would
+                 ;; miss exactly the digits most used. This is the failure
+                 ;; that sent shift-cmd-tab to the Dock on 2026-09-10.
+                 ;;
+                 ;; `--notify` on the SET keys only: their whole output is a
+                 ;; confirmation you would otherwise never see. The enter
+                 ;; keys need none -- success is visibly landing somewhere,
+                 ;; and main() notifies failures unconditionally.
+                 ;;
+                 ;; No conflict with `fn`+digit -> F1..F9 elsewhere in this
+                 ;; file: that rule's mandatory modifier is `fn`, these are
+                 ;; gated on the space layer. Checked in the COMPILED json.
+                 [:1 [:context "slot 1"]]
+                 [:2 [:context "slot 2"]]
+                 [:3 [:context "slot 3"]]
+                 [:4 [:context "slot 4"]]
+                 [:5 [:context "slot 5"]]
+                 [:6 [:context "slot 6"]]
+                 [:7 [:context "slot 7"]]
+                 [:8 [:context "slot 8"]]
+                 [:9 [:context "slot 9"]]
+                 [:!S1 [:context "--notify slot-set 1"]]
+                 [:!R1 [:context "--notify slot-set 1"]]
+                 [:!S2 [:context "--notify slot-set 2"]]
+                 [:!R2 [:context "--notify slot-set 2"]]
+                 [:!S3 [:context "--notify slot-set 3"]]
+                 [:!R3 [:context "--notify slot-set 3"]]
+                 [:!S4 [:context "--notify slot-set 4"]]
+                 [:!R4 [:context "--notify slot-set 4"]]
+                 [:!S5 [:context "--notify slot-set 5"]]
+                 [:!R5 [:context "--notify slot-set 5"]]
+                 [:!S6 [:context "--notify slot-set 6"]]
+                 [:!R6 [:context "--notify slot-set 6"]]
+                 [:!S7 [:context "--notify slot-set 7"]]
+                 [:!R7 [:context "--notify slot-set 7"]]
+                 [:!S8 [:context "--notify slot-set 8"]]
+                 [:!R8 [:context "--notify slot-set 8"]]
+                 [:!S9 [:context "--notify slot-set 9"]]
+                 [:!R9 [:context "--notify slot-set 9"]]
 
                  ;; AeroSpace - windows
                  ;; Cycle the windows of this workspace. dfs-next walks the
