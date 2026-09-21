@@ -381,17 +381,25 @@ cursor_row = 2
 # The chord is HELD, not typed into -- the switcher's own setting. paneld's
 # cycle machine still delivers arrow keys and Enter to the surface.
 no_input   = true
-# Windows open, close and retitle continuously, unlike apps or workspaces, so
-# the rows are re-produced at every reveal. Without this the f12 bind is never
-# emitted (compose gates it on `refresh`) and paneld's poke lands on an
-# unbound key, silently -- a panel that lies about what is open.
-refresh    = true
-# THIS PICKER'S REVEAL RELOAD REORDERS ROWS -- the only one that does, which
-# is why this flag exists at all. Measured, not reasoned:
-# docs/experiments/2026-09-19-fzf-cursor-after-reload.py. Do NOT simplify the
-# chain to `+first+down`; that was measured and leaves the cursor exactly
-# where the bug leaves it.
-cursor_after_refresh = true
+# NO `refresh`, NO `on_reveal_key`, NO `cursor_after_refresh` -- REMOVED
+# 2026-09-21, and the removal is the point. The user, on first use: "I must
+# be able to hammer this and it behave as expected."
+#
+# The reveal reload fired from paneld's reveal timer and its bind forced the
+# cursor back to row 2, so every chord step taken before the panel appeared
+# was DISCARDED: four taps inside the delay landed you on row 2, not row 4.
+# At the old 150ms that was a narrow window; the user has asked for a ~500ms
+# hold before the panel draws, which would have made it eat most real
+# hammering. Nothing reloads now, so nothing stomps the cursor, and the
+# panel serves the list it was armed with.
+#
+# THE COST, so it can be reversed knowingly: a window opened since the last
+# arm is not listed. paneld re-arms after every dismissal and
+# picker-refresh.sh re-arms on every workspace change, so the list is stale
+# only for a window opened in the workspace you are already sitting in,
+# since the last time the panel closed. To undo, restore `refresh`,
+# `cursor_after_refresh` and paneld's `on_reveal_key = "f12"` together --
+# they are one mechanism and half of it is worse than neither.
 # ONE LINE: an inline TOML table may not span lines, and a parse error here
 # takes every panel's compose down.
 action = [ { bind = "enter", verb = "focus-window", default = true } ]
