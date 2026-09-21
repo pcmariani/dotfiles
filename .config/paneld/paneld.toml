@@ -346,9 +346,50 @@ arm            = true
 #
 # Release-to-commit is keyed on COMMAND ONLY -- option is never consulted, so
 # a thumb slipping off option does not commit, and cmd-up commits regardless.
-# `arm = true` is effectively required for a cycle panel: the chord types into
-# the live surface, and the FIRST chord sends no step, so the producer opens
-# with the cursor already on row 2 (`load:down+unbind(load)` in the compose).
+#
+# `arm = true` IS REQUIRED HERE, and not merely conventional. A cycle chord's
+# steps are sent per keypress by `sendCycleKey`, not at reveal. With
+# `arm = false` `settle()` tears the surface down while hidden
+# (`holdsSurfaceWhileHidden`), so the first presses would be typed into an fzf
+# that is still spawning -- ~155-173ms warm, longer than the reveal delay and
+# squarely inside a hammering cadence. `sendKey` returns TRUE when the client
+# discards a keystroke, so it would fail SILENTLY and present as "hammering
+# does nothing sometimes". The FIRST chord sends no step, so the producer
+# opens with the cursor already on row 2 (`load:down+unbind(load)`).
+#
+# NO `on_reveal_key`, DELIBERATELY -- the only panel without one. The reveal
+# key fires a reload whose bind forces the cursor back to row 2, so every
+# chord step taken inside the reveal delay was discarded when the reveal
+# landed: hammer four times and you land on row 2, not row 4. The user asked
+# to be able to hammer this. The sibling dropped the panel's `refresh` to
+# match, so nothing stomps the cursor. COST: a window opened in the workspace
+# you are already sitting in is not listed until the next rearm. Theirs to
+# reverse.
+#
+# WIDTH 300, NOT 912 -- the user wanted one column and no more. The rows are
+# APP NAME ONLY (no window title), budget 20 content + ~4 fzf chrome = 24
+# columns. 300 gives 28 columns on the LG and **29 on the Retina, MEASURED**
+# (`grid 29x16 cells in 576x832px`). 260 was proposed and rejected: it lands
+# on EXACTLY 24 on the LG, which is the switcher's 85-of-85 zero-spare
+# condition in a new place. This panel is unpinned and can open on either
+# screen, so THE LG GOVERNS -- never size for the Retina.
+#
+# HOW TO DERIVE A NEW WIDTH, because two models have already been wrong here.
+# NEVER divide by the cell size in the log: it is rounded to whole pixels and
+# the division disagrees with itself (94 cols in 1800px and 95 in 1824px
+# cannot both hold at 19px). A first bracket that fixed that still predicted
+# 30 on the Retina and measured 29, because it omitted libghostty's
+# HORIZONTAL padding. The model that fits all four live observations
+# (900pt/2x=94, 912pt/2x=95, 288pt/2x=29, 900pt/1x=89) is
+# `cols = floor((width - 2*inset - 2*padding_x) * scale / cell)` with
+# padding_x 1-3pt, cell (18.93, 19.11]px at 2x and (9.93, 10.09]px at 1x.
+# Every padding value in that range agrees on the answers, so they are safe:
+# **260 -> LG 24 / Retina 25 · 280 -> 26 / 27 · 300 -> 28 / 29 · 320 -> 30 /
+# 31.** The LG column is the one that matters. Confirm by reading the grid
+# line after a kickstart rather than trusting any of this.
+#
+# `height` stays a FLOOR: the producer emits `paneld:rows:N` and the window
+# sizes down to the list.
 [[panel]]
 name           = "windows"
 hotkey         = "cmd-opt-f15"
@@ -356,6 +397,5 @@ hotkey_reverse = "cmd-opt-shift-f15"
 cycle          = true
 compose        = "context pick-command windows"
 arm            = true
-on_reveal_key  = "f12"
-width          = 912
+width          = 300
 height         = 420
