@@ -383,10 +383,45 @@
                  ;; 0.09-0.17s. Accepted deliberately. To revert, put these
                  ;; four lines back as [:aerospace "workspace <name>"] and run
                  ;; goku -- nothing else depends on the change.
-                 [:w [:context "enter work"]]
-                 [:a [:context "enter ai"]]
-                 [:b [:context "enter browser"]]
-                 [:p [:context "enter personal"]]
+                 ;; THESE FOUR ARE NOW SLOTS TOO, 2026-09-21 (Spec M, A2).
+                 ;; They were `enter <name>` with the name hardcoded here.
+                 ;; The mapping moved into ~/.local/state/context/slots.tsv,
+                 ;; with w/a/b/p as built-in defaults in `slots.py`, because
+                 ;; the PICKER has to draw which key reaches which workspace
+                 ;; and it cannot read this file. A second table in Python
+                 ;; would have disagreed with this one the moment a letter
+                 ;; was re-pointed, and the picker would have lied.
+                 ;;
+                 ;; So these keys behave exactly as before by default, and
+                 ;; `space-shift-<letter>` can now re-point one, which it
+                 ;; could not do while the name lived here.
+                 ;;
+                 ;; To revert: put `[:w [:context "enter work"]]` and its
+                 ;; three siblings back and delete the eight shift rules.
+                 ;; Nothing else depends on the change.
+                 [:w [:context "slot w"]]
+                 [:a [:context "slot a"]]
+                 [:b [:context "slot b"]]
+                 [:p [:context "slot p"]]
+                 ;; NO SHIFT SET-KEYS FOR THE LETTERS, and this is a
+                 ;; correction rather than a decision. They were written and
+                 ;; then removed the same minute, 2026-09-21, because
+                 ;; `space-shift-a` is ALREADY the applications picker and
+                 ;; `space-shift-b` is ALREADY new-chrome.sh -- both in this
+                 ;; same space layer, both declared LATER in this file than
+                 ;; the slot block. Karabiner takes the first match, so the
+                 ;; slot rules would have won and silently broken two
+                 ;; working keys. Found by reading the COMPILED json for
+                 ;; duplicate (key, modifier, condition) triples, not by
+                 ;; noticing it in the edn.
+                 ;;
+                 ;; So the letters are DISPLAY AND DEFAULT ONLY: they enter
+                 ;; their workspace and they draw in the picker's slot
+                 ;; column, but they cannot be re-pointed by a chord. The
+                 ;; digits are the settable ones. Editing
+                 ;; ~/.local/state/context/slots.tsv by hand still works for
+                 ;; a letter, and `w`/`p` could take set-keys safely if it
+                 ;; ever mattered -- only `a` and `b` are taken.
 
                  ;; NUMBERED SLOTS, back 2026-09-21 (Spec M). These were
                  ;; tried and removed 2026-08-31 for TWO reasons, and only
@@ -581,7 +616,12 @@
 
                  ;; The APPLICATIONS picker (Spec H, 2026-09-19) -- the third
                  ;; member of the shift family: shift-f files, shift-c config,
-                 ;; shift-a apps. Bare `a` above stays `enter ai`. Rows are
+                 ;; shift-a apps. Bare `a` above is `slot a`, which
+                 ;; resolves to `ai` by default (Spec M A2, 2026-09-21; it
+                 ;; was `enter ai` until then). THIS KEY IS WHY the slot
+                 ;; block has no `!Sa` set-key: both would be shift-a in the
+                 ;; space layer, and the slot block is declared first, so it
+                 ;; would have shadowed this picker. Rows are
                  ;; installed app names; Enter is `open -a`. Directly to
                  ;; `paneld toggle`, like config-files and unlike files: there
                  ;; is no rootless case to guard. Written while the user slept;

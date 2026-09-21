@@ -726,7 +726,7 @@
             "key_code" : "w"
           },
           "to" : [ {
-            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context enter work"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context slot w"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -739,7 +739,7 @@
             "key_code" : "a"
           },
           "to" : [ {
-            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context enter ai"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context slot a"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -752,7 +752,7 @@
             "key_code" : "b"
           },
           "to" : [ {
-            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context enter browser"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context slot b"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
@@ -765,7 +765,7 @@
             "key_code" : "p"
           },
           "to" : [ {
-            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context enter personal"
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context slot p"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
