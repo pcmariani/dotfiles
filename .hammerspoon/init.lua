@@ -510,7 +510,16 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "d", detachChromeTabToWorkspace)
 -- workspace, key fired, silent no-op. Scoped to AeroSpace's own idea of
 -- "this workspace" instead -- the same authority `context`'s own Python
 -- side defers to, never AppleScript's.
-local function chromeWindowCountInFocusedWorkspace()
+--
+-- Returns the list of {id, title} (AeroSpace's own window-id and
+-- window-title), not just a count: the caller needs BOTH -- the count for
+-- the v1 gate, and the non-focused entry's title to find the right item in
+-- Chrome's OWN "Move Tab to Another Window" submenu, which lists every
+-- Chrome window on the machine, not just this workspace's two (see the
+-- 2026-09-22 note on findTargetWindowMenuItem below -- "exactly one
+-- candidate" was never a valid test once a third Chrome window exists
+-- anywhere, which is the common case).
+local function chromeWindowsInFocusedWorkspace()
   local out, ok = hs.execute(aerospace .. " list-windows --workspace focused --json")
 
   if not ok then
@@ -523,15 +532,25 @@ local function chromeWindowCountInFocusedWorkspace()
     return nil
   end
 
-  local count = 0
+  local chromeWindows = {}
 
   for _, w in ipairs(windows) do
     if w["app-name"] == "Google Chrome" then
-      count = count + 1
+      table.insert(chromeWindows, { id = w["window-id"], title = w["window-title"] })
     end
   end
 
-  return count
+  return chromeWindows
+end
+
+-- AeroSpace's window-title is the macOS window title, e.g. "<active tab
+-- title> - Google Chrome - Peter". Chrome's own "Move Tab to Another
+-- Window" submenu shows just the tab-title portion (truncated with an
+-- ellipsis if long, plus "and N Other Tab(s)" for a multi-tab window) --
+-- so both sides need reducing to the same bare tab-title before they can
+-- be compared.
+local function chromeTabTitleFromWindowTitle(fullTitle)
+  return fullTitle:match("^(.-) %- Google Chrome") or fullTitle
 end
 
 -- The tab strip CANNOT be found by walking the window's full accessibility
@@ -612,25 +631,46 @@ end
 
 -- The submenu's own items are found the same way, scanned from the
 -- "Move Tab to Another Window" item's OWN position and size (not a fixed
--- offset), since the submenu opens immediately to its right regardless of
--- where on screen that item ended up.
+-- offset).
 --
--- v1 requires EXACTLY ONE candidate. "New Window" is Chrome's own generic
--- entry, not a specific window, and is excluded. Zero real candidates
--- means the only other window is Incognito -- Chrome itself excludes it
--- from this list, by design, and there is nothing to do. Two or more
--- would mean the earlier `chromeWindowCountInFocusedWorkspace() == 2` check raced against a
--- window opening; either way, an ambiguous target is a no-op, not a
--- guess.
-local function findSoleOtherWindowMenuItem(moveItem)
+-- TWO BUGS, found live 2026-09-22 against the user's real two-window
+-- "ai" workspace:
+--
+-- 1. The submenu does NOT always open to the item's right -- macOS flips
+--    it to the LEFT when there is not enough room on the right, and a
+--    window tiled against the screen's edge (exactly what this key is
+--    for) is the common case, not an edge case. Measured live: a window
+--    4pt from the screen's right edge opened its submenu leftward, and a
+--    right-only scan silently found nothing -- a real menu the user could
+--    see, an invisible bug underneath it. Now picks a side by the same
+--    logic macOS itself uses: is there enough room to the right of the
+--    item for a submenu to fit.
+--
+-- 2. "Exactly one candidate" (excluding "New Window") was never a valid
+--    test once a third Chrome window exists ANYWHERE on the machine --
+--    which is the common case, not rare, since Chrome's own submenu lists
+--    EVERY open Chrome window, not just this workspace's two. Measured
+--    live: 6 machine-wide windows produced 6 real candidates in the
+--    submenu although exactly 2 were in the focused workspace (the v1
+--    gate upstream was already correctly scoped -- this matching step was
+--    not). Now matches the SPECIFIC other window by title instead of
+--    counting candidates: `targetTabTitle` comes from AeroSpace's own
+--    window list (the non-focused Chrome window in this workspace), and a
+--    submenu entry matches when it is a PREFIX of that title once its
+--    trailing "and N Other Tab(s)" suffix and ellipsis are stripped --
+--    Chrome only ever truncates FROM the full tab title, never extends
+--    it, so a prefix match is exact wherever it succeeds. Zero matches
+--    (title format changed, or the target genuinely isn't listed, e.g.
+--    Incognito, which Chrome excludes from this menu by design) is a
+--    no-op, not a guess.
+local function findTargetWindowMenuItem(moveItem, targetTabTitle, screenFrame)
   local sw = hs.axuielement.systemWideElement()
   local pos = moveItem:attributeValue("AXPosition")
   local size = moveItem:attributeValue("AXSize")
-  local originX = pos.x + size.w
-  local originY = pos.y - 60
 
-  local seen = {}
-  local candidate, count = nil, 0
+  local roomToRight = (screenFrame.x + screenFrame.w) - (pos.x + size.w)
+  local originX = (roomToRight > 350) and (pos.x + size.w) or (pos.x - 700)
+  local originY = pos.y - 60
 
   for dx = 0, 700, 25 do
     for dy = 0, 400, 16 do
@@ -639,17 +679,15 @@ local function findSoleOtherWindowMenuItem(moveItem)
       if hit and hit:attributeValue("AXRole") == "AXMenuItem" then
         local title = hit:attributeValue("AXTitle")
 
-        if title and title ~= "" and title ~= "New Window" and not seen[title] then
-          seen[title] = true
-          candidate = hit
-          count = count + 1
+        if title and title ~= "" and title ~= "New Window" then
+          local bare = title:gsub(" and %d+ [Oo]ther [Tt]abs?$", ""):gsub("…$", "")
+
+          if bare ~= "" and targetTabTitle:sub(1, #bare) == bare then
+            return hit
+          end
         end
       end
     end
-  end
-
-  if count == 1 then
-    return candidate
   end
 
   return nil
@@ -673,19 +711,36 @@ local function joinChromeTabToOtherWindow()
     return false
   end
 
-  -- Scoped to the focused AeroSpace workspace (bug found live 2026-09-22
-  -- -- see the function's own comment). NOT #chrome:allWindows() either --
-  -- that was seen, live, to include a near-zero-size stray AX window
-  -- (frame 86x19), so a raw accessibility count would misfire this gate.
-  if chromeWindowCountInFocusedWorkspace() ~= 2 then
-    return false
-  end
-
   local window = chrome:focusedWindow()
 
   if not window then
     return false
   end
+
+  -- Scoped to the focused AeroSpace workspace (bug found live 2026-09-22
+  -- -- see the function's own comment). NOT #chrome:allWindows() either --
+  -- that was seen, live, to include a near-zero-size stray AX window
+  -- (frame 86x19), so a raw accessibility count would misfire this gate.
+  local chromeWindows = chromeWindowsInFocusedWorkspace()
+
+  if not chromeWindows or #chromeWindows ~= 2 then
+    return false
+  end
+
+  local windowId = window:id()
+  local targetTitle = nil
+
+  for _, w in ipairs(chromeWindows) do
+    if w.id ~= windowId then
+      targetTitle = w.title
+    end
+  end
+
+  if not targetTitle then
+    return false
+  end
+
+  local targetTabTitle = chromeTabTitleFromWindowTitle(targetTitle)
 
   -- Defensive: discard anything a previous, interrupted run of this
   -- function left open, so a stale highlight can never carry into this
@@ -724,7 +779,9 @@ local function joinChromeTabToOtherWindow()
   moveItem:performAction("AXPress")
   hs.timer.usleep(400000)
 
-  local otherWindowItem = findSoleOtherWindowMenuItem(moveItem)
+  local otherWindowItem = findTargetWindowMenuItem(
+    moveItem, targetTabTitle, window:screen():fullFrame()
+  )
 
   if not otherWindowItem then
     dismissAnyChromeMenu()
