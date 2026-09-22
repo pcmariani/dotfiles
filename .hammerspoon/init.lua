@@ -697,6 +697,26 @@ local function dismissAnyChromeMenu()
   hs.eventtap.keyStroke({}, "escape", 0)
 end
 
+-- BUG, found live 2026-09-22: `performAction("AXShowMenu")` on the tab
+-- element was measured blocking for a consistent ~1.5s -- not organic
+-- rendering time (the menu is fully findable within ~150ms of the call
+-- returning early, and pollUntil below finds it fast once given the
+-- chance) but AXUIElement's default cross-process messaging timeout,
+-- which this call was hitting every time because Chrome apparently never
+-- sends the acknowledgement the AX bridge is waiting for. This is what
+-- the user saw as "the first menu sits open for a while" -- the earlier
+-- pollUntil change fixed the wait AFTER this call returns, not the block
+-- INSIDE it, which dominates.
+--
+-- `hs.axuielement` objects expose `setTimeout(seconds)` for exactly this
+-- -- the same messaging timeout, made explicit and short. Chrome still
+-- shows the menu / opens the submenu / completes the press regardless of
+-- whether our end waits for its acknowledgement, so this only changes how
+-- long we sit blocked, never what happens. Verified live: 0.2s here, full
+-- end-to-end join in 0.437s (down from >1.9s), tab history still intact
+-- (a fresh `go back` after the join still reached the earlier URL).
+local AX_ACTION_TIMEOUT = 0.2
+
 -- Replaces a fixed sleep-then-hope with an actual wait for the state to
 -- show up: retries `attempt` every `intervalSeconds` until it returns a
 -- truthy value or `timeoutSeconds` elapses. As fast as Chrome actually
@@ -777,6 +797,7 @@ local function joinChromeTabToOtherWindow()
     return false
   end
 
+  tab:setTimeout(AX_ACTION_TIMEOUT)
   tab:performAction("AXShowMenu")
 
   local tabPos = tab:attributeValue("AXPosition")
@@ -796,6 +817,7 @@ local function joinChromeTabToOtherWindow()
   -- AXPress on a submenu-owning item is what opens ITS submenu -- this is
   -- how VoiceOver activates one -- which avoids arrow keys (and their
   -- stateful-highlight trap above) entirely.
+  moveItem:setTimeout(AX_ACTION_TIMEOUT)
   moveItem:performAction("AXPress")
 
   local otherWindowItem = pollUntil(function()
@@ -807,6 +829,7 @@ local function joinChromeTabToOtherWindow()
     return false
   end
 
+  otherWindowItem:setTimeout(AX_ACTION_TIMEOUT)
   otherWindowItem:performAction("AXPress")
   return true
 end
