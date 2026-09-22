@@ -468,6 +468,255 @@ end
 hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "d", detachChromeTabToWorkspace)
 
 
+-- Join the active tab of the frontmost Chrome window into the OTHER Chrome
+-- window. v1 scope, agreed with the user 2026-09-22: exactly two Chrome
+-- windows open -- three or more is ambiguous about which window "wins"
+-- and no-ops rather than guessing.
+--
+-- Exists because of an AeroSpace bug: dragging a tab between two TILED
+-- windows makes the target window jump away mid-drag. Not fixable here --
+-- this trades the drag for a key.
+--
+-- TWO MECHANISMS ARE RULED OUT, both confirmed live against Chrome
+-- 153.0.8010.53, 2026-09-22, with disposable throwaway windows (a tab
+-- driven through two URLs so it has real back/forward history):
+--
+--   AppleScript's own `move tab N of window id A to end of tabs of window
+--   id B` is DESTRUCTIVE. It returns success with no error and delivers a
+--   blank chrome://newtab/ carrying a FRESH tab id -- the URL and the
+--   entire back/forward history are gone. Looks exactly like success.
+--   NEVER use it for this.
+--
+--   Chrome's Tab menu has no "Move Tab to Window" item on this version --
+--   only "Move Tab to New Window", which is breakOutChromeTab's own
+--   mechanism above, unrelated and untouched.
+--
+-- WHAT WORKS: the tab's own real right-click context menu, opened with
+-- ZERO mouse movement via performAction("AXShowMenu") on the tab's
+-- accessibility element. It contains "Move Tab to Another Window" with a
+-- submenu listing the other open window(s) -- the same internal code path
+-- as a real drag, so history survives. Verified live: a tab driven through
+-- two URLs kept the SAME AppleScript tab id across the join, and calling
+-- `go back` on it in its new window correctly returned to the earlier
+-- URL -- where the AppleScript verb above produces a dead blank tab.
+local function chromeWindowCount()
+  local ok, count = hs.osascript.applescript(
+    'tell application "Google Chrome" to count windows'
+  )
+
+  if not ok then
+    return nil
+  end
+
+  return count
+end
+
+-- The tab strip CANNOT be found by walking the window's full accessibility
+-- tree top-down -- that recursion wanders into web page content and is
+-- dangerously slow (measured: it did not return). Hit-testing instead:
+-- a handful of probe points near the top-left of the window land on a
+-- tab-strip descendant. (x=100 at this offset is Chrome's "Tab Search"
+-- dropdown, an AXPopUpButton, not a tab -- harmless here since we only use
+-- the hit to walk UP to its parent's siblings, not act on it directly.)
+-- One hop up from the hit is an AXGroup whose AXChildren include the
+-- AXTabGroup; ITS AXChildren are the tabs (AXRadioButton, AXValue == true
+-- on the active one).
+local function findActiveChromeTab(window)
+  local sw = hs.axuielement.systemWideElement()
+  local f = window:frame()
+
+  for _, dx in ipairs({ 100, 120, 140, 160, 180, 200, 220 }) do
+    for _, dy in ipairs({ 10, 14, 18 }) do
+      local hit = sw:elementAtPosition(f.x + dx, f.y + dy)
+      local parent = hit and hit:attributeValue("AXParent")
+      local siblings = parent and parent:attributeValue("AXChildren")
+
+      if siblings then
+        for _, sibling in ipairs(siblings) do
+          if sibling:attributeValue("AXRole") == "AXTabGroup" then
+            for _, tab in ipairs(sibling:attributeValue("AXChildren") or {}) do
+              if tab:attributeValue("AXValue") == true then
+                return tab
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return nil
+end
+
+-- The context menu ITSELF is also found by hit-testing, not by walking the
+-- app's AXChildren (no AXMenu ever showed up there, checked live) and not
+-- by counting arrow-key presses down from the top. That looked promising
+-- at first -- 4 downs landed on "Move Tab to Another Window" -- until a
+-- SECOND run, on a menu never dismissed with Escape, added its 4 downs to
+-- the PREVIOUS run's leftover highlight instead of starting fresh, and a
+-- later blind Enter on that drifted position landed on "Show Tabs
+-- Vertically". That preference is APP-WIDE, not per-window, so it
+-- silently changed the layout of every real Chrome window on this
+-- machine -- caught only because a screenshot of a REAL window was taken
+-- immediately after. (Reverted the same way: chrome:selectMenuItem
+-- {"View","Show Tabs Vertically"}.) Hit-testing sidesteps the highlight
+-- state entirely, and performAction("AXShowMenu") is always preceded by a
+-- defensive Escape below, in case a previous run of this function did not
+-- get to clean up its own menu.
+--
+-- Scanned relative to the ACTIVE TAB's own position, not the window's
+-- frame -- proven offsets (menu item column starting ~130pt right of the
+-- tab's left edge, item rows every ~24-34pt) hold regardless of window
+-- size or position, where a window-frame-relative offset would not.
+local function findVisibleMenuItem(originX, originY, title)
+  local sw = hs.axuielement.systemWideElement()
+
+  for dx = 0, 420, 20 do
+    for dy = 0, 420, 14 do
+      local hit = sw:elementAtPosition(originX + dx, originY + dy)
+
+      if hit
+          and hit:attributeValue("AXRole") == "AXMenuItem"
+          and hit:attributeValue("AXTitle") == title
+      then
+        return hit
+      end
+    end
+  end
+
+  return nil
+end
+
+-- The submenu's own items are found the same way, scanned from the
+-- "Move Tab to Another Window" item's OWN position and size (not a fixed
+-- offset), since the submenu opens immediately to its right regardless of
+-- where on screen that item ended up.
+--
+-- v1 requires EXACTLY ONE candidate. "New Window" is Chrome's own generic
+-- entry, not a specific window, and is excluded. Zero real candidates
+-- means the only other window is Incognito -- Chrome itself excludes it
+-- from this list, by design, and there is nothing to do. Two or more
+-- would mean the earlier `chromeWindowCount() == 2` check raced against a
+-- window opening; either way, an ambiguous target is a no-op, not a
+-- guess.
+local function findSoleOtherWindowMenuItem(moveItem)
+  local sw = hs.axuielement.systemWideElement()
+  local pos = moveItem:attributeValue("AXPosition")
+  local size = moveItem:attributeValue("AXSize")
+  local originX = pos.x + size.w
+  local originY = pos.y - 60
+
+  local seen = {}
+  local candidate, count = nil, 0
+
+  for dx = 0, 700, 25 do
+    for dy = 0, 400, 16 do
+      local hit = sw:elementAtPosition(originX + dx, originY + dy)
+
+      if hit and hit:attributeValue("AXRole") == "AXMenuItem" then
+        local title = hit:attributeValue("AXTitle")
+
+        if title and title ~= "" and title ~= "New Window" and not seen[title] then
+          seen[title] = true
+          candidate = hit
+          count = count + 1
+        end
+      end
+    end
+  end
+
+  if count == 1 then
+    return candidate
+  end
+
+  return nil
+end
+
+local function dismissAnyChromeMenu()
+  hs.eventtap.keyStroke({}, "escape", 0)
+end
+
+local function joinChromeTabToOtherWindow()
+  local chrome = hs.application.get("Google Chrome")
+
+  if not chrome then
+    hs.alert.show("🌐 Chrome is not running")
+    return false
+  end
+
+  -- Same guard as breakOutChromeTab: acting on a window the user cannot
+  -- see would be a surprise, not a feature.
+  if not chrome:isFrontmost() then
+    return false
+  end
+
+  -- AppleScript's OWN window count, not #chrome:allWindows() -- that was
+  -- seen, live, to include a near-zero-size stray AX window (frame
+  -- 86x19) that AppleScript's "count windows" does not count. Trusting
+  -- the accessibility layer for that number would misfire this v1 gate.
+  if chromeWindowCount() ~= 2 then
+    return false
+  end
+
+  local window = chrome:focusedWindow()
+
+  if not window then
+    return false
+  end
+
+  -- Defensive: discard anything a previous, interrupted run of this
+  -- function left open, so a stale highlight can never carry into this
+  -- run (see the comment on findVisibleMenuItem above for why that
+  -- matters).
+  dismissAnyChromeMenu()
+  hs.timer.usleep(200000)
+
+  local tab = findActiveChromeTab(window)
+
+  if not tab then
+    hs.alert.show("🌐 Chrome's tab strip is not where it used to be")
+    return false
+  end
+
+  tab:performAction("AXShowMenu")
+  hs.timer.usleep(400000)
+
+  local tabPos = tab:attributeValue("AXPosition")
+  local moveItem = findVisibleMenuItem(
+    tabPos.x, tabPos.y, "Move Tab to Another Window"
+  )
+
+  if not moveItem then
+    -- The path is matched by its ENGLISH name, so a Chrome rename lands
+    -- here. Say so out loud: a key that silently does nothing is the
+    -- expensive failure, not the noisy one.
+    hs.alert.show("🌐 Chrome has no 'Move Tab to Another Window' menu item")
+    dismissAnyChromeMenu()
+    return false
+  end
+
+  -- AXPress on a submenu-owning item is what opens ITS submenu -- this is
+  -- how VoiceOver activates one -- which avoids arrow keys (and their
+  -- stateful-highlight trap above) entirely.
+  moveItem:performAction("AXPress")
+  hs.timer.usleep(400000)
+
+  local otherWindowItem = findSoleOtherWindowMenuItem(moveItem)
+
+  if not otherWindowItem then
+    dismissAnyChromeMenu()
+    return false
+  end
+
+  otherWindowItem:performAction("AXPress")
+  return true
+end
+
+-- ⌘⇧⌃⌥O → join the active Chrome tab into the other Chrome window ("the
+-- OTHER one"). `o` was free in the space-mode layer -- checked against
+-- every bare-letter rule in karabiner.edn's space-mode block -- and reads
+-- as "other" alongside `d` for "detach".
+hs.hotkey.bind({ "cmd", "shift", "ctrl", "alt" }, "o", joinChromeTabToOtherWindow)
 
 
 

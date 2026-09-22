@@ -296,6 +296,17 @@
                  ;; shift keeps this in the `d` family while staying distinct.
                  [:!Sd :!CTOd] ;; hammerspoon cmd-ctrl-alt D: detach and move
 
+                 ;; Join the active Chrome tab into the OTHER Chrome
+                 ;; window -- the v1 case of exactly 2 windows open. Exists
+                 ;; to route around an AeroSpace bug where dragging a tab
+                 ;; between two TILED windows makes the target window jump
+                 ;; away mid-drag. `o` reads as "the OTHER window",
+                 ;; alongside `d` for "detach"; free in this layer as of
+                 ;; 2026-09-22 (checked every bare-letter rule below).
+                 ;; Silent no-op unless exactly 2 Chrome windows are open,
+                 ;; matching space-d's own "nothing to do" silence.
+                 [:o :!!o] ;; hammerspoon hyper O: join chrome tab to other window
+
                  ;; applications
                  [:g :!!g] ;; hammerspoon hyper G: focus chrome Boomi Gmail
                  [:i [:open "Messages"]]
