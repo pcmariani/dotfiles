@@ -1,0 +1,22 @@
+# fd --ignore-file, gitignore format. Used ONLY by context's `files` and
+# `search` pickers (context/producers.py), paired with --no-ignore-vcs --
+# so a repo's own .gitignore no longer hides anything from the picker, and
+# this file is the only thing that does. Edit freely.
+
+node_modules/
+.git/
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+target/
+.next/
+.nuxt/
+.turbo/
+.cache/
+coverage/
+.terraform/
