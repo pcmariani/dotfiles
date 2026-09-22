@@ -697,6 +697,27 @@ local function dismissAnyChromeMenu()
   hs.eventtap.keyStroke({}, "escape", 0)
 end
 
+-- Replaces a fixed sleep-then-hope with an actual wait for the state to
+-- show up: retries `attempt` every `intervalSeconds` until it returns a
+-- truthy value or `timeoutSeconds` elapses. As fast as Chrome actually
+-- renders the menu (typically well under the old fixed 400ms), and still
+-- bounded so a genuine failure returns nil instead of hanging the key.
+local function pollUntil(attempt, timeoutSeconds, intervalSeconds)
+  local deadline = hs.timer.secondsSinceEpoch() + timeoutSeconds
+
+  repeat
+    local result = attempt()
+
+    if result then
+      return result
+    end
+
+    hs.timer.usleep(intervalSeconds * 1000000)
+  until hs.timer.secondsSinceEpoch() >= deadline
+
+  return nil
+end
+
 local function joinChromeTabToOtherWindow()
   local chrome = hs.application.get("Google Chrome")
 
@@ -757,12 +778,11 @@ local function joinChromeTabToOtherWindow()
   end
 
   tab:performAction("AXShowMenu")
-  hs.timer.usleep(400000)
 
   local tabPos = tab:attributeValue("AXPosition")
-  local moveItem = findVisibleMenuItem(
-    tabPos.x, tabPos.y, "Move Tab to Another Window"
-  )
+  local moveItem = pollUntil(function()
+    return findVisibleMenuItem(tabPos.x, tabPos.y, "Move Tab to Another Window")
+  end, 0.8, 0.02)
 
   if not moveItem then
     -- The path is matched by its ENGLISH name, so a Chrome rename lands
@@ -777,11 +797,10 @@ local function joinChromeTabToOtherWindow()
   -- how VoiceOver activates one -- which avoids arrow keys (and their
   -- stateful-highlight trap above) entirely.
   moveItem:performAction("AXPress")
-  hs.timer.usleep(400000)
 
-  local otherWindowItem = findTargetWindowMenuItem(
-    moveItem, targetTabTitle, window:screen():fullFrame()
-  )
+  local otherWindowItem = pollUntil(function()
+    return findTargetWindowMenuItem(moveItem, targetTabTitle, window:screen():fullFrame())
+  end, 0.8, 0.02)
 
   if not otherWindowItem then
     dismissAnyChromeMenu()
