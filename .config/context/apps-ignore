@@ -1,0 +1,12 @@
+# Used ONLY by context's `apps` and `search` pickers (scripts/app-rows.sh).
+# One exact app NAME per line, as it appears in the picker -- not a path,
+# not a glob. Edit freely.
+
+Claude Code URL Handler
+TeamsURLHandler
+LogiMgr Uninstaller
+UninstallApplication
+Install macOS Tahoe
+CuaDriver
+QualysCloudAgent
+PMCPackageManager
