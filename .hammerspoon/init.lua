@@ -499,13 +499,36 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "d", detachChromeTabToWorkspace)
 -- two URLs kept the SAME AppleScript tab id across the join, and calling
 -- `go back` on it in its new window correctly returned to the earlier
 -- URL -- where the AppleScript verb above produces a dead blank tab.
-local function chromeWindowCount()
-  local ok, count = hs.osascript.applescript(
-    'tell application "Google Chrome" to count windows'
-  )
+-- BUG, found live 2026-09-22: this used to be AppleScript's global `count
+-- windows`, which counts every Chrome window on the whole machine, not just
+-- the two the user is looking at. That is wrong for what this key is FOR --
+-- two windows tiled side by side in ONE AeroSpace workspace -- and it fails
+-- in exactly the realistic case: the user has other Chrome windows open in
+-- OTHER workspaces essentially always, so the global count is almost never
+-- 2 even when the two windows on screen are exactly what the key should
+-- act on. Reproduced live: 6 Chrome windows machine-wide, 2 in the focused
+-- workspace, key fired, silent no-op. Scoped to AeroSpace's own idea of
+-- "this workspace" instead -- the same authority `context`'s own Python
+-- side defers to, never AppleScript's.
+local function chromeWindowCountInFocusedWorkspace()
+  local out, ok = hs.execute(aerospace .. " list-windows --workspace focused --json")
 
   if not ok then
     return nil
+  end
+
+  local windows = hs.json.decode(out)
+
+  if not windows then
+    return nil
+  end
+
+  local count = 0
+
+  for _, w in ipairs(windows) do
+    if w["app-name"] == "Google Chrome" then
+      count = count + 1
+    end
   end
 
   return count
@@ -596,7 +619,7 @@ end
 -- entry, not a specific window, and is excluded. Zero real candidates
 -- means the only other window is Incognito -- Chrome itself excludes it
 -- from this list, by design, and there is nothing to do. Two or more
--- would mean the earlier `chromeWindowCount() == 2` check raced against a
+-- would mean the earlier `chromeWindowCountInFocusedWorkspace() == 2` check raced against a
 -- window opening; either way, an ambiguous target is a no-op, not a
 -- guess.
 local function findSoleOtherWindowMenuItem(moveItem)
@@ -650,11 +673,11 @@ local function joinChromeTabToOtherWindow()
     return false
   end
 
-  -- AppleScript's OWN window count, not #chrome:allWindows() -- that was
-  -- seen, live, to include a near-zero-size stray AX window (frame
-  -- 86x19) that AppleScript's "count windows" does not count. Trusting
-  -- the accessibility layer for that number would misfire this v1 gate.
-  if chromeWindowCount() ~= 2 then
+  -- Scoped to the focused AeroSpace workspace (bug found live 2026-09-22
+  -- -- see the function's own comment). NOT #chrome:allWindows() either --
+  -- that was seen, live, to include a near-zero-size stray AX window
+  -- (frame 86x19), so a raw accessibility count would misfire this gate.
+  if chromeWindowCountInFocusedWorkspace() ~= 2 then
     return false
   end
 
