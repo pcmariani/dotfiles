@@ -411,12 +411,23 @@ reveal_delay_ms = 300
 
 [[panel]]
 name    = "keybindings"
-# Read-only keybindings reference. Summoned by space-? via `paneld toggle
-# keybindings`, like files/config-files/apps -- so this hotkey is never
-# pressed and is set explicitly only to avoid the f18 default. f16/17/19/20
-# are already taken by switcher/apps/config-files/files; f21 is free.
+# A static keybindings reference, paged by `less` -- NOT a picker (see
+# context/keybindings_view.py and pickers.toml's note). Summoned by
+# space-? via `paneld toggle keybindings`, like files/config-files/apps --
+# so this hotkey is never pressed and is set explicitly only to avoid the
+# f18 default. f16/17/19/20 are already taken by switcher/apps/config-
+# files/files; f21 failed to parse (HOTKEY NOT REGISTERED), f14 works.
 hotkey  = "hyper-f14"
-compose = "context pick-command keybindings"
-width   = 912
-height  = 420
+# render-keybindings-command prints the pane's whole pipeline: the
+# renderer piped into `less -R`, restarted if it ever exits (see
+# context/keybindings_view.py's own comment for why).
+compose = "context render-keybindings-command"
+# FIXED, not content-driven -- the user's own ask: equal padding on all
+# four sides of the SMALL monitor (Built-in Retina, 1440x900 logical,
+# measured via hs.screen). For ANY margin M centred on that screen,
+# width - height must equal 1440 - 900 = 540 -- solved at M=150:
+# width=1140, height=600. Same absolute px on the big monitor (LG HDR
+# WQHD, 3440x1440) by the user's own choice, margins uneven there.
+width   = 1140
+height  = 600
 arm     = true
