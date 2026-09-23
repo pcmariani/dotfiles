@@ -639,6 +639,16 @@
                  ;; the key and its title are waiting on eyes.
                  [:!Sa [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle apps"]]
 
+                 ;; THE KEYBINDINGS HELPER (2026-09-23). space-? for "what
+                 ;; can I press" -- a read-only reference, like the other
+                 ;; three picker chords above. `:!Sslash` is shift-slash,
+                 ;; i.e. "?" on a US layout. Verified free before adding
+                 ;; this: grepped the whole file for :slash/:!Sslash -- the
+                 ;; only other hit is s-mode's OWN `:!Sslash` as an OUTPUT
+                 ;; (a different layer's `l` key sends it), not an input
+                 ;; condition inside space-mode. Built overnight, autonomously.
+                 [:!Sslash [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle keybindings"]]
+
                  [:!Sb [:run "/Users/petermariani/.config/aerospace/new-chrome.sh"]]
                  [:return_or_enter [:run "/Users/petermariani/.config/aerospace/new-ghostty.sh"]]
                  ;; New Finder WINDOW. Deliberately not modelled on Finder's
