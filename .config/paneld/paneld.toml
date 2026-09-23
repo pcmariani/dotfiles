@@ -408,3 +408,15 @@ height         = 420
 # Read where the timer is scheduled, so `paneld reload windows` is enough to
 # change it -- unlike font_size/inset/line_height, which need a restart.
 reveal_delay_ms = 300
+
+[[panel]]
+name    = "keybindings"
+# Read-only keybindings reference. Summoned by space-? via `paneld toggle
+# keybindings`, like files/config-files/apps -- so this hotkey is never
+# pressed and is set explicitly only to avoid the f18 default. f16/17/19/20
+# are already taken by switcher/apps/config-files/files; f21 is free.
+hotkey  = "hyper-f21"
+compose = "context pick-command keybindings"
+width   = 912
+height  = 420
+arm     = true

@@ -403,3 +403,26 @@ no_input   = true
 # ONE LINE: an inline TOML table may not span lines, and a parse error here
 # takes every panel's compose down.
 action = [ { bind = "enter", verb = "focus-window", default = true } ]
+
+# THE KEYBINDINGS HELPER -- space-?, through `paneld toggle keybindings`.
+# Built overnight, 2026-09-23, per the backlog item "a keybindings-helper
+# popup on space-?, listing every bound key, logically grouped." Read-only
+# reference, not an action list: no action block, so the consumer just
+# discards the selection -- same shape as apps/config-files, which also
+# have no action block and no pick-accept involvement at all.
+#
+# Rows come from ~/.config/context/keybindings.toml, a NEW, hand-maintained
+# data file -- deliberately NOT parsed out of karabiner.edn's freeform prose
+# comments (see the design spec's D2 for why: no structured place to put a
+# description, and a scraper reading comment prose is exactly the kind of
+# fragile mechanism this project has been burned by before). It WILL drift
+# from karabiner.edn if a binding changes and this file isn't updated by
+# hand -- no automatic sync exists yet.
+[[picker]]
+name     = "keybindings"
+producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source keybindings"
+refresh  = true
+consumer = "/usr/bin/xargs -0 /usr/bin/true"
+fields   = "bare"
+multi    = false
+cursor_row = 1

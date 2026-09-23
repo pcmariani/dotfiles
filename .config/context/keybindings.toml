@@ -1,0 +1,193 @@
+# Keybindings reference for the keybindings-helper popup (space-?).
+#
+# HAND-MAINTAINED, NOT auto-derived from karabiner.edn -- see
+# docs/superpowers/specs/2026-09-23-keybindings-helper-design.md (D2) for
+# why: karabiner.edn's rich prose comments are not reliably machine-parsable,
+# and this project's own precedent (files-ignore, apps-ignore) is a plain
+# data file the user edits directly rather than a scraper that can silently
+# drift or misparse. This file WILL drift from karabiner.edn as chords
+# change; there is no automatic check. Update it by hand when a real
+# binding changes.
+#
+# One [[group]] per section, in the order they should be shown. Each group
+# has a `name` and one or more [[group.binding]] entries (`key`,
+# `description`). Scope: the space-mode layer (by far the largest and
+# most-used), cmd-space-mode (move-window), and the global chords outside
+# any layer. NOT covered (2026-09-23 decision, see the spec's Scoped Out):
+# chrome-mode/s-mode/d-mode/vim-mode/f-mode -- narrow utility sub-layers,
+# rarely used, already documented inline in karabiner.edn for whoever needs
+# them.
+
+[[group]]
+name = "Workspaces"
+
+[[group.binding]]
+key = "space-w / a / b / p"
+description = "enter workspace slot w/a/b/p (defaults: work/ai/browser/personal)"
+
+[[group.binding]]
+key = "space-1..9"
+description = "enter workspace slot 1-9"
+
+[[group.binding]]
+key = "space-shift-1..9"
+description = "point this slot digit at the current workspace"
+
+[[group.binding]]
+key = "space-tab"
+description = "cycle this workspace's windows (DFS order, wraps)"
+
+[[group.binding]]
+key = "space-h / j / k / l, arrows"
+description = "focus window left/down/up/right (j/k cross monitor boundary)"
+
+[[group.binding]]
+key = "space-shift-tab"
+description = "workspace back-and-forth"
+
+[[group.binding]]
+key = "space-` (grave)"
+description = "move this workspace to the next monitor"
+
+[[group.binding]]
+key = "ctrl-h / j / k / l"
+description = "navigate windows outside a terminal (nvim/herdr own it inside)"
+
+[[group.binding]]
+key = "cmd-tab (hold, release to commit)"
+description = "cycle AeroSpace workspaces"
+
+[[group.binding]]
+key = "opt-cmd-` (hold, release to commit)"
+description = "cycle this workspace's windows"
+
+[[group.binding]]
+key = "cmd-esc"
+description = "workspace picker (paneld)"
+
+[[group.binding]]
+key = "cmd-shift-esc"
+description = "move the focused window to a picked workspace"
+
+[[group]]
+name = "Window state"
+
+[[group.binding]]
+key = "space-f"
+description = "toggle fullscreen"
+
+[[group.binding]]
+key = "space-z"
+description = "toggle floating / tiling"
+
+[[group.binding]]
+key = "space-r"
+description = "flatten this workspace's layout tree (reset)"
+
+[[group.binding]]
+key = "space-, / ."
+description = "set layout: accordion / tiles"
+
+[[group.binding]]
+key = "space-- / space-="
+description = "resize the focused window smaller / larger"
+
+[[group.binding]]
+key = "cmd-space-h / j / k / l"
+description = "move the focused window left/down/up/right"
+
+[[group.binding]]
+key = "cmd-space-w / a / b / p"
+description = "move the focused window to workspace work/ai/browser/personal"
+
+[[group]]
+name = "Pickers"
+
+[[group.binding]]
+key = "space-e"
+description = "search: every workspace, every file under this root, every app"
+
+[[group.binding]]
+key = "space-shift-f"
+description = "files picker, scoped to this workspace's root"
+
+[[group.binding]]
+key = "space-shift-c"
+description = "config files picker (~/.config)"
+
+[[group.binding]]
+key = "space-shift-a"
+description = "applications picker"
+
+[[group.binding]]
+key = "space-shift-p"
+description = "terminal context picker (herdr sessions)"
+
+[[group.binding]]
+key = "space-?"
+description = "this keybindings reference"
+
+[[group]]
+name = "New window / app"
+
+[[group.binding]]
+key = "space-t"
+description = "attach or open this workspace's terminal session"
+
+[[group.binding]]
+key = "space-shift-t"
+description = "Ghostty quick terminal (dropdown)"
+
+[[group.binding]]
+key = "space-return"
+description = "new Ghostty window"
+
+[[group.binding]]
+key = "space-n"
+description = "new Finder window"
+
+[[group.binding]]
+key = "space-shift-b"
+description = "new Chrome window"
+
+[[group]]
+name = "Commands"
+
+[[group.binding]]
+key = "space-m"
+description = "toggle mic mute"
+
+[[group.binding]]
+key = "space-shift-r"
+description = "reload Hammerspoon"
+
+[[group.binding]]
+key = "space-d"
+description = "detach the active Chrome tab into its own window"
+
+[[group.binding]]
+key = "space-shift-d"
+description = "detach the Chrome tab, then open the move picker"
+
+[[group.binding]]
+key = "space-o"
+description = "join the active Chrome tab into the other Chrome window (this workspace, exactly 2 windows)"
+
+[[group]]
+name = "Applications"
+
+[[group.binding]]
+key = "space-g"
+description = "focus Chrome's Boomi Gmail tab"
+
+[[group.binding]]
+key = "space-i"
+description = "open Messages"
+
+[[group.binding]]
+key = "space-s"
+description = "open Slack"
+
+[[group.binding]]
+key = "space-q"
+description = "go to the next workspace whose agent needs attention"
