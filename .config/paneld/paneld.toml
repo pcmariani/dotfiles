@@ -419,15 +419,20 @@ name    = "keybindings"
 # files/files; f21 failed to parse (HOTKEY NOT REGISTERED), f14 works.
 hotkey  = "hyper-f14"
 # render-keybindings-command prints the pane's whole pipeline: the
-# renderer piped into `less -R`, restarted if it ever exits (see
-# context/keybindings_view.py's own comment for why).
+# renderer piped into `less -R --lesskey-src=keybindings.lesskey` (NOT
+# `-k`/`--lesskey-file=` -- that flag wants a COMPILED lesskey file and
+# rejected this plain-text one live, "Cannot use lesskey file"), then
+# paneld's own PICKER_HIDE command -- so `less` exiting (q, or the
+# lesskey-bound Esc) actually closes the panel, the same as a dismissed
+# fzf picker.
 compose = "context render-keybindings-command"
 # FIXED, not content-driven -- the user's own ask: equal padding on all
 # four sides of the SMALL monitor (Built-in Retina, 1440x900 logical,
 # measured via hs.screen). For ANY margin M centred on that screen,
-# width - height must equal 1440 - 900 = 540 -- solved at M=150:
-# width=1140, height=600. Same absolute px on the big monitor (LG HDR
-# WQHD, 3440x1440) by the user's own choice, margins uneven there.
-width   = 1140
-height  = 600
+# width - height must equal 1440 - 900 = 540. First cut used M=150
+# (1140x600); the user asked to size up a bit, so M=100: width=1240,
+# height=700. Same absolute px on the big monitor (LG HDR WQHD,
+# 3440x1440) by the user's own choice, margins uneven there.
+width   = 1240
+height  = 700
 arm     = true
