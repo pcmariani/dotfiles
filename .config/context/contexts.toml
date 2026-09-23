@@ -202,6 +202,28 @@ path_args   = ["--new-window", "{path}"]
 app_name    = "Code"
 bundle_name = "Visual Studio Code"
 
+# Group 3: the generic `open -a App <path>` document route -- Preview has no
+# cwd concept and no per-context reuse protocol at all, unlike neovide/code.
+# Verified live 2026-09-23: `open -a Preview <path>` genuinely creates a NEW
+# window even when Preview already has one open elsewhere, but AeroSpace
+# groups the new window into that OTHER window's workspace and steals focus
+# there -- the reported bug. file_args (not path_args: {path} here is the
+# FILE being opened, not a context directory) routes this through the same
+# placement helper `context open` already uses, so the new window gets moved
+# back into the current workspace instead. Re-opening a file already open
+# elsewhere still jumps there (Preview reuses that window, so there's no new
+# one to move) -- accepted native behaviour, not fixed; `open -n` was tested
+# and rejected: it forces a genuinely new process, but that process's own
+# window-restore feature silently reopens whatever was last "resumed",
+# unrelated to the file actually requested.
+[[app]]
+name            = "preview"
+argv            = ["/usr/bin/open", "-a", "Preview"]
+app_name        = "Preview"
+bundle_name     = "Preview"
+open_extensions = ["pdf"]
+file_args       = ["{path}"]
+
 # The config tree itself, so the files picker can reach it. Not discovered:
 # ~/.config is under none of the [discover] roots, and adding it as a root
 # would make every direct child (~/.config/nvim, ~/.config/herdr, ...) its own
