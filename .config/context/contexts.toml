@@ -175,11 +175,15 @@ app_name    = "neovide"
 # The apps/search pickers' row for this app (scripts/app-rows.sh) -- lets
 # launch-app route through `context open` instead of a bare `open -a`.
 bundle_name = "Neovide"
-# Per-context reuse (2026-09-22 spec): picking one of these from the
-# search picker's file rows opens it as a TAB in that context's own
-# already-running Neovide, cold-starting one if none is live yet. Add an
-# extension here any time -- no code change needed.
-open_extensions = ["xml", "json"]
+# Per-context reuse (2026-09-22 spec): picking a file from the search
+# picker's file rows opens it as a TAB in that context's own
+# already-running Neovide, cold-starting one if none is live yet. Matched
+# by bundle_name against macOS's own LaunchServices default-app for the
+# file (2026-09-23) -- not a hand-maintained extension list, which used
+# to cover only xml/json and silently misrouted anything else (e.g. .py)
+# into whatever unrelated Neovide window LaunchServices happened to pick
+# for a plain `open --`. Whatever you set as the file's default app in
+# Finder is what this now follows, automatically.
 remote_bin = "/opt/homebrew/bin/nvim"
 # ONE token for "+cd {path}", not two -- see the design spec's D7 for why
 # splitting them silently opens the directory itself as a stray tab.
@@ -215,13 +219,13 @@ bundle_name = "Visual Studio Code"
 # one to move) -- accepted native behaviour, not fixed; `open -n` was tested
 # and rejected: it forces a genuinely new process, but that process's own
 # window-restore feature silently reopens whatever was last "resumed",
-# unrelated to the file actually requested.
+# unrelated to the file actually requested. Matched by bundle_name against
+# macOS's own default-app resolution (2026-09-23), same as neovide above.
 [[app]]
 name            = "preview"
 argv            = ["/usr/bin/open", "-a", "Preview"]
 app_name        = "Preview"
 bundle_name     = "Preview"
-open_extensions = ["pdf"]
 file_args       = ["{path}"]
 
 # The config tree itself, so the files picker can reach it. Not discovered:
