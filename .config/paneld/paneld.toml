@@ -415,7 +415,7 @@ name    = "keybindings"
 # keybindings`, like files/config-files/apps -- so this hotkey is never
 # pressed and is set explicitly only to avoid the f18 default. f16/17/19/20
 # are already taken by switcher/apps/config-files/files; f21 is free.
-hotkey  = "hyper-f21"
+hotkey  = "hyper-f14"
 compose = "context pick-command keybindings"
 width   = 912
 height  = 420
