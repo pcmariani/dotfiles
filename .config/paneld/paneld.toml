@@ -29,7 +29,7 @@ hotkey  = "cmd-esc"
 # which is that entry's own default action, so no `--default` override is
 # needed here (compare the `move` panel below).
 compose = "context pick-command workspaces --title 'Workspaces' --socket /Users/petermariani/.local/state/context/picker.sock"
-width   = 740
+width   = 700
 height  = 420
 # PINNED TO THE LG, 2026-09-16. Without this the panel follows keyboard focus
 # (PanelController.swift:107 falls back to NSScreen.main), so the picker
@@ -320,8 +320,14 @@ compose        = "context pick-command switcher --socket /Users/petermariani/.lo
 # the same `sendKey` path -- but it is untested, not verified.
 # If cmd-tab ever "does nothing" intermittently, remove this line first.
 on_reveal_key = "f12"
-width          = 880
+width          = 925
 height         = 420
+# 16 -> 18, the user's own ask ("increase the font of the switcher by 2
+# points"), switcher-only. Needs a daemon restart to take effect, not
+# `paneld reload switcher` -- see the `windows` panel's comment on
+# reveal_delay_ms for the same distinction (font_size/inset/line_height
+# vs. everything read live off the config).
+font_size      = 18
 # Same pin as `picker` and `move` -- see the picker panel's comment. cmd-tab
 # is the one pressed most by reflex and least by reading, so a fixed location
 # matters more here than anywhere else.
