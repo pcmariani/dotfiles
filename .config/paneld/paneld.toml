@@ -29,7 +29,7 @@ hotkey  = "cmd-esc"
 # which is that entry's own default action, so no `--default` override is
 # needed here (compare the `move` panel below).
 compose = "context pick-command workspaces --title 'Workspaces' --socket /Users/petermariani/.local/state/context/picker.sock"
-width   = 912
+width   = 740
 height  = 420
 # PINNED TO THE LG, 2026-09-16. Without this the panel follows keyboard focus
 # (PanelController.swift:107 falls back to NSScreen.main), so the picker
@@ -320,7 +320,7 @@ compose        = "context pick-command switcher --socket /Users/petermariani/.lo
 # the same `sendKey` path -- but it is untested, not verified.
 # If cmd-tab ever "does nothing" intermittently, remove this line first.
 on_reveal_key = "f12"
-width          = 912
+width          = 880
 height         = 420
 # Same pin as `picker` and `move` -- see the picker panel's comment. cmd-tab
 # is the one pressed most by reflex and least by reading, so a fixed location
