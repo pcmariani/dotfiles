@@ -93,7 +93,7 @@ on-mode-changed = []
 # a feedback loop because focus-follows-mouse.enabled is false below; with that
 # true, this would fight it.
 on-focus-changed = [
-    'exec-and-forget [ $(/opt/homebrew/bin/aerospace list-windows --workspace focused --count) -eq 1 ] && /opt/homebrew/bin/borders width=0 || /opt/homebrew/bin/borders width=4',
+    # 'exec-and-forget /opt/homebrew/bin/borders width=4',
     'exec-and-forget /Users/petermariani/.config/context/record-window-focus.sh',
     'exec-and-forget /opt/homebrew/bin/aerospace move-mouse window-lazy-center'
 ]
@@ -120,9 +120,19 @@ on-focus-changed = [
 # picker-refresh.sh's own rendered-for comparison is now redundant. Leave it
 # until the shell side has tests -- it is harmless, and deleting untested
 # shell is how the last round of picker bugs reached the user.
+#
+# Chrome workspace-steal guard runs FIRST, then picker-refresh.sh, as ONE
+# chained command -- exec-on-workspace-change cannot be declared twice
+# (confirmed: duplicate TOML keys are a hard parse error), and the guard
+# must not be embedded inside picker-refresh.sh itself (its internal
+# settle/re-exec loop would multiply the guard's firing). See
+# docs/superpowers/specs/2026-09-26-chrome-workspace-steal-guard-design.md
+# in context-based-mac. GUARD_ARMED is unset here deliberately -- the
+# guard defaults to dry-run (logs what it WOULD do, corrects nothing)
+# until it's been watched under real use and explicitly armed.
 exec-on-workspace-change = [
     '/bin/bash', '-c',
-    '/Users/petermariani/.config/context/picker-refresh.sh'
+    '/Users/petermariani/.config/context/chrome-workspace-steal-guard.sh; /Users/petermariani/.config/context/picker-refresh.sh'
 ]
 
 focus-follows-mouse.enabled = false

@@ -430,6 +430,85 @@ end
 hs.hotkey.bind({ "cmd", "shift", "ctrl", "alt" }, "d", breakOutChromeTab)
 
 
+-- Chrome workspace-steal guard: non-interactive correction entry point,
+-- invoked via `hs -c "correctChromeSteal('<workspace>')"` from
+-- chrome-workspace-steal-guard.sh, which has already: matched an
+-- unknown-URL Chrome front window against a fresh cache, confirmed this
+-- is not its own echo, acquired correction.lock, and backgrounded this
+-- whole call under `timeout 5`. This function does not re-check any of
+-- that -- re-checking here would duplicate the guard's own decision
+-- logic in two places and risk them disagreeing.
+--
+-- See docs/superpowers/specs/2026-09-26-chrome-workspace-steal-guard-design.md
+-- in context-based-mac for the full design, including why the marker is
+-- written BEFORE move/refocus (not after), and why a failed move must
+-- not refocus.
+local STEAL_GUARD_MARKER_FILE =
+  os.getenv("HOME") .. "/.local/state/context/chrome-tabs/last-corrected-window"
+local STEAL_GUARD_AEROSPACE_BIN = "/opt/homebrew/bin/aerospace"
+
+local function writeStealGuardMarker(windowId)
+  local tmp = STEAL_GUARD_MARKER_FILE .. ".tmp"
+  local f = io.open(tmp, "w")
+  if not f then
+    print("correctChromeSteal: could not open marker tmp file for writing")
+    return false
+  end
+  f:write(windowId .. "\t" .. tostring(os.time()) .. "\n")
+  f:close()
+  return os.rename(tmp, STEAL_GUARD_MARKER_FILE) ~= nil
+end
+
+-- Runs an aerospace subcommand and blocks until it exits, returning true
+-- only on a real exit code 0. Deliberately blocking (unlike PANELD_BIN's
+-- hs.task above, which is fire-and-forget from a hotkey): this function
+-- is only ever reached from the backgrounded, timeout-wrapped `hs -c`
+-- call in chrome-workspace-steal-guard.sh, never from a hotkey, so there
+-- is no keypress latency to protect here -- and the whole point is a
+-- strict move-then-refocus ORDER with real failure detection, which an
+-- async callback chain would make far harder to get right.
+local function runStealGuardAerospace(args)
+  local task = hs.task.new(STEAL_GUARD_AEROSPACE_BIN, nil, args)
+  if not task:start() then
+    return false
+  end
+  task:waitUntilExit()
+  return task:terminationStatus() == 0
+end
+
+function correctChromeSteal(prevWorkspace)
+  if not breakOutChromeTab() then
+    print("correctChromeSteal: breakOutChromeTab() reported failure or nothing to detach")
+    return
+  end
+
+  -- Focus is on the new window immediately after selectMenuItem returns --
+  -- already measured true (+0ms) for detachChromeTabToWorkspace() below,
+  -- reused here rather than re-measured.
+  local newWin = hs.window.focusedWindow()
+  if not newWin then
+    print("correctChromeSteal: detach succeeded but no focused window found")
+    return
+  end
+  local newWinId = tostring(newWin:id())
+
+  if not writeStealGuardMarker(newWinId) then
+    print("correctChromeSteal: failed to write correction marker for window " .. newWinId)
+    -- Still proceed: a missed marker only risks one extra mis-detected
+    -- echo next time, not a wrong workspace placement now.
+  end
+
+  if not runStealGuardAerospace({"move-node-to-workspace", "--fail-if-noop", "--", prevWorkspace}) then
+    print("correctChromeSteal: move-node-to-workspace failed for workspace " .. prevWorkspace .. ", not refocusing")
+    return
+  end
+
+  if not runStealGuardAerospace({"workspace", "--fail-if-noop", "--", prevWorkspace}) then
+    print("correctChromeSteal: refocus of workspace " .. prevWorkspace .. " failed after a successful move")
+  end
+end
+
+
 -- Detach the active tab AND immediately offer to place the new window,
 -- which is the two-key flow (space-d then shift-cmd-esc) as one key.
 --
@@ -589,6 +668,39 @@ local function findActiveChromeTab(window)
 
   return nil
 end
+
+-- ATTEMPTED 2026-09-25, REVERTED THE SAME DAY: a global entry point here
+-- (contextChromeActiveTab, calling a since-removed findActiveChromeTabIndex)
+-- was going to let context-based-mac's chrome-tabs switcher ask Hammerspoon
+-- which tab is active in the focused-workspace Chrome window, matching by
+-- AeroSpace window id instead of by title. Two real problems surfaced
+-- while wiring it up, both found live, not assumed:
+--
+-- 1. ID-NAMESPACE MISMATCH: AeroSpace's window-id / hs.window:id() is a
+--    CGWindowID. context-based-mac's own poll.py/cache.json key every tab
+--    by Chrome's OWN AppleScript "id of window" -- a completely different
+--    number space (active-now.py's own comment already noted this same
+--    mismatch for a different pair of ids: "Chrome's AppleScript window
+--    ids are not CGWindowIDs"). A CGWindowID-based result from Hammerspoon
+--    can never match cache.json's `win` field, so this would have shipped
+--    silently broken (every tab filtered out) without a second title-based
+--    bridge -- which reintroduces the exact problem this was meant to
+--    avoid.
+-- 2. HIT-TESTING DEPENDS ON SCREEN Z-ORDER: findActiveChromeTabIndex found
+--    the tab strip by hit-testing screen coordinates at the window's own
+--    frame -- which only works if that window is actually the thing
+--    rendered on screen at that position. The switcher can be invoked from
+--    ANY app in the current workspace (e.g. a terminal, with Chrome tiled
+--    beside it but not frontmost), and live testing showed the hit-test
+--    returning nothing for a real, non-minimized, workspace-resident
+--    Chrome window once it wasn't the frontmost app.
+--
+-- Net: matching by title, done CORRECTLY (prefix, not exact), turned out
+-- to be the actual fix, with no new runtime dependency. See
+-- ~/.config/context/chrome-tabs/active-now.py, and
+-- docs/superpowers/specs/2026-09-25-chrome-tabs-hammerspoon-active-window-design.md
+-- in context-based-mac for the full writeup of both the original design
+-- and this reversal.
 
 -- The context menu ITSELF is also found by hit-testing, not by walking the
 -- app's AXChildren (no AXMenu ever showed up there, checked live) and not
