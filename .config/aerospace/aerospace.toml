@@ -130,9 +130,22 @@ on-focus-changed = [
 # in context-based-mac. GUARD_ARMED is unset here deliberately -- the
 # guard defaults to dry-run (logs what it WOULD do, corrects nothing)
 # until it's been watched under real use and explicitly armed.
+#
+# active-now.py (chrome-tabs switcher) ALSO backgrounded here, 2026-09-26 --
+# an adversarial review of a persisting "cmd-backtick jumps to another
+# workspace" report found producer.sh only backgrounds active-now.py at
+# PICKER-INVOCATION time and reads fresh.tsv immediately after, racing its
+# own ~0.75-0.84s completion (confirmed live, and worse under contention
+# with poll.py -- see active-now.py's own docstring). Firing it here too,
+# on every REAL workspace change, gives it the time between the switch and
+# whenever the user actually presses cmd-backtick to finish -- almost
+# always much longer than the picker-invocation-to-read gap producer.sh
+# has to work with. Safe to fire redundantly: active-now.py's own
+# non-blocking flock makes an overlapping run exit immediately rather than
+# duplicate work, exactly as producer.sh's own comment already relies on.
 exec-on-workspace-change = [
     '/bin/bash', '-c',
-    '/Users/petermariani/.config/context/chrome-workspace-steal-guard.sh; /Users/petermariani/.config/context/picker-refresh.sh'
+    '/Users/petermariani/.config/context/chrome-workspace-steal-guard.sh; (/Users/petermariani/.local/share/mise/installs/python/3.12/bin/python3 /Users/petermariani/.config/context/chrome-tabs/active-now.py >/dev/null 2>&1 &); /Users/petermariani/.config/context/picker-refresh.sh'
 ]
 
 focus-follows-mouse.enabled = false
