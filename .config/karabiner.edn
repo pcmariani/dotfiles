@@ -131,26 +131,64 @@
          ;; "cmd-shift-f18" into Carbon's generic shiftKey, which is
          ;; side-agnostic. Right COMMAND is deliberately not handled: the
          ;; forward chord works, which proves left cmd is the one in use.
-         ;; THE WINDOW SWITCHER, 2026-09-19 (Spec L). option-cmd-` cycles the
-         ;; FOCUSED WORKSPACE's windows, as cmd-tab cycles workspaces.
-         ;; Rewritten to cmd-f15 for the same reason cmd-tab is rewritten to
-         ;; cmd-f18 -- Carbon cannot register the raw chord -- and the
-         ;; rewrite KEEPS cmd deliberately: release-to-commit reads the
-         ;; physical modifier through a local NSEvent monitor, and a bare
-         ;; f15 would drop it. option-cmd rather than plain cmd (the user,
-         ;; 2026-09-20) so macOS KEEPS its own cmd-` for the frontmost app's
-         ;; windows. THREE rules for the same reason the tab chord needs
-         ;; three: `S` is LEFT shift, and ` is a left-hand reach with
-         ;; option-cmd under the left thumb, so the shifted chord is a
-         ;; natural RIGHT-shift press. Both shift rules map to the same
-         ;; cmd-opt-shift-f15, which paneld parses into Carbon's
-         ;; side-agnostic shiftKey. Fully reversible: delete these lines.
+         ;;
+         ;; THE `move` PICKER, 2026-09-26. option-cmd-` now opens `move`
+         ;; (move focused window to another workspace) instead of `windows`
+         ;; -- see the next note for where `windows` went. `move` is a plain
+         ;; toggle, not a cycle panel, so it needs only ONE hotkey; the
+         ;; pre-existing shift variant (cmd-opt-shift-f15) is simply unused
+         ;; now, not removed, since nothing else claims option-cmd-shift-`.
+         ;; Rewritten to cmd-opt-f15 for the same Carbon-registration reason
+         ;; as every other chord in this block -- unchanged from when this
+         ;; rewrite served `windows`, only the CONSUMING panel changed (see
+         ;; paneld.toml's `move` panel).
+         ;;
+         ;; THE WINDOW SWITCHER MOVED TO cmd-esc, 2026-09-26 (the user's own
+         ;; request: cmd-tab/cmd-esc/cmd-backtick as workspace/window/
+         ;; chrome-tab, one modifier family). It is REGISTERED DIRECTLY BY
+         ;; PANELD, no rewrite here -- unlike tab/backtick, plain Escape
+         ;; already reaches Carbon's RegisterEventHotKey cleanly (proven by
+         ;; the `picker`/`move` panels, both plain cmd-esc/shift-cmd-esc
+         ;; chords, working since 2026-09-09 with no rewrite rule at all).
+         ;; `windows` is a CYCLE panel, though, and every cycle panel tried
+         ;; here so far (this one, formerly on option-cmd-`; chrome-tabs,
+         ;; below) needed the rewrite for CARBON REGISTRATION reasons
+         ;; specific to tab/backtick -- whether repeated taps of a directly-
+         ;; registered cmd-esc/shift-cmd-esc behave the same way for a HELD
+         ;; cycle gesture has NOT been tested with a real key press (the
+         ;; screen was locked when this was wired up). If hammering cmd-esc
+         ;; to step through windows does not work, that is the first thing
+         ;; to suspect -- fall back to a cmd-esc -> cmd-fNN rewrite here,
+         ;; matching the other two, and set paneld.toml's `windows` hotkey
+         ;; to match.
+         ;;
+         ;; THE CHROME-TAB SWITCHER MOVED TO PLAIN cmd-` (BACKTICK),
+         ;; 2026-09-26, off control-cmd-tab (freeing that chord entirely --
+         ;; nothing claims it now). Rewritten to cmd-f13, reusing the F13
+         ;; this rule used to route control-cmd-tab through, for the same
+         ;; Carbon-registration reason as the other rewrites in this block.
+         ;; The rewrite KEEPS cmd (not bare f13) for the same reason as
+         ;; `windows`/`switcher` above: release-to-commit reads the physical
+         ;; modifier through a local NSEvent monitor, and paneld's own
+         ;; release-to-commit monitor is HARDCODED to
+         ;; `NSEvent.modifierFlags.contains(.command)`
+         ;; (~/projects/paneld/Sources/paneld/PanelController.swift:474,532)
+         ;; -- ANY cycle panel's physical chord needs cmd physically held,
+         ;; confirmed live 2026-09-25 when plain control-tab (no cmd at all)
+         ;; committed instantly with no panel ever drawn, matching
+         ;; ~/.local/state/paneld/paneld.log's trace exactly. THREE rules,
+         ;; same reason as the others: `S` is LEFT shift, `R` is RIGHT
+         ;; shift, both map to the same cmd-shift-f13 (Carbon's shiftKey is
+         ;; side-agnostic).
          :rules [[:!Ctab  :!Cf18]
                  [:!CStab :!CSf18]
                  [:!CRtab :!CSf18]
                  [:!COgrave_accent_and_tilde  :!COf15]
                  [:!COSgrave_accent_and_tilde :!COSf15]
-                 [:!CORgrave_accent_and_tilde :!COSf15]]
+                 [:!CORgrave_accent_and_tilde :!COSf15]
+                 [:!Cgrave_accent_and_tilde  :!Cf13]
+                 [:!CSgrave_accent_and_tilde :!CSf13]
+                 [:!CRgrave_accent_and_tilde :!CSf13]]
          }
 
         ;; CTRL-HJKL, THE OUTSIDE HALF, 2026-09-10. One key navigates
@@ -370,6 +408,12 @@
                  ;; Written with the user at the keyboard but unseen; the door
                  ;; and the kind glyphs (· file, ⌘ app) are the user's call.
                  [:e [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"]]
+                 ;; `c` IS FREE AGAIN. The chrome-tabs picker (space-c,
+                 ;; 2026-09-25 morning) was replaced the same day by a real
+                 ;; control-tab switcher -- see the "workspace switcher"
+                 ;; rule block above, and pickers.toml's `chrome-tabs` entry.
+                 ;; space-c is deliberately not reassigned to anything else
+                 ;; yet.
                  ;; THE WORKSPACE TERMINAL. `context terminal` attaches this
                  ;; workspace's herdr session -- creating it if there is none --
                  ;; in a Ghostty window rooted at the workspace directory. It is
@@ -566,13 +610,36 @@
                  ;; --boundaries all-monitors-outer-frame to ctrl-j/k is what
                  ;; made them reach another monitor's workspace at all.
                  ;;
-                 ;; So this is NOT `focus dfs-next --wrap-around`, which is what
-                 ;; cycle-window.sh's own comment said to revert to -- that is
-                 ;; the buggy form. Bounding to `workspace` with
-                 ;; wrap-around-the-workspace is what --wrap-around was always
-                 ;; meant to express here, and it matches the deliberate
-                 ;; boundary handling on j/k below.
-                 [:tab [:aerospace "focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-next"]]
+                 ;; RETIRED 2026-09-25 (dfs-next blind cycling, the several
+                 ;; --boundaries fixes documented above through 2026-09-11):
+                 ;; the user's own stated preference is a frecency-ranked
+                 ;; switcher with the 2nd item pre-highlighted, not cycling.
+                 ;; paneld's `windows` panel (~/.config/paneld/paneld.toml)
+                 ;; already IS that switcher -- it is option-cmd-backtick's
+                 ;; own panel (hotkey cmd-opt-f15, compose "context
+                 ;; pick-command windows"), added 2026-09-19 for exactly this
+                 ;; per-workspace window-switching job. Repointed here rather
+                 ;; than building a second one. Full dfs-next history is in
+                 ;; karabiner.edn.bak-prespacetabwindows if it's ever needed
+                 ;; again.
+                 ;;
+                 ;; `:run`, not a raw-chord remap the way cmd-tab/opt-cmd-` are
+                 ;; rewritten to cmd-f18/cmd-opt-f15 above: those two rewrite a
+                 ;; REAL held modifier (cmd) so paneld's release-to-commit
+                 ;; NSEvent monitor still sees an actual physical cmd go up.
+                 ;; space-mode has no real modifier under it -- `space-mode` is
+                 ;; a goku variable, set on :held and cleared on :afterup, not
+                 ;; a synthesized keydown -- so there is no physical modifier
+                 ;; here to rewrite. `paneld toggle windows` is the SAME
+                 ;; invocation style this file already uses for every other
+                 ;; space-mode-triggered panel (search, config-files, apps,
+                 ;; keybindings below) -- consistent with existing precedent,
+                 ;; not a new mechanism. NOT YET VERIFIED BY HAND: whether
+                 ;; holding space and tapping tab repeatedly cycles the
+                 ;; panel's selection the same way holding option-cmd-` does,
+                 ;; or whether it only opens/advances once per press. Check
+                 ;; this live before relying on it.
+                 [:tab [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle windows"]]
 
                  ;; j/k cross the monitor boundary; h/l deliberately do not.
                  ;; The monitors are stacked vertically (1 = LG HDR WQHD above
