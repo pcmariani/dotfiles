@@ -15,15 +15,32 @@
 
                       ; to_delayed_action_delay_milliseconds (def: 500)
                       ; note: this should be equal to :held for mod-tap layers
-                      :delay   160
+                      :delay   220
 
                       ; to_if_held_down_threshold_milliseconds (def: 500)
                       ; note: this should be equal to :delay for mod-tap layers
-                      :held    160
+                      ;
+                      ; 160 (both this and :alone below) was too tight for
+                      ; reliable fast typing -- confirmed live 2026-09-28: the
+                      ; user reported space-chords (e.g. space-w) intermittently
+                      ; failing, registering as literal "space" + the bare
+                      ; letter instead of engaging the layer. A deliberate SLOW
+                      ; press worked every time, confirmed only after asking
+                      ; (a timing race can't be diagnosed from the .edn alone,
+                      ; and physical key presses can't be tested from here) --
+                      ; that pattern (works slow, fails fast, intermittent, not
+                      ; every time) is a threshold race, not a logic bug: a
+                      ; natural fast "space, w" rhythm sometimes finishes both
+                      ; the press and the intervening event outside a 159/160ms
+                      ; window, sometimes doesn't. Widened by 60ms, a modest
+                      ; bump, not a redesign -- re-tune further if this still
+                      ; isn't reliable enough, or dial it back if normal typing
+                      ; starts triggering the layer by accident.
+                      :held    220
 
                       ; to_if_alone_timeout_milliseconds (def: 1000)
                       ; note: (i think) this must be just less than the delay / held value to avoid bug where mod-tap layer stays 1
-                      :alone   159
+                      :alone   219
 
                       ; you can set these delays individually in mod-tap layer definitions if you want separate default values here 
                       }
