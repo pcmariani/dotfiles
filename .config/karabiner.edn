@@ -358,14 +358,14 @@
                  ;; no-op unless Chrome is frontmost with 2+ tabs -- Chrome's
                  ;; own menu item reports whether there is anything to do.
                  [:d :!!d] ;; hammerspoon hyper D: detach chrome tab to a window
-                 ;; Same, then immediately open the move picker so the new
-                 ;; window can be placed -- the two-key flow as one key.
-                 ;;
-                 ;; Sends hyper MINUS shift, not hyper-shift-D, because hyper
-                 ;; already CONTAINS shift: hyper-D and hyper-shift-D are the
-                 ;; same chord and Hammerspoon cannot tell them apart. Dropping
-                 ;; shift keeps this in the `d` family while staying distinct.
-                 [:!Sd :!CTOd] ;; hammerspoon cmd-ctrl-alt D: detach and move
+                 ;; RETIRED 2026-09-28: detach-then-move used to live here as
+                 ;; space-shift-d (hammerspoon cmd-ctrl-alt D). Superseded by
+                 ;; plain opt-` (~/.hammerspoon/init.lua, detachChromeTabTo-
+                 ;; Workspace), registered directly by Hammerspoon with no
+                 ;; karabiner rewrite needed -- fitting the cmd=switch/
+                 ;; opt=move pattern one tier down from `windows`
+                 ;; (cmd-esc/opt-esc), since cmd-backtick already switches
+                 ;; this same window's Chrome tabs. Confirmed working live.
 
                  ;; Join the active Chrome tab into the OTHER Chrome
                  ;; window -- the v1 case of exactly 2 windows open. Exists
