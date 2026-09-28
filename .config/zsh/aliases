@@ -17,6 +17,17 @@ alias serve='browser-sync start -s -f . --no-notify --host $(ipconfig getifaddr 
 alias puml='java -jar ~/.local/lib/plantuml-1.2023.4.jar'
 # alias gg="$HOME/.config/ghostty/toggle-opacity.sh"
 
+# --- claude code --- #
+alias ccc='claude'
+alias ccp='claude /pickup'
+
+# --- herdr --- #
+alias hss='herdr server stop'
+alias hsl='herdr session list'
+alias hsa='herdr session attach'
+alias hsss='herdr session stop'
+alias hwc='herdr workspace create --cwd'
+
 # --- yadm --- #
 alias gy='yadm-lazygit'
 alias yg='yadm-lazygit'
