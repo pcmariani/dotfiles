@@ -24,3 +24,6 @@ Library/**
 # PUBLIC (github.com/pcmariani/dotfiles), same reasoning as the Chrome state
 # above. The file stays on disk; it is simply not ours to publish.
 .config/aerospace/layout-preferences
+
+# Python bytecode cache, chrome-tabs' own (2026-09-28, its first real commit).
+.config/context/chrome-tabs/__pycache__/
