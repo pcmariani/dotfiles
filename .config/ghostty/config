@@ -36,3 +36,9 @@ window-save-state = never
 # than a persistent workspace.
 keybind = global:shift+cmd+ctrl+alt+t=toggle_quick_terminal
 
+# Ghostty's default is super+arrow_left=text:\x01, the macOS "cmd+left is
+# beginning-of-line" convention. \x01 IS ctrl+a, which is herdr's prefix, so
+# cmd+left was silently triggering the prefix. Send Home instead: zsh here
+# binds ^[OH to beginning-of-line, while ^A is self-insert under vi mode.
+keybind = super+arrow_left=text:\x1bOH
+
