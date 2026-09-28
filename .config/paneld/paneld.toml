@@ -468,3 +468,13 @@ arm     = true
 # hammering behavior observed yet. Reversible: `paneld reload chrome-tabs`
 # after changing this number.
 reveal_delay_ms = 300
+# ON_EMPTY, 2026-09-28: a real macOS notification instead of an empty
+# switcher panel when this workspace has no Chrome windows at all. Runs
+# synchronously, bounded by paneld's own short timeout, right as the
+# reveal timer fires -- see Config.swift's own onEmpty field and
+# PanelController.swift's isEmpty() for the mechanism, and
+# empty-check.sh's own comment for why it doesn't reuse active-now.py's
+# heavier query. Verified live before wiring in the real script: a
+# throwaway test panel confirmed the toast-and-suppress path, the
+# reveal-normally path, and graceful fail-open on a cold-start timeout.
+on_empty = "/Users/petermariani/.config/context/chrome-tabs/empty-check.sh"
