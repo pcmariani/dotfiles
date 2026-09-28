@@ -176,7 +176,26 @@ if [ -x "$PANELD" ]; then
     # workspace's windows, so they follow it more directly than anything
     # else here -- but it also re-produces at every reveal (`refresh` +
     # `on_reveal_key`), so a stale arm costs it nothing and it pays last.
-    for panel in switcher picker move files search windows; do
+    #
+    # `chrome-tabs` added 2026-09-27, SECOND (right after `switcher`) -- THE
+    # missing piece of that whole night's cmd-backtick debugging. Its rows
+    # ARE the focused workspace's Chrome window's tabs, same as `windows`,
+    # but unlike `windows` it has NO `refresh`/`on_reveal_key` (deliberately:
+    # a reveal-time reload would discard every chord step of a held,
+    # hammerable switcher -- see pickers.toml's own comment). That means a
+    # stale arm here is NOT free the way it is for `windows`: with nothing to
+    # fall back on at reveal time, THIS rearm is the only thing that ever
+    # refreshes it. Confirmed live: `paneld status` showed
+    # `chrome-tabs armed 586.9s ago` after real workspace switches that
+    # should have refreshed it -- every fix made to producer.sh/active-now.py
+    # that same session was correct but irrelevant, because paneld was never
+    # told to re-run them at all. Placed second (not first) because
+    # `switcher`'s own producer is a bare cached `cat` (~0ms) and stays the
+    # single fastest, most latency-felt toggle; chrome-tabs' producer
+    # backgrounds its own slow work (poll.py/active-now.py) the same way, so
+    # it is cheap enough to not need to wait behind the two agent-status-join
+    # panels either.
+    for panel in switcher chrome-tabs move files search windows; do
         "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
 fi

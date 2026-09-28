@@ -109,7 +109,28 @@ on-focus-changed = [
     # call) makes a fire that finds one already in flight exit
     # immediately, same reasoning exec-on-workspace-change's own comment
     # already relies on.
-    'exec-and-forget /Users/petermariani/.local/share/mise/installs/python/3.12/bin/python3 /Users/petermariani/.config/context/chrome-tabs/active-now.py'
+    'exec-and-forget /Users/petermariani/.local/share/mise/installs/python/3.12/bin/python3 /Users/petermariani/.config/context/chrome-tabs/active-now.py',
+    # `paneld rearm chrome-tabs` HERE TOO, 2026-09-27, same day, found
+    # AFTER the fix above turned out not to be enough on its own: the
+    # active-now.py fire above only recomputes the ANSWER (fresh.tsv) --
+    # it does nothing for paneld's own panel, which holds an ALREADY-ARMED
+    # fzf that read producer.sh's output once, at its last arm, and does
+    # not re-read it just because fresh.tsv changed underneath it. Proven
+    # live: `paneld status` showed chrome-tabs `armed 586.9s ago` (~10
+    # minutes stale) right after real workspace switches and real
+    # Chrome-window switches that should have refreshed it -- confirmed by
+    # running `paneld rearm chrome-tabs` by hand and watching
+    # switcher.debug.log gain a brand-new `[producer.sh]` line instantly.
+    # picker-refresh.sh's own rearm loop (see that file) already does this
+    # for `exec-on-workspace-change`, i.e. an ACTUAL workspace switch --
+    # but switching between TWO CHROME WINDOWS IN THE SAME WORKSPACE fires
+    # only on-focus-changed (this callback), which picker-refresh.sh is
+    # never invoked from at all, so that case had NOTHING rearming this
+    # panel. `rearm` is non-blocking (deferred internally by paneld if a
+    # verb is in flight or the panel is visible), so firing it on every
+    # ordinary focus change is the same safe-to-fire-redundantly reasoning
+    # already used above and in exec-on-workspace-change.
+    'exec-and-forget /Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld rearm chrome-tabs'
 ]
 
 # Keep the terminal picker's pre-rendered rows in step with reality, and let
