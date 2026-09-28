@@ -56,7 +56,7 @@ ff() {
   [[ -n "$files" ]] && nvim -O ${(f)files}
 }
 
-fg() {
+ffg() {
   local files
   local query="$*"
   files=$(
