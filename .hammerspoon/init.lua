@@ -641,41 +641,64 @@ local function chromeTabTitleFromWindowTitle(fullTitle)
   return fullTitle:match("^(.-) %- Google Chrome") or fullTitle
 end
 
--- The tab strip CANNOT be found by walking the window's full accessibility
--- tree top-down -- that recursion wanders into web page content and is
--- dangerously slow (measured: it did not return). Hit-testing instead:
--- a handful of probe points near the top-left of the window land on a
--- tab-strip descendant. (x=100 at this offset is Chrome's "Tab Search"
--- dropdown, an AXPopUpButton, not a tab -- harmless here since we only use
--- the hit to walk UP to its parent's siblings, not act on it directly.)
--- One hop up from the hit is an AXGroup whose AXChildren include the
--- AXTabGroup; ITS AXChildren are the tabs (AXRadioButton, AXValue == true
--- on the active one).
-local function findActiveChromeTab(window)
-  local sw = hs.axuielement.systemWideElement()
-  local f = window:frame()
-
-  for _, dx in ipairs({ 100, 120, 140, 160, 180, 200, 220 }) do
-    for _, dy in ipairs({ 10, 14, 18 }) do
-      local hit = sw:elementAtPosition(f.x + dx, f.y + dy)
-      local parent = hit and hit:attributeValue("AXParent")
-      local siblings = parent and parent:attributeValue("AXChildren")
-
-      if siblings then
-        for _, sibling in ipairs(siblings) do
-          if sibling:attributeValue("AXRole") == "AXTabGroup" then
-            for _, tab in ipairs(sibling:attributeValue("AXChildren") or {}) do
-              if tab:attributeValue("AXValue") == true then
-                return tab
-              end
-            end
-          end
-        end
-      end
+-- REWRITTEN 2026-09-28: the previous version found the tab strip by
+-- hit-testing fixed pixel offsets near the window's top-left, tuned for
+-- Chrome's horizontal tab strip. It broke once the user switched to
+-- Chrome's vertical tabs, which move the strip to a narrow column down
+-- the LEFT edge -- none of those points land anywhere near it any more,
+-- confirmed live via Hammerspoon's own AX introspection (`hs -c`) against
+-- real windows: the old offsets landed on the Back/Forward/Reload toolbar
+-- instead.
+--
+-- Structural search instead of coordinates: walk the window's own
+-- accessibility tree for an AXTabGroup, then search THAT subtree for the
+-- active AXRadioButton (AXValue == true). The tree can still not be
+-- walked UNGUARDED -- recursing into an AXWebArea wanders into page
+-- content and is dangerously slow (measured: it did not return) -- but
+-- stopping at any AXWebArea boundary keeps this bounded and fast, since
+-- the tab strip itself never contains one. Verified live against both
+-- vertical-tab layouts: collapsed (56pt, icon-only) and expanded (240pt),
+-- and against a real 3-tab window (not just single-tab ones, where an
+-- empty scroll area could be mistaken for "tabs aren't exposed here").
+-- In BOTH vertical layouts the active tab is an AXRadioButton nested four
+-- levels under AXTabGroup (a regular-vs-pinned AXScrollArea, then two
+-- wrapper AXGroups) rather than a direct AXTabGroup child the way
+-- horizontal tabs expose it -- this generalizes over that difference for
+-- free, so it isn't specific to either layout and won't need a third
+-- rewrite if Chrome reshuffles the vertical strip's own internals again.
+local function findDescendant(el, predicate, depth)
+  depth = depth or 0
+  if depth > 10 then
+    return nil
+  end
+  if el:attributeValue("AXRole") == "AXWebArea" then
+    return nil
+  end
+  if predicate(el) then
+    return el
+  end
+  for _, child in ipairs(el:attributeValue("AXChildren") or {}) do
+    local found = findDescendant(child, predicate, depth + 1)
+    if found then
+      return found
     end
   end
-
   return nil
+end
+
+local function findActiveChromeTab(window)
+  local axWindow = hs.axuielement.windowElement(window)
+  local tabGroup = findDescendant(axWindow, function(el)
+    return el:attributeValue("AXRole") == "AXTabGroup"
+  end)
+
+  if not tabGroup then
+    return nil
+  end
+
+  return findDescendant(tabGroup, function(el)
+    return el:attributeValue("AXRole") == "AXRadioButton" and el:attributeValue("AXValue") == true
+  end)
 end
 
 -- ATTEMPTED 2026-09-25, REVERTED THE SAME DAY: a global entry point here
