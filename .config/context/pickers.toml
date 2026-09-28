@@ -422,12 +422,25 @@ name     = "chrome-tabs"
 # any switcher-style panel needs cmd in its chord; see paneld.toml's own
 # comment on the `chrome-tabs` panel for the full account). The
 # Chrome-tab analogue of `windows` (the FOCUSED WORKSPACE's windows) one
-# level further down (the FOCUSED Chrome window's tabs). Deliberately NOT
-# global across every Chrome window, and NOT per-AeroSpace-workspace
-# either (the user, asked directly rather than assumed) -- that would need
-# matching Chrome's own window ids to AeroSpace workspaces, the exact
-# ownership-tracking layer deleted 2026-09-09 (see memory
-# chrome-artifact-links-wrong-workspace.md). Entirely outside this repo
+# level further down.
+#
+# SCOPED TO THE FOCUSED WORKSPACE, NOT ONE WINDOW -- REVERSED 2026-09-28.
+# This used to be scoped to the single focused Chrome window on purpose
+# (the user, asked directly rather than assumed, 2026-09-25) -- global
+# scope and per-workspace scope were both considered and rejected, the
+# latter specifically because it would need matching Chrome's own window
+# ids to AeroSpace workspaces, the exact ownership-tracking layer deleted
+# 2026-09-09 (see memory chrome-artifact-links-wrong-workspace.md). The
+# user reconsidered this a third time, 2026-09-28: per-workspace scope
+# does NOT need that deleted persistent layer at all, only a one-shot
+# `aerospace list-windows --workspace focused` query (the exact mechanism
+# already proven for the opt-backtick join feature) -- and the SPECIFIC
+# bug that killed the second attempt (2026-09-27: picking ONE window
+# among several in a workspace picked the wrong one) does not recur once
+# every window's tabs are in scope together, since there is no longer a
+# single window to choose wrong. See active-now.py's own docstring for
+# the full account. Also now works invoked from any app, not just from
+# Chrome itself. Entirely outside this repo
 # and outside context/*.py on purpose, matching that same 2026-09-09
 # decision ("this tool knows nothing about Chrome") -- both scripts below
 # live in ~/.config/context/chrome-tabs/, plain AppleScript/Python with
@@ -436,7 +449,7 @@ name     = "chrome-tabs"
 # control-f13 rewrite and paneld.toml's own panel entry for cycle/hotkey.
 #
 # producer: refreshes the poll cache (poll.py) then reformats rank.py's
-# frecency-ranked, front-window-only rows into NUL-terminated
+# MRU-ranked, focused-workspace-scoped rows into NUL-terminated
 # "win_id:index<TAB>display" records -- verified directly 2026-09-25 that
 # this machine's /usr/bin/awk silently DROPS a `\0` printf escape instead
 # of emitting the byte (two lines ran together with no separator, not an
