@@ -777,20 +777,30 @@ end
 -- "Move Tab to Another Window" item's OWN position and size (not a fixed
 -- offset).
 --
--- TWO BUGS, found live 2026-09-22 against the user's real two-window
--- "ai" workspace:
+-- THREE BUGS, found live 2026-09-22 and 2026-09-28 against the user's real
+-- two-window workspaces:
 --
 -- 1. The submenu does NOT always open to the item's right -- macOS flips
 --    it to the LEFT when there is not enough room on the right, and a
 --    window tiled against the screen's edge (exactly what this key is
---    for) is the common case, not an edge case. Measured live: a window
---    4pt from the screen's right edge opened its submenu leftward, and a
---    right-only scan silently found nothing -- a real menu the user could
---    see, an invisible bug underneath it. Now picks a side by the same
---    logic macOS itself uses: is there enough room to the right of the
+--    for) is the common case, not an edge case. Measured live 2026-09-22:
+--    a window 4pt from the screen's right edge opened its submenu
+--    leftward, and a right-only scan silently found nothing -- a real
+--    menu the user could see, an invisible bug underneath it. Fixed then
+--    by picking a side up front: is there enough room to the right of the
 --    item for a submenu to fit.
 --
--- 2. "Exactly one candidate" (excluding "New Window") was never a valid
+-- 2. That same "room to the right" heuristic was ALSO measured wrong live
+--    2026-09-28, on a different two-window layout: it predicted room on
+--    the right and scanned there, while the real submenu had opened on
+--    the LEFT (dx -418 from moveItem, found by a wide diagnostic scan) --
+--    silently finding nothing again, the exact failure mode bug 1 was
+--    supposed to fix. Trying to reverse-engineer macOS/Chrome's own
+--    placement decision is exactly the trap the vertical-tabs rewrite
+--    above already avoided once; scanning BOTH sides unconditionally,
+--    removed below, sidesteps needing to predict it at all.
+--
+-- 3. "Exactly one candidate" (excluding "New Window") was never a valid
 --    test once a third Chrome window exists ANYWHERE on the machine --
 --    which is the common case, not rare, since Chrome's own submenu lists
 --    EVERY open Chrome window, not just this workspace's two. Measured
@@ -807,18 +817,13 @@ end
 --    (title format changed, or the target genuinely isn't listed, e.g.
 --    Incognito, which Chrome excludes from this menu by design) is a
 --    no-op, not a guess.
-local function findTargetWindowMenuItem(moveItem, targetTabTitle, screenFrame)
+local function findTargetWindowMenuItem(moveItem, targetTabTitle)
   local sw = hs.axuielement.systemWideElement()
   local pos = moveItem:attributeValue("AXPosition")
-  local size = moveItem:attributeValue("AXSize")
 
-  local roomToRight = (screenFrame.x + screenFrame.w) - (pos.x + size.w)
-  local originX = (roomToRight > 350) and (pos.x + size.w) or (pos.x - 700)
-  local originY = pos.y - 60
-
-  for dx = 0, 700, 25 do
-    for dy = 0, 400, 16 do
-      local hit = sw:elementAtPosition(originX + dx, originY + dy)
+  for dx = -750, 750, 25 do
+    for dy = -60, 400, 16 do
+      local hit = sw:elementAtPosition(pos.x + dx, pos.y + dy)
 
       if hit and hit:attributeValue("AXRole") == "AXMenuItem" then
         local title = hit:attributeValue("AXTitle")
@@ -965,7 +970,7 @@ local function joinChromeTabToOtherWindow()
   moveItem:performAction("AXPress")
 
   local otherWindowItem = pollUntil(function()
-    return findTargetWindowMenuItem(moveItem, targetTabTitle, window:screen():fullFrame())
+    return findTargetWindowMenuItem(moveItem, targetTabTitle)
   end, 0.8, 0.02)
 
   if not otherWindowItem then
