@@ -477,20 +477,76 @@ local function runStealGuardAerospace(args)
 end
 
 function correctChromeSteal(prevWorkspace)
+  local beforeIds = {}
+  do
+    local chrome = hs.application.get("Google Chrome")
+    if chrome then
+      for _, w in ipairs(chrome:allWindows()) do
+        beforeIds[w:id()] = true
+      end
+    end
+  end
+
   if not breakOutChromeTab() then
     print("correctChromeSteal: breakOutChromeTab() reported failure or nothing to detach")
     return
   end
 
-  -- Focus is on the new window immediately after selectMenuItem returns --
-  -- already measured true (+0ms) for detachChromeTabToWorkspace() below,
-  -- reused here rather than re-measured.
-  local newWin = hs.window.focusedWindow()
-  if not newWin then
-    print("correctChromeSteal: detach succeeded but no focused window found")
+  -- "Focus is on the new window immediately after selectMenuItem returns"
+  -- was measured true for detachChromeTabToWorkspace()'s HOTKEY path, where
+  -- a keypress already has Chrome active. Found live 2026-09-28 to NOT hold
+  -- here: this function runs non-interactively (`hs -c` from
+  -- chrome-workspace-steal-guard.sh, right as AeroSpace hands Chrome system
+  -- focus), and a single synchronous hs.window.focusedWindow() call lost
+  -- that race and returned nil. Poll for a genuinely NEW Chrome window (its
+  -- id absent from the pre-detach snapshot above) instead of trusting
+  -- "focused" at all -- this also can't misidentify the OLD, still-focused
+  -- window as the detached one, which a bare focusedWindow() retry could,
+  -- and would move the wrong (multi-tab) window.
+  local newWinId = nil
+  local deadline = hs.timer.secondsSinceEpoch() + 0.5
+  repeat
+    local chrome = hs.application.get("Google Chrome")
+    if chrome then
+      for _, w in ipairs(chrome:allWindows()) do
+        if not beforeIds[w:id()] then
+          newWinId = w:id()
+          break
+        end
+      end
+    end
+    if not newWinId then
+      hs.timer.usleep(30000)
+    end
+  until newWinId or hs.timer.secondsSinceEpoch() >= deadline
+
+  if not newWinId then
+    print("correctChromeSteal: detach succeeded but no new Chrome window appeared")
     return
   end
-  local newWinId = tostring(newWin:id())
+
+  -- The marker is read back by chrome-workspace-steal-guard.sh's
+  -- is_reentrant_echo(), which compares it against ITS OWN win_id --
+  -- Chrome's own AppleScript "id of window 1", a completely different
+  -- numbering scheme from hs.window ids (confirmed live 2026-09-28:
+  -- hs.window ids here are small CGWindowID-style integers like
+  -- 470/15116/9475; Chrome's own ids are large opaque integers like
+  -- 994907846/994908351). Writing newWinId (an hs.window id) into the
+  -- marker meant is_reentrant_echo() could never match -- EVERY real
+  -- correction's own move+refocus re-triggered a second, spurious
+  -- "correction" attempt, which only ever failed harmlessly because
+  -- there was nothing left to detach. Ask Chrome directly for ITS id of
+  -- the now-frontmost (just-detached) window instead of reusing the
+  -- CGWindowID from the snapshot-diff above -- that diff's only job was
+  -- confirming a new window really exists before trusting Chrome's own
+  -- notion of "window 1" here.
+  local ok, chromeWinId = hs.osascript.applescript(
+    'tell application "Google Chrome" to return (id of window 1) as text')
+  if not ok or not chromeWinId or chromeWinId == "" then
+    print("correctChromeSteal: detach succeeded but could not read Chrome's own window id for the marker")
+    return
+  end
+  newWinId = chromeWinId
 
   if not writeStealGuardMarker(newWinId) then
     print("correctChromeSteal: failed to write correction marker for window " .. newWinId)
