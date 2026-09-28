@@ -90,7 +90,19 @@ description                  = "resize right"
 
 [[keys.command]]
 key                          = "prefix+space"
-command                      = "herdr plugin pane open --plugin fullerzz.sesh --entrypoint picker --placement popup"
+# A keys.command entry with no type is accepted by `herdr config check` and
+# then silently never fires -- type is load-bearing. It also has no `title`
+# field (key/command/type/description/width/height only), so `type = "popup"`
+# always labels its border "popup". Going through the plugin pane instead
+# means the border shows the manifest's title, "Sesh Picker".
+#
+# `--placement popup` is valid despite `plugin pane open --help` omitting it;
+# the server enum is overlay|popup|split|tab.
+#
+# Absolute herdr path: the shell runner's PATH has no Homebrew. The picker's
+# preview no longer depends on that -- sesh.toml pins an absolute eza.
+type                         = "shell"
+command                      = "/opt/homebrew/bin/herdr plugin pane open --plugin fullerzz.sesh --entrypoint picker --placement popup"
 description                  = "open Sesh picker"
 
 [[keys.command]]
@@ -102,7 +114,13 @@ description                  = "previous Sesh workspace"
 [[keys.command]]
 key                          = "prefix+t"
 type                         = "popup"
-command                      = "exec \"${SHELL:-sh}\""
+# -l is load-bearing: PATH is built in $ZDOTDIR/.zprofile, which zsh reads for
+# login shells only. Without it this popup gets the herdr server's inherited
+# PATH (/usr/bin:/bin:/usr/sbin:/sbin) and no Homebrew.
+#
+# The border always reads "popup": a keys.command entry has no `title` field,
+# and herdr ignores an OSC 2 title from the pane (tried, no effect).
+command                      = "exec \"${SHELL:-sh}\" -l"
 description                  = "scratch terminal"
 width                        = "80%"
 height                       = "80%"
@@ -121,7 +139,12 @@ hide_tab_bar_when_single_tab = true
 status_indicators            = "symbols"
 
 [ui.toast]
-delivery = "system"
+# "system" shells out to terminal-notifier, but the server's PATH has no
+# Homebrew so it silently falls back to `osascript -e 'display notification'`.
+# macOS credits osascript notifications to Script Editor, which is what
+# clicking one opens. "terminal" routes through Ghostty instead.
+# Options: off | herdr | terminal | system
+delivery = "terminal"
 herdr.position               = "top-right"
 clipboard.enabled            = false
 
