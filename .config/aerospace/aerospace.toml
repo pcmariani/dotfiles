@@ -95,7 +95,21 @@ on-mode-changed = []
 on-focus-changed = [
     # 'exec-and-forget /opt/homebrew/bin/borders width=4',
     'exec-and-forget /Users/petermariani/.config/context/record-window-focus.sh',
-    'exec-and-forget /opt/homebrew/bin/aerospace move-mouse window-lazy-center'
+    'exec-and-forget /opt/homebrew/bin/aerospace move-mouse window-lazy-center',
+    # active-now.py (chrome-tabs switcher) proactively refreshed HERE too,
+    # 2026-09-27 -- the other half of exec-on-workspace-change's own
+    # proactive-refresh fix below did not cover the user's actual live
+    # reproduction: opening a NEW Chrome window INSIDE an
+    # already-focused workspace fires on-focus-changed (this callback),
+    # not exec-on-workspace-change, so nothing refreshed active-now.py's
+    # answer for that case at all -- confirmed live, see HANDOFF.md and
+    # wait-for-fresh.py. Safe to fire on every ordinary focus change too
+    # (a click, an alt-tab, an app re-raising itself): active-now.py's
+    # own non-blocking flock (checked BEFORE it makes any AppleScript
+    # call) makes a fire that finds one already in flight exit
+    # immediately, same reasoning exec-on-workspace-change's own comment
+    # already relies on.
+    'exec-and-forget /Users/petermariani/.local/share/mise/installs/python/3.12/bin/python3 /Users/petermariani/.config/context/chrome-tabs/active-now.py'
 ]
 
 # Keep the terminal picker's pre-rendered rows in step with reality, and let
