@@ -546,6 +546,15 @@ end
 -- staying a distinct binding.
 hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "d", detachChromeTabToWorkspace)
 
+-- opt-` (2026-09-28) → same action, fitting the emerging cmd=switch/opt=move
+-- pattern one tier down from `windows` (cmd-esc/opt-esc): cmd-backtick
+-- switches the focused Chrome window's tabs, so opt-backtick moves one.
+-- Registered directly by Hammerspoon, no Karabiner rewrite needed -- unlike
+-- cmd-`, plain option-` is not a macOS-reserved chord. Confirmed working
+-- live; the older space-shift-d chord that used to reach this function is
+-- retired (see karabiner.edn's own history for that rule).
+hs.hotkey.bind({ "alt" }, "`", detachChromeTabToWorkspace)
+
 
 -- Join the active tab of the frontmost Chrome window into the OTHER Chrome
 -- window. v1 scope, agreed with the user 2026-09-22: exactly two Chrome
