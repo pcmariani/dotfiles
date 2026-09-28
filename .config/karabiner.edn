@@ -297,6 +297,22 @@
                  :space-mode
 
                  ;; commands
+                 ;; SPELLING SUGGESTIONS WITHOUT THE MOUSE, 2026-09-28 (the
+                 ;; user's own request: navigate and correct typos entirely
+                 ;; from the keyboard). macOS's own Cmd-; already jumps to the
+                 ;; NEXT misspelled word, but showing the SUGGESTION list for
+                 ;; it still needs Control-click or a real right-click --
+                 ;; there is no plain keyboard shortcut for that popover
+                 ;; (checked against Apple's own support docs, not assumed).
+                 ;; The actual keyboard equivalent macOS DOES recognize
+                 ;; natively in Cocoa text views is the standard HID
+                 ;; "Application"/"Menu" key -- confirmed goku/Karabiner
+                 ;; accepts `:application` as a real key_code (compiled and
+                 ;; verified, not guessed from a keycode table) -- so this
+                 ;; synthesizes exactly that. Paired mnemonically with Cmd-;:
+                 ;; Cmd-; finds the next typo, space-; opens its suggestions,
+                 ;; both from the keyboard, right where the cursor already is.
+                 [:semicolon :application]
                  [:m :!!m] ;; hammerspoon hyper M: toggle mute mic
                  [:!Sr :!!r] ;; hammerspoon hyper R: reload hammerspoon
                  ;; Break the active Chrome tab into its own window, so it can
