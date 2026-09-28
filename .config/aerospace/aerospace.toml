@@ -96,41 +96,25 @@ on-focus-changed = [
     # 'exec-and-forget /opt/homebrew/bin/borders width=4',
     'exec-and-forget /Users/petermariani/.config/context/record-window-focus.sh',
     'exec-and-forget /opt/homebrew/bin/aerospace move-mouse window-lazy-center',
-    # active-now.py (chrome-tabs switcher) proactively refreshed HERE too,
-    # 2026-09-27 -- the other half of exec-on-workspace-change's own
-    # proactive-refresh fix below did not cover the user's actual live
-    # reproduction: opening a NEW Chrome window INSIDE an
-    # already-focused workspace fires on-focus-changed (this callback),
-    # not exec-on-workspace-change, so nothing refreshed active-now.py's
-    # answer for that case at all -- confirmed live, see HANDOFF.md and
-    # wait-for-fresh.py. Safe to fire on every ordinary focus change too
-    # (a click, an alt-tab, an app re-raising itself): active-now.py's
-    # own non-blocking flock (checked BEFORE it makes any AppleScript
-    # call) makes a fire that finds one already in flight exit
-    # immediately, same reasoning exec-on-workspace-change's own comment
-    # already relies on.
-    'exec-and-forget /Users/petermariani/.local/share/mise/installs/python/3.12/bin/python3 /Users/petermariani/.config/context/chrome-tabs/active-now.py',
-    # `paneld rearm chrome-tabs` HERE TOO, 2026-09-27, same day, found
-    # AFTER the fix above turned out not to be enough on its own: the
-    # active-now.py fire above only recomputes the ANSWER (fresh.tsv) --
-    # it does nothing for paneld's own panel, which holds an ALREADY-ARMED
-    # fzf that read producer.sh's output once, at its last arm, and does
-    # not re-read it just because fresh.tsv changed underneath it. Proven
-    # live: `paneld status` showed chrome-tabs `armed 586.9s ago` (~10
-    # minutes stale) right after real workspace switches and real
-    # Chrome-window switches that should have refreshed it -- confirmed by
-    # running `paneld rearm chrome-tabs` by hand and watching
-    # switcher.debug.log gain a brand-new `[producer.sh]` line instantly.
-    # picker-refresh.sh's own rearm loop (see that file) already does this
-    # for `exec-on-workspace-change`, i.e. an ACTUAL workspace switch --
-    # but switching between TWO CHROME WINDOWS IN THE SAME WORKSPACE fires
-    # only on-focus-changed (this callback), which picker-refresh.sh is
-    # never invoked from at all, so that case had NOTHING rearming this
-    # panel. `rearm` is non-blocking (deferred internally by paneld if a
-    # verb is in flight or the panel is visible), so firing it on every
-    # ordinary focus change is the same safe-to-fire-redundantly reasoning
-    # already used above and in exec-on-workspace-change.
-    'exec-and-forget /Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld rearm chrome-tabs'
+    # active-now.py's proactive refresh + `paneld rearm chrome-tabs`,
+    # 2026-09-27/28, now GATED behind a real Chrome-focus check (see
+    # on-focus-changed-if-chrome.sh's own docstring for the full story).
+    # Originally two separate unconditional `exec-and-forget` entries here
+    # (one per action) -- both fired on EVERY focus change anywhere on the
+    # machine, Chrome-relevant or not, and each one triggers a real
+    # `producer.sh` run that ALSO backgrounds poll.py's own full tab
+    # enumeration. Measured live: 2149 `poll.py` starts vs 319
+    # `active-now.py` starts in the same debug-log window -- almost 7x
+    # more firings than were ever Chrome-relevant, and the resulting
+    # contention on Chrome's single Apple Event dispatcher is what turned
+    # active-now.py's own isolated ~40-60ms enumeration cost into the
+    # 0.8-1.1s completions visible throughout switcher.debug.log (the
+    # user's own report: "when I switch to another chrome instance...
+    # nothing happens on the first try"). Collapsed into one script so the
+    # cheap AeroSpace-native focus check (no AppleScript, ~30-60ms) runs
+    # ONCE and gates both actions, instead of duplicating the check or
+    # letting either fire unconditionally.
+    'exec-and-forget /Users/petermariani/.config/context/chrome-tabs/on-focus-changed-if-chrome.sh'
 ]
 
 # Keep the terminal picker's pre-rendered rows in step with reality, and let
