@@ -412,3 +412,52 @@ action = [ { bind = "enter", verb = "focus-window", default = true } ]
 # context/keybindings_view.py and paneld.toml's `keybindings` panel, whose
 # `compose` calls `context render-keybindings-command` directly instead of
 # `context pick-command`. Nothing belongs here for it any more.
+
+[[picker]]
+name     = "chrome-tabs"
+# control-cmd-tab, a REAL switcher now (2026-09-25 afternoon), not the
+# space-c toggle-picker from that same morning, and not plain control-tab
+# either (tried first, reverted the same afternoon -- paneld's
+# release-to-commit monitor is hardcoded to watch cmd specifically, so
+# any switcher-style panel needs cmd in its chord; see paneld.toml's own
+# comment on the `chrome-tabs` panel for the full account). The
+# Chrome-tab analogue of `windows` (the FOCUSED WORKSPACE's windows) one
+# level further down (the FOCUSED Chrome window's tabs). Deliberately NOT
+# global across every Chrome window, and NOT per-AeroSpace-workspace
+# either (the user, asked directly rather than assumed) -- that would need
+# matching Chrome's own window ids to AeroSpace workspaces, the exact
+# ownership-tracking layer deleted 2026-09-09 (see memory
+# chrome-artifact-links-wrong-workspace.md). Entirely outside this repo
+# and outside context/*.py on purpose, matching that same 2026-09-09
+# decision ("this tool knows nothing about Chrome") -- both scripts below
+# live in ~/.config/context/chrome-tabs/, plain AppleScript/Python with
+# no context package import. See karabiner.edn's "workspace switcher"
+# rule block for the control-cmd-tab ->
+# control-f13 rewrite and paneld.toml's own panel entry for cycle/hotkey.
+#
+# producer: refreshes the poll cache (poll.py) then reformats rank.py's
+# frecency-ranked, front-window-only rows into NUL-terminated
+# "win_id:index<TAB>display" records -- verified directly 2026-09-25 that
+# this machine's /usr/bin/awk silently DROPS a `\0` printf escape instead
+# of emitting the byte (two lines ran together with no separator, not an
+# error), so the reformatting step is Python, not awk.
+producer = "/Users/petermariani/.config/context/chrome-tabs/producer.sh"
+# consumer: `xargs -0` hands the whole NUL-delimited record (tab intact,
+# the same protection the `apps` picker's consumer relies on for
+# space-containing app names) to activate-one.sh as one argument, which
+# splits win_id:index back out and calls activate.py.
+consumer = "/usr/bin/xargs -0 /Users/petermariani/.config/context/chrome-tabs/activate-one.sh"
+fields     = "value-tab-display"
+multi      = false
+# Row 2, same as `windows`/`switcher`: the second item is your most recent
+# alternate tab, so a single confirm swaps to it -- the user's own stated
+# preference from the start of this thread.
+cursor_row = 2
+# The chord is HELD, not typed into -- the switcher's own setting, same as
+# `windows`. paneld's cycle machine still delivers arrow keys and Enter to
+# the surface.
+no_input   = true
+# NO `refresh`, NO `on_reveal_key`, matching `windows`' own explicit
+# removal (2026-09-21): a reveal-time reload discards every chord step
+# taken before the panel appears, which is exactly wrong for a held,
+# hammerable switcher. See that panel's own comment for the full account.
