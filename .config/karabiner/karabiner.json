@@ -6,9 +6,9 @@
     "complex_modifications" : {
       "parameters" : {
         "basic.simultaneous_threshold_milliseconds" : 50,
-        "basic.to_delayed_action_delay_milliseconds" : 160,
-        "basic.to_if_alone_timeout_milliseconds" : 159,
-        "basic.to_if_held_down_threshold_milliseconds" : 160
+        "basic.to_delayed_action_delay_milliseconds" : 220,
+        "basic.to_if_alone_timeout_milliseconds" : 219,
+        "basic.to_if_held_down_threshold_milliseconds" : 220
       },
       "rules" : [ {
         "description" : "CAPSLOCK is CTRL if pressed in combination, otherwise ESC",
@@ -99,6 +99,42 @@
           "to" : [ {
             "key_code" : "f15",
             "modifiers" : [ "left_command", "left_option", "left_shift" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "grave_accent_and_tilde",
+            "modifiers" : {
+              "mandatory" : [ "left_command" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f13",
+            "modifiers" : [ "left_command" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "grave_accent_and_tilde",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f13",
+            "modifiers" : [ "left_command", "left_shift" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "grave_accent_and_tilde",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "right_shift" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "f13",
+            "modifiers" : [ "left_command", "left_shift" ]
           } ],
           "type" : "basic"
         } ]
@@ -548,6 +584,19 @@
       }, {
         "description" : "space-mode: AeroSpace commands",
         "manipulators" : [ {
+          "from" : {
+            "key_code" : "semicolon"
+          },
+          "to" : [ {
+            "key_code" : "application"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
           "from" : {
             "key_code" : "m"
           },
@@ -1197,7 +1246,7 @@
             "key_code" : "tab"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-next"
+            "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle windows"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
