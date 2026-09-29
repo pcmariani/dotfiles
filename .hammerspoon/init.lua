@@ -595,6 +595,25 @@ local function detachChromeTabToWorkspace()
   return true
 end
 
+-- send-tab's "0 windows here" row: detach the active tab into its own
+-- new window, then move it DIRECTLY to `workspaceName` -- no further
+-- picker (unlike plain opt-` / detachChromeTabToWorkspace, which shows
+-- the move picker because it doesn't yet know the destination). The
+-- destination is already known here; showing another picker would be a
+-- second, redundant prompt.
+--
+-- CONTEXT_BIN: absolute path, same reasoning as PANELD_BIN above --
+-- Hammerspoon does not inherit the Homebrew/asdf PATH.
+local CONTEXT_BIN = "/Users/petermariani/.local/bin/context"
+
+function detachChromeTabAndMoveTo(workspaceName)
+  if not breakOutChromeTab() then
+    return false
+  end
+  hs.task.new(CONTEXT_BIN, nil, { "move", workspaceName, "--rightmost" }):start()
+  return true
+end
+
 -- ⌘⌃⌥D (hyper MINUS shift) → detach the tab, then pick its workspace.
 -- It cannot be hyper-shift-D: hyper already CONTAINS shift, so hyper-D and
 -- hyper-shift-D are the same chord and Hammerspoon cannot tell them apart.
@@ -610,6 +629,35 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "d", detachChromeTabToWorkspace)
 -- live; the older space-shift-d chord that used to reach this function is
 -- retired (see karabiner.edn's own history for that rule).
 hs.hotkey.bind({ "alt" }, "`", detachChromeTabToWorkspace)
+
+-- shift-opt-` (2026-09-28) -- reveals the send-tab picker directly, with
+-- NO chrome action first (unlike plain opt-`): the whole point of this
+-- picker is computing rows BEFORE touching the tab. Confirmed this
+-- session: no existing shift+option+grave binding anywhere in this file
+-- or karabiner.edn -- free chord. Same non-Carbon registration path as
+-- plain opt-` (Hammerspoon's own hs.hotkey.bind, not paneld's Carbon
+-- RegisterEventHotKey) -- deliberately NOT registered as a paneld hotkey:
+-- every existing panel whose chord includes the backtick key needed a
+-- karabiner rewrite to a safe F-key first (see paneld.toml's own
+-- comments on `chrome-tabs`/`switcher`/`windows`), while plain option-`
+-- already proves Hammerspoon's OWN key capture handles this key directly
+-- with no such rewrite.
+--
+-- Plain opt-` never reveals ITS picker unless Chrome is frontmost --
+-- that guard lives inside breakOutChromeTab, called before anything is
+-- shown. This binding has no detach step to hide behind (the whole
+-- design computes the picker before touching anything), so the same
+-- guard has to be explicit here instead, or this would pop the picker
+-- over whatever app the user is actually in -- "acting on a window the
+-- user cannot see would be a surprise, not a feature," this file's own
+-- existing phrase for the identical class of guard elsewhere.
+hs.hotkey.bind({ "alt", "shift" }, "`", function()
+  local chrome = hs.application.get("Google Chrome")
+  if not chrome or not chrome:isFrontmost() then
+    return
+  end
+  hs.task.new(PANELD_BIN, nil, { "show", "send-tab" }):start()
+end)
 
 
 -- Join the active tab of the frontmost Chrome window into the OTHER Chrome
