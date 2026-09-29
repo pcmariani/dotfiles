@@ -1045,6 +1045,99 @@ end
 -- as "other" alongside `d` for "detach".
 hs.hotkey.bind({ "cmd", "shift", "ctrl", "alt" }, "o", joinChromeTabToOtherWindow)
 
+-- Merge the source tab (the focused Chrome window's active tab) directly
+-- into an arbitrary EXISTING Chrome window, identified by CGWindowID --
+-- the same number space `aerospace list-windows`'s own window-id and this
+-- file's `chrome:focusedWindow():id()` already share (proven above in
+-- joinChromeTabToOtherWindow, not re-derived here).
+--
+-- REFUSES rather than guesses when the target's title is not unique
+-- machine-wide -- two mechanisms to safely disambiguate identically-
+-- titled windows were tried and both failed live (raising the target:
+-- drags real OS/AeroSpace focus along, can switch the user's visible
+-- workspace; reading Chrome's own window order once and pressing by
+-- computed rank: a real, confirmed TOCTOU race against this project's
+-- own chrome-tabs poller, which also touches Chrome via AppleScript
+-- every ~20s -- see this plan's "Refinements over the spec" §1). When
+-- the title IS unique, neither problem exists: there is nothing to
+-- rank, and the uniqueness COUNT itself is not meaningfully racy (a
+-- window's title does not spontaneously change, unlike window ORDER,
+-- which a background process demonstrably does perturb).
+function mergeChromeTabInto(targetWindowId)
+  local chrome = hs.application.get("Google Chrome")
+  if not chrome then return false end
+
+  local target = hs.window(targetWindowId)
+  if not target then return false end
+
+  local targetTitle = chromeTabTitleFromWindowTitle(target:title())
+
+  local ok, chromeTabTitles = hs.osascript.applescript([[
+    tell application "Google Chrome"
+      set out to {}
+      repeat with w in windows
+        set end of out to title of active tab of w
+      end repeat
+      return out
+    end tell
+  ]])
+  if not ok or not chromeTabTitles then return false end
+
+  local matchCount = 0
+  for _, title in ipairs(chromeTabTitles) do
+    if title == targetTitle then
+      matchCount = matchCount + 1
+    end
+  end
+  if matchCount > 1 then
+    hs.alert.show("🌐 Can't safely merge into \"" .. targetTitle ..
+      "\" -- another window shares this title. Use space-o manually.")
+    return false
+  end
+
+  local window = chrome:focusedWindow()
+  if not window then return false end
+
+  dismissAnyChromeMenu()
+  hs.timer.usleep(200000)
+
+  local tab = findActiveChromeTab(window)
+  if not tab then return false end
+
+  tab:setTimeout(AX_ACTION_TIMEOUT)
+  tab:performAction("AXShowMenu")
+
+  local tabPos = tab:attributeValue("AXPosition")
+  local moveItem = pollUntil(function()
+    return findVisibleMenuItem(tabPos.x, tabPos.y, "Move Tab to Another Window")
+  end, 0.8, 0.02)
+  if not moveItem then
+    dismissAnyChromeMenu()
+    return false
+  end
+
+  moveItem:setTimeout(AX_ACTION_TIMEOUT)
+  moveItem:performAction("AXPress")
+  hs.timer.usleep(300000)
+
+  -- Exactly one candidate can match targetTitle here (matchCount == 1,
+  -- just confirmed above) -- reuses joinChromeTabToOtherWindow's own
+  -- existing single-match finder unchanged; no rank/order tracking
+  -- needed, and therefore no TOCTOU risk.
+  local otherWindowItem = pollUntil(function()
+    return findTargetWindowMenuItem(moveItem, targetTitle)
+  end, 0.8, 0.02)
+
+  if not otherWindowItem then
+    dismissAnyChromeMenu()
+    return false
+  end
+
+  otherWindowItem:setTimeout(AX_ACTION_TIMEOUT)
+  otherWindowItem:performAction("AXPress")
+  return true
+end
+
 
 
 -- -----------------------------------------------------------
