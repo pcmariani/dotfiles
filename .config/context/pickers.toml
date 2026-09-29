@@ -474,3 +474,14 @@ no_input   = true
 # removal (2026-09-21): a reveal-time reload discards every chord step
 # taken before the panel appears, which is exactly wrong for a held,
 # hammerable switcher. See that panel's own comment for the full account.
+
+[[picker]]
+name     = "send-tab"
+producer = "/Users/petermariani/.config/context/send-tab/producer.sh"
+# xargs -0, exactly matching chrome-tabs' own consumer wiring: hands the
+# WHOLE NUL-delimited record to consumer.sh as one argument, tab intact
+# (see consumer.sh's own comment for why it needs the tab, not just the
+# value half).
+consumer = "/usr/bin/xargs -0 /Users/petermariani/.config/context/send-tab/consumer.sh"
+fields     = "value-tab-display"
+multi      = false

@@ -478,3 +478,19 @@ reveal_delay_ms = 300
 # throwaway test panel confirmed the toast-and-suppress path, the
 # reveal-normally path, and graceful fail-open on a cold-start timeout.
 on_empty = "/Users/petermariani/.config/context/chrome-tabs/empty-check.sh"
+
+[[panel]]
+name    = "send-tab"
+# hyper-f22 -- a placeholder, matching this file's own established
+# "never pressed" precedent (apps/search's hyper-f17/hyper-f16): PanelConfig.hotkey
+# is a non-optional String (confirmed by reading Sources/PanelCore/Config.swift),
+# but the REAL trigger is Hammerspoon's shift-opt-` binding (Task 4), calling
+# `paneld show send-tab` directly -- nothing in karabiner.edn maps hyper-f22
+# to anything, so this chord is never physically reachable. Confirmed unused
+# by grepping every f1[0-9]/f2[0-9] token across this file and karabiner.edn.
+hotkey  = "hyper-f22"
+compose = "context pick-command send-tab"
+width   = 912
+height  = 420
+screen  = "LG HDR WQHD"
+arm     = false
