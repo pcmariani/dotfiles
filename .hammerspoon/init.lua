@@ -1045,6 +1045,22 @@ end
 -- as "other" alongside `d` for "detach".
 hs.hotkey.bind({ "cmd", "shift", "ctrl", "alt" }, "o", joinChromeTabToOtherWindow)
 
+-- Bounds comparison for a SINGLE snapshot read only (identifying which
+-- AppleScript list entry IS the source window, right now) -- NOT for
+-- computing a rank to be pressed later across an intervening AX
+-- operation. That later use is exactly what the removed rank mechanism
+-- did, and it lost to a real TOCTOU race against this project's own
+-- chrome-tabs poller (see mergeChromeTabInto's own comment below). A
+-- same-instant identity check has no such gap to race against.
+local function boundsCloseEnough(a, b)
+  for i = 1, 4 do
+    if math.abs(a[i] - b[i]) > 2 then
+      return false
+    end
+  end
+  return true
+end
+
 -- Merge the source tab (the focused Chrome window's active tab) directly
 -- into an arbitrary EXISTING Chrome window, identified by CGWindowID --
 -- the same number space `aerospace list-windows`'s own window-id and this
@@ -1059,10 +1075,24 @@ hs.hotkey.bind({ "cmd", "shift", "ctrl", "alt" }, "o", joinChromeTabToOtherWindo
 -- computed rank: a real, confirmed TOCTOU race against this project's
 -- own chrome-tabs poller, which also touches Chrome via AppleScript
 -- every ~20s -- see this plan's "Refinements over the spec" §1). When
--- the title IS unique, neither problem exists: there is nothing to
--- rank, and the uniqueness COUNT itself is not meaningfully racy (a
--- window's title does not spontaneously change, unlike window ORDER,
--- which a background process demonstrably does perturb).
+-- the title IS unique AMONG WINDOWS OTHER THAN THE SOURCE ITSELF,
+-- neither problem exists: there is nothing to rank, and the uniqueness
+-- COUNT itself is not meaningfully racy (a window's title does not
+-- spontaneously change, unlike window ORDER, which a background
+-- process demonstrably does perturb).
+--
+-- The source window is EXCLUDED from that count -- Chrome's own "Move
+-- Tab to Another Window" submenu never lists the window a tab is
+-- already in, so the source sharing the target's title (e.g. two
+-- windows both on "New Tab") is not a real collision. AppleScript's
+-- `id of w` is a different, uncorrelated number space from CGWindowID
+-- (documented and confirmed in this feature's task-3 report), so the
+-- source's AppleScript-list entry can't be found by id -- it's found
+-- by matching `bounds of w` against the source's own `hs.window` frame,
+-- taken in the same single AppleScript read used for the count itself.
+-- If that bounds match is ambiguous (zero or more than one candidate),
+-- nothing is excluded and the count falls back to its old, conservative
+-- behavior rather than risk excluding the wrong window.
 function mergeChromeTabInto(targetWindowId)
   local chrome = hs.application.get("Google Chrome")
   if not chrome then return false end
@@ -1072,20 +1102,34 @@ function mergeChromeTabInto(targetWindowId)
 
   local targetTitle = chromeTabTitleFromWindowTitle(target:title())
 
-  local ok, chromeTabTitles = hs.osascript.applescript([[
+  local window = chrome:focusedWindow()
+  if not window then return false end
+
+  local sf = window:frame()
+  local sourceBounds = { sf.x, sf.y, sf.x + sf.w, sf.y + sf.h }
+
+  local ok, chromeWindows = hs.osascript.applescript([[
     tell application "Google Chrome"
       set out to {}
       repeat with w in windows
-        set end of out to title of active tab of w
+        set end of out to {bounds of w, title of active tab of w}
       end repeat
       return out
     end tell
   ]])
-  if not ok or not chromeTabTitles then return false end
+  if not ok or not chromeWindows then return false end
+
+  local sourceMatches = {}
+  for i, w in ipairs(chromeWindows) do
+    if boundsCloseEnough(w[1], sourceBounds) then
+      table.insert(sourceMatches, i)
+    end
+  end
+  local excludeIndex = (#sourceMatches == 1) and sourceMatches[1] or nil
 
   local matchCount = 0
-  for _, title in ipairs(chromeTabTitles) do
-    if title == targetTitle then
+  for i, w in ipairs(chromeWindows) do
+    if w[2] == targetTitle and i ~= excludeIndex then
       matchCount = matchCount + 1
     end
   end
@@ -1094,9 +1138,6 @@ function mergeChromeTabInto(targetWindowId)
       "\" -- another window shares this title. Use space-o manually.")
     return false
   end
-
-  local window = chrome:focusedWindow()
-  if not window then return false end
 
   dismissAnyChromeMenu()
   hs.timer.usleep(200000)
