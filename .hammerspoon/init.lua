@@ -1472,18 +1472,29 @@ end
 --
 --
 -----------------------------------------------------------
--- Window split resizing (simple AeroSpace resize commands)
+-- Window split sizing: see splitsize.lua for the design and why the earlier
+-- two attempts failed. Bare `aerospace` here silently returned exit 127
+-- (Hammerspoon's PATH has no Homebrew), so the keys fired and did nothing.
 -----------------------------------------------------------
 
--- Grow left window by 100px (cmd-ctrl-alt + ])
-hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "]", function()
-  os.execute("aerospace resize width +100")
-end)
+local splitsize = require("splitsize")
 
--- Shrink left window by 100px (cmd-ctrl-alt + [)
-hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "[", function()
-  os.execute("aerospace resize width -100")
-end)
+-- pcall, so a Lua error in a hotkey callback becomes a visible alert instead
+-- of a line in the console nobody is looking at.
+local function splitKey(direction)
+  return function()
+    local ok, err = pcall(splitsize.step, direction)
+    if not ok then
+      hs.alert.show("split error: " .. tostring(err), 3)
+    end
+  end
+end
+
+-- Grow the focused window: 25 -> 33 -> 50 -> 66 -> 75 (cmd-ctrl-alt + ])
+hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "]", splitKey(1))
+
+-- Shrink the focused window: 75 -> 66 -> 50 -> 33 -> 25 (cmd-ctrl-alt + [)
+hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "[", splitKey(-1))
 
 -- -----------------------------------------------------------
 -- -- Chrome hotkeys
