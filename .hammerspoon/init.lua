@@ -4,6 +4,9 @@
 -- Used by `context doctor` and other tooling to probe this instance.
 require("hs.ipc")
 
+-- Workspace layout system: called by `context startup layout <name>`
+require("layouts")
+
 -- THE CONTEXT PICKER LIVES IN paneld NOW, 2026-09-05.
 --
 -- What stood here was `contextPicker` (context-picker.lua, an hs.chooser) on
