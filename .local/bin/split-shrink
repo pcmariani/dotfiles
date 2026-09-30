@@ -1,0 +1,3 @@
+#!/bin/bash
+# Shrink left window by 100px (grow right window)
+aerospace resize width -100

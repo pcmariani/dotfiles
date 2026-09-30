@@ -1417,29 +1417,17 @@ end
 --
 --
 -----------------------------------------------------------
--- Window split resizing (two side-by-side windows)
+-- Window split resizing (simple AeroSpace resize commands)
 -----------------------------------------------------------
 
--- Cycle through split sizes: 50% → 66% → 75% → 50%
-hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "=", function()
-  cycleSplitSize()
+-- Grow left window by 100px (cmd-ctrl-alt + ])
+hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "]", function()
+  os.execute("aerospace resize width +100")
 end)
 
--- Quick jump to specific split sizes
-hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "5", function()
-  resizeSplit(50)
-end)
-
-hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "6", function()
-  resizeSplit(66)
-end)
-
-hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "7", function()
-  resizeSplit(75)
-end)
-
-hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "2", function()
-  resizeSplit(75)  -- left=75%, right=25%
+-- Shrink left window by 100px (cmd-ctrl-alt + [)
+hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "[", function()
+  os.execute("aerospace resize width -100")
 end)
 
 -- -----------------------------------------------------------

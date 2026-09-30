@@ -32,22 +32,53 @@ function resizeSplit(leftPercent)
     return false
   end
 
-  local w, h, x, y = getDisplayDimensions()
-  local windows = hs.window.visibleWindows()
+  -- Get windows in focused AeroSpace workspace only
+  local output = hs.execute("aerospace list-windows --workspace focused", true)
+  if not output or output == "" then
+    print("[resize-split] no windows in focused workspace")
+    return false
+  end
 
-  if #windows < 2 then
-    print("[resize-split] need at least 2 windows; found " .. #windows)
+  local windowLines = {}
+  for line in output:gmatch("[^\n]+") do
+    table.insert(windowLines, line)
+  end
+
+  if #windowLines < 2 then
+    print("[resize-split] need at least 2 windows in focused workspace; found " .. #windowLines)
+    return false
+  end
+
+  -- Get Hammerspoon windows currently visible on focused screen
+  local screen = getMainDisplay()
+  local screenFrame = screen:frame()
+
+  -- Filter to windows on the focused screen, sorted by x position
+  local wsWindows = {}
+  for _, hsWin in ipairs(hs.window.allWindows()) do
+    if hsWin:isVisible() then
+      local wFrame = hsWin:frame()
+      -- Check if window is on the focused screen
+      if wFrame.x >= screenFrame.x and wFrame.x < (screenFrame.x + screenFrame.w) then
+        table.insert(wsWindows, hsWin)
+      end
+    end
+  end
+
+  if #wsWindows < 2 then
+    print("[resize-split] need at least 2 visible windows on focused screen; found " .. #wsWindows)
     return false
   end
 
   -- Sort by x position (left to right)
-  table.sort(windows, function(a, b)
+  table.sort(wsWindows, function(a, b)
     return a:frame().x < b:frame().x
   end)
 
-  local leftWindow = windows[1]
-  local rightWindow = windows[2]
+  local leftWindow = wsWindows[1]
+  local rightWindow = wsWindows[2]
 
+  local w, h, x, y = screenFrame.w, screenFrame.h, screenFrame.x, screenFrame.y
   local leftWidth = (w * leftPercent) / 100
   local rightWidth = w - leftWidth
 
