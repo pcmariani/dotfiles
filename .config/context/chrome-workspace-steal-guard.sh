@@ -29,6 +29,7 @@ set -u
 CACHE="$CHROME_TABS_STATE/cache.json"
 LAST_WS="$CHROME_TABS_STATE/last-workspace"
 MARKER="$CHROME_TABS_STATE/last-corrected-window"
+DELIBERATE="$CHROME_TABS_STATE/deliberate-until"
 LOCKDIR="$CHROME_TABS_STATE/correction.lock"
 DBG="$CHROME_TABS_STATE/steal-guard.debug.log"
 
@@ -73,6 +74,28 @@ is_reentrant_echo() {
     now=$(date +%s)
     age=$(( now - marked_ts ))
     [ "$age" -ge 0 ] && [ "$age" -lt "$ECHO_WINDOW" ]
+}
+
+# True (0) if Hammerspoon has declared a DELIBERATE Chrome tab move in
+# flight: $DELIBERATE holds an absolute expiry epoch, written by
+# init.lua's suppressStealGuard() right before mergeChromeTabInto() /
+# detachChromeTabAndMoveTo() touch Chrome (2026-09-30 -- found live: a
+# cross-workspace merge via shift-opt-` is indistinguishable from a
+# link-steal by anything this script can observe, and the correction
+# detached the just-merged tab straight back out every time). NOT
+# consumed on read: one deliberate move can fire this hook more than once
+# (the second invocation usually lands on "lock held"), so the marker has
+# to outlive the first reader. A missing, empty, or non-numeric file is
+# simply "not in flight" -- never an error that could disable the guard.
+#
+# NOW_OVERRIDE exists only for tests, same as in_startup_grace_period.
+deliberate_action_in_flight() {
+    [ -f "$DELIBERATE" ] || return 1
+    local until_epoch now
+    until_epoch=$(head -n1 "$DELIBERATE" 2>/dev/null | tr -cd '0-9')
+    [ -n "$until_epoch" ] || return 1
+    now=${NOW_OVERRIDE:-$(date +%s)}
+    [ "$now" -lt "$until_epoch" ]
 }
 
 # True (0) if AeroSpace itself started less than STARTUP_GRACE seconds
@@ -208,6 +231,14 @@ main() {
     current_app_name=$(current_app)
 
     if [ "$current_app_name" != "Google Chrome" ]; then
+        write_last_workspace "$(current_workspace)"
+        return 0
+    fi
+
+    # Before the ~0.2s Chrome query: a declared deliberate move is a
+    # decision already made, nothing Chrome says can change it.
+    if deliberate_action_in_flight; then
+        dbg "DELIBERATE Chrome move in flight (deliberate-until=$(head -n1 "$DELIBERATE" 2>/dev/null)), skipping correction"
         write_last_workspace "$(current_workspace)"
         return 0
     fi

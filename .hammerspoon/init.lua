@@ -501,6 +501,51 @@ local function writeStealGuardMarker(windowId)
   return os.rename(tmp, STEAL_GUARD_MARKER_FILE) ~= nil
 end
 
+-- DELIBERATE-ACTION SUPPRESSION, 2026-09-30. Found live: shift-opt-`'s
+-- mergeChromeTabInto() worked every time, and the steal guard undid it
+-- every time. A cross-workspace merge makes Chrome raise the destination
+-- window, AeroSpace follows focus there, exec-on-workspace-change fires,
+-- and the guard sees exactly what a link-steal looks like -- Chrome
+-- frontmost, a (window, url) pair the ~20s poller has never seen under
+-- THAT window -- so it "corrected" by detaching the just-merged tab
+-- straight back out (steal-guard.debug.log: "ARMED: correcting window=...
+-- url=<the tab just sent>"). Plain opt-` only survived the same misfire
+-- by accident: its detached window has ONE tab, so the correction's
+-- "Move Tab to New Window" is disabled and no-ops.
+--
+-- The guard cannot tell a deliberate move from a steal by looking at
+-- Chrome, so the functions that MAKE deliberate moves tell it: write this
+-- marker (an absolute expiry epoch) BEFORE touching Chrome, and
+-- chrome-workspace-steal-guard.sh's deliberate_action_in_flight() stands
+-- down while it is unexpired. Written before, not after, for the same
+-- reason correctChromeSteal writes its echo marker before move/refocus:
+-- whether the hook fires synchronously is unconfirmed, so the marker must
+-- already exist before anything that could fire it. Not consumed on
+-- read (unlike the echo marker): one merge can fire the hook twice
+-- (seen live: a second invocation 0.1s later hits "lock held"), so a
+-- consume-on-read marker would protect only the first.
+--
+-- Cost if wrong: a real link-steal inside this window after a deliberate
+-- move goes uncorrected. Merge itself takes up to ~3s (AXShowMenu's own
+-- 1.5s timeout + menu polls) before Chrome raises anything, so the
+-- budget has to cover that plus the hook's ~0.5s; 8s leaves slack
+-- without making the blind spot feel long.
+local STEAL_GUARD_SUPPRESS_FILE =
+  os.getenv("HOME") .. "/.local/state/context/chrome-tabs/deliberate-until"
+local STEAL_GUARD_SUPPRESS_SECONDS = 8
+
+local function suppressStealGuard()
+  local tmp = STEAL_GUARD_SUPPRESS_FILE .. ".tmp"
+  local f = io.open(tmp, "w")
+  if not f then
+    print("suppressStealGuard: could not open marker tmp file for writing")
+    return false
+  end
+  f:write(tostring(os.time() + STEAL_GUARD_SUPPRESS_SECONDS) .. "\n")
+  f:close()
+  return os.rename(tmp, STEAL_GUARD_SUPPRESS_FILE) ~= nil
+end
+
 -- Runs an aerospace subcommand and blocks until it exits, returning true
 -- only on a real exit code 0. Deliberately blocking (unlike PANELD_BIN's
 -- hs.task above, which is fire-and-forget from a hotkey): this function
@@ -673,6 +718,11 @@ function detachChromeTabAndMoveTo(workspaceName)
   local chrome = hs.application.get("Google Chrome")
   local sourceWindow = chrome and chrome:focusedWindow()
   local sourceId = sourceWindow and sourceWindow:id()
+
+  -- The detached window is moved with focus following it, which fires
+  -- the steal guard against a window it has never seen (see
+  -- suppressStealGuard). Single-tab windows only escaped by accident.
+  suppressStealGuard()
 
   local ok, reason = breakOutChromeTab()
 
@@ -1256,6 +1306,11 @@ function mergeChromeTabInto(targetWindowId)
 
   local window = chrome:focusedWindow()
   if not window then return false end
+
+  -- Before the first thing that could make Chrome raise the target (see
+  -- suppressStealGuard's own comment): a cross-workspace merge changes
+  -- the focused workspace and the guard would otherwise undo it.
+  suppressStealGuard()
 
   dismissAnyChromeMenu()
   hs.timer.usleep(200000)
