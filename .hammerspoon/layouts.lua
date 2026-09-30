@@ -24,6 +24,78 @@ local function getDisplayDimensions()
   return frame.w, frame.h, frame.x, frame.y
 end
 
+-- Resize split: move boundary between two side-by-side windows
+-- leftPercent: 0-100, width of left window as percentage of screen
+function resizeSplit(leftPercent)
+  if not leftPercent or leftPercent < 10 or leftPercent > 90 then
+    print("[resize-split] invalid percentage: " .. tostring(leftPercent))
+    return false
+  end
+
+  local w, h, x, y = getDisplayDimensions()
+  local windows = hs.window.visibleWindows()
+
+  if #windows < 2 then
+    print("[resize-split] need at least 2 windows; found " .. #windows)
+    return false
+  end
+
+  -- Sort by x position (left to right)
+  table.sort(windows, function(a, b)
+    return a:frame().x < b:frame().x
+  end)
+
+  local leftWindow = windows[1]
+  local rightWindow = windows[2]
+
+  local leftWidth = (w * leftPercent) / 100
+  local rightWidth = w - leftWidth
+
+  positionWindow(leftWindow, x, y, leftWidth, h)
+  positionWindow(rightWindow, x + leftWidth, y, rightWidth, h)
+
+  print(string.format("[resize-split] left: %.0f%%, right: %.0f%%",
+                      leftPercent, 100 - leftPercent))
+  return true
+end
+
+-- Cycle through preset split sizes: 50 → 66 → 75 → 50
+function cycleSplitSize()
+  -- Try to read current state from a temp file
+  local stateFile = os.getenv("HOME") .. "/.cache/context/split-state"
+  local currentSize = 50
+
+  local f = io.open(stateFile, "r")
+  if f then
+    local line = f:read("*n")
+    if line then
+      currentSize = line
+    end
+    f:close()
+  end
+
+  -- Cycle: 50 → 66 → 75 → 50
+  local nextSize = 50
+  if currentSize == 50 then
+    nextSize = 66
+  elseif currentSize == 66 then
+    nextSize = 75
+  elseif currentSize == 75 then
+    nextSize = 50
+  end
+
+  -- Write new state
+  local dir = os.getenv("HOME") .. "/.cache/context"
+  os.execute("mkdir -p '" .. dir .. "'")
+  f = io.open(stateFile, "w")
+  if f then
+    f:write(tostring(nextSize))
+    f:close()
+  end
+
+  return resizeSplit(nextSize)
+end
+
 -- Apply a named workspace layout
 function applyWorkspaceLayout(layoutName)
   if not layoutName or layoutName == "" then
