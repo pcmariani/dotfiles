@@ -75,7 +75,11 @@
                 ;; Apps that OWN ctrl-hjkl and must never have it taken away.
                 ;; Ghostty holds herdr, whose own binding walks panes and then
                 ;; hands off to AeroSpace; Neovide is nvim in its own window
-                ;; and walks splits the same way. Anything NOT here has no
+                ;; and walks splits the same way. NEOVIDE'S ENTRY MATCHES ONLY THE
+                ;; BINARY INSIDE Neovide.app (bundle id com.neovide.neovide); the
+                ;; Homebrew binary has NO bundle id, so this rule never excluded it.
+                ;; ~/.config/context/apps.toml deliberately launches the bundled
+                ;; one. Anything NOT here has no
                 ;; navigation of its own, which is what `:!terminals` below
                 ;; keys on. Add a terminal here before using it, or ctrl-hjkl
                 ;; will start moving windows out from under it.
@@ -197,7 +201,8 @@
         ;; The first two layers are handled INSIDE the terminal --
         ;; ~/.config/herdr/nav-fallthrough.sh, bound to ctrl-hjkl in
         ;; ~/.config/herdr/config.toml, and the `at_edge` hook in
-        ;; ~/.config/nvim/plugin/herdr-splits-nvim.lua. Neither can help
+        ;; ~/.config/nvim/plugin/herdr-splits-nvim.lua (Neovide has its own
+        ;; mapping, ~/.config/nvim/lua/config/neovide-nav.lua). Neither can help
         ;; anywhere else: they are herdr and nvim keybindings, so they only
         ;; exist while one of those has keyboard focus. That is why navigation
         ;; was ONE-WAY before this rule -- you could leave Ghostty for a Chrome
@@ -228,8 +233,9 @@
         ;; the frames overlap.
         ;;
         ;; THE SAME CHANGE IS NEEDED IN TWO MORE PLACES, because this rule is
-        ;; off inside terminals: ~/.config/herdr/nav-fallthrough.sh and the
-        ;; `at_edge` function in ~/.config/nvim/plugin/herdr-splits-nvim.lua.
+        ;; off inside terminals: ~/.config/herdr/nav-fallthrough.sh and, for nvim
+        ;; (the herdr plugin's `at_edge` hook AND Neovide's own mapping), the one
+        ;; shared definition in ~/.config/nvim/lua/config/aerospace-edge.lua.
         ;; All three must agree or ctrl-j behaves differently depending on
         ;; which app happens to hold focus.
         {

@@ -34,8 +34,8 @@ rename_tab                   = "prefix+,"
 #
 # The plugin is NOT bypassed for nvim panes -- the script forwards the chord
 # into nvim and herdr-splits.nvim owns it from there, reaching AeroSpace via
-# the `at_edge` function in ~/.config/nvim/plugin/herdr-splits-nvim.lua. Both
-# halves are needed; see the header comment in nav-fallthrough.sh for why.
+# the `at_edge` hook in ~/.config/nvim/plugin/herdr-splits-nvim.lua, which calls
+# ~/.config/nvim/lua/config/aerospace-edge.lua. Both halves are needed; see the header comment in nav-fallthrough.sh for why.
 #
 # `nav_at_edge` in the plugin's generated herdr-splits.conf no longer has any
 # effect on these keys: the script decides what happens at an edge, and it

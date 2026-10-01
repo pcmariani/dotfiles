@@ -14,8 +14,10 @@
 #
 # THE NVIM HALF IS NOT HERE. A pane running nvim gets the chord forwarded into
 # it, and herdr-splits.nvim owns everything from there -- including the hop to
-# AeroSpace, via the `at_edge` function in
-# ~/.config/nvim/plugin/herdr-splits-nvim.lua. Both halves are required: nvim's
+# AeroSpace, via the `at_edge` hook in ~/.config/nvim/plugin/herdr-splits-nvim.lua,
+# which calls ~/.config/nvim/lua/config/aerospace-edge.lua (the one nvim definition of
+# the flags, shared with Neovide's ctrl-hjkl in lua/config/neovide-nav.lua). Both
+# halves are required: nvim's
 # plugin calls `herdr pane focus` DIRECTLY (herdr.lua:110) and never returns
 # through this script, so a herdr-only fix would leave nvim panes wrapping.
 #
