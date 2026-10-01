@@ -34,6 +34,10 @@ key = "space-shift-1..9"
 description = "point this slot digit at the current workspace"
 
 [[group.binding]]
+key = "alt-x (in space-e)"
+description = "unpin the highlighted workspace's slot digit"
+
+[[group.binding]]
 key = "space-tab"
 description = "cycle this workspace's windows (DFS order, wraps)"
 
