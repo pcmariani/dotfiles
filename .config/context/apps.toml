@@ -38,7 +38,7 @@
 # Note `--new-window` is not standalone for neovide: it needs --reuse-instance.
 [[app]]
 name        = "neovide"
-argv        = ["/opt/homebrew/bin/neovide"]
+argv        = ["/Applications/Neovide.app/Contents/MacOS/neovide"]
 path_args   = ["--", "+cd {path}"]
 app_name    = "neovide"
 # The apps/search pickers' row for this app (scripts/app-rows.sh) -- lets
