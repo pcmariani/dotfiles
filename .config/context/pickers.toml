@@ -243,10 +243,11 @@ action = [
   { bind = "enter", verb = { W = "enter", F = "open-path", A = "launch-app" }, after = "close", default = true },
   # Unpin the highlighted workspace's digit (`space-<n>`); never its letter.
   # Workspace rows only -- on a file or app row it says there is nothing to
-  # do. Backlog 1c. `close`, not `reload`: a reload action's key record only
-  # parses when the picker already has an --expect bind, which this one did
-  # not before this key. Reopen the picker to see the digit gone.
-  { bind = "alt-x", verb = { W = "slot-clear" }, after = "close" },
+  # do. Backlog 1c. `reload`: the panel stays open and the list refreshes in
+  # place (reload-sync, so the cursor stays put and no partial list shows).
+  # The key reaches pick-accept as `--key alt-x`, not in the data -- see
+  # compose()'s keep/reload chain. A change here needs `paneld reload search`.
+  { bind = "alt-x", verb = { W = "slot-clear" }, after = "reload" },
 ]
 
 # cmd-tab's workspace switcher. IDENTICAL to `contexts` except for the
