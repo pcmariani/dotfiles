@@ -157,29 +157,36 @@ local tabFieldSeparator = "<|>"
 -- focus something else, which would race the tab switch below.
 --
 -- Returns a list of:
---   { windowID, windowTitle, tabIndex, tabTitle, tabURL }
+--   { windowID, tabIndex, tabTitle, tabURL }
+--
+-- ONE bulk read per property across every window, not a read per tab
+-- (2026-10-03, N4 "space-g takes too long"). Measured against the same
+-- 10 windows / 33 tabs: the per-tab version (`tab t of theWindow`, then
+-- `title of` and `URL of` on it, plus `name of theWindow`) took 2.7s;
+-- bulk reads per window took 0.85s; `URL of every tab of every window`
+-- and `title of every tab of every window` take 0.17s and return the
+-- identical 33 rows in the identical order. Every AppleScript property
+-- read is an Apple event to Chrome, so the cost is the event count.
+-- The window's own title is no longer read: nothing used it, and
+-- `name of every window` alone costs 0.15s.
 local function listChromeTabs()
   local script = string.format([[
     tell application "Google Chrome"
       set fieldSeparator to "%s"
+      set allURLs to URL of every tab of every window
+      set allTitles to title of every tab of every window
+      set allIDs to id of every window
       set rowList to {}
 
-      repeat with theWindow in windows
-        -- Whatever Hammerspoon will see as this window's title.
-        try
-          set windowTitle to name of theWindow
-        on error
-          set windowTitle to title of active tab of theWindow
-        end try
+      repeat with w from 1 to (count of allIDs)
+        set urls to item w of allURLs
+        set titles to item w of allTitles
 
-        repeat with t from 1 to (count of tabs of theWindow)
-          set theTab to tab t of theWindow
-
-          set end of rowList to ((id of theWindow as text) & fieldSeparator ¬
-            & windowTitle & fieldSeparator ¬
+        repeat with t from 1 to (count of urls)
+          set end of rowList to ((item w of allIDs as text) & fieldSeparator ¬
             & (t as text) & fieldSeparator ¬
-            & (title of theTab) & fieldSeparator ¬
-            & (URL of theTab))
+            & (item t of titles) & fieldSeparator ¬
+            & (item t of urls))
         end repeat
       end repeat
 
@@ -204,16 +211,15 @@ local function listChromeTabs()
       table.insert(fields, field)
     end
 
-    if #fields >= 5 then
+    if #fields >= 4 then
       table.insert(tabs, {
         -- Kept as a string: Chrome's window ids are large, and we
         -- only ever hand them straight back to AppleScript.
-        windowID    = fields[1],
-        windowTitle = fields[2],
-        tabIndex    = tonumber(fields[3]),
-        tabTitle    = fields[4],
+        windowID = fields[1],
+        tabIndex = tonumber(fields[2]),
+        tabTitle = fields[3],
         -- The URL may itself contain the separator; rejoin the tail.
-        tabURL      = table.concat(fields, tabFieldSeparator, 5),
+        tabURL   = table.concat(fields, tabFieldSeparator, 4),
       })
     end
   end
