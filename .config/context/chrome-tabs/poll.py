@@ -28,7 +28,8 @@ Two files, both under ~/.local/state/context/chrome-tabs/:
                      rank.py skips keys starting with "_".
 
 Real numbers from this project (measured 2026-09-25, not assumed): full
-enumeration with id+title+url costs 1.6-1.8s for 8 windows/29 tabs; the
+enumeration with id+title+url cost 1.6-1.8s for 8 windows/29 tabs
+until 2026-10-04 (bulk reads now: 0.25s for 10 windows/34 tabs); the
 SAME script asking only for ids costs ~0.6-0.8s; a single active-tab-only
 query (used nowhere here, but proves the floor) costs ~0.18s. Full
 enumeration's cost is Apple Events round-trips per tab property access, not
@@ -49,25 +50,36 @@ CACHE_FILE = STATE_DIR / "cache.json"
 FRECENCY_FILE = STATE_DIR / "frecency.json"
 LOCK_FILE = STATE_DIR / "poll.lock"
 
-ENUMERATE_SCRIPT = '''
-tell application "Google Chrome"
-    set AppleScript's text item delimiters to "\\t"
-    set out to {"__FRONT__" & (id of window 1)}
-    set winIdx to 0
-    repeat with w in windows
-        set winIdx to winIdx + 1
-        set frontActiveId to (id of active tab of w)
-        set tabIdx to 0
-        repeat with t in tabs of w
-            set tabIdx to tabIdx + 1
-            set isActive to "0"
-            if winIdx is 1 and (id of t) is frontActiveId then set isActive to "1"
-            set end of out to ((id of w) as text) & "\\t" & (tabIdx as text) & "\\t" & ((id of t) as text) & "\\t" & isActive & "\\t" & (title of t) & "\\t" & (URL of t)
-        end repeat
-    end repeat
-    set AppleScript's text item delimiters to "\\n"
-    return out as text
+# BULK reads, not a per-tab loop (2026-10-04). The old script asked Chrome
+# for `id of w`, `id of t`, `title of t` and `URL of t` one tab at a time:
+# 2.84s for 10 windows / 33 tabs. `id/title/URL of every tab of every
+# window` is one Apple event per property, 0.25s, and returned the same
+# 34 lines (FRONT + 33 tabs) compared byte for byte, including five
+# one-tab windows, the case where a nested list could have collapsed. Same fix and same
+# reason as space-g's listChromeTabs in ~/.hammerspoon/init.lua, and the
+# vectorized note in active-now.py. Output format is unchanged:
+# `__FRONT__<id>` then one tab-separated line per tab.
+ENUMERATE_SCRIPT = '''tell application "Google Chrome"
+    set winIds to id of every window
+    set allTabIds to id of every tab of every window
+    set allTitles to title of every tab of every window
+    set allURLs to URL of every tab of every window
+    set frontActive to (id of active tab of window 1)
 end tell
+set AppleScript's text item delimiters to "\t"
+set out to {"__FRONT__" & (item 1 of winIds)}
+repeat with w from 1 to (count of winIds)
+    set tabIds to item w of allTabIds
+    set titles to item w of allTitles
+    set urls to item w of allURLs
+    repeat with t from 1 to (count of tabIds)
+        set isActive to "0"
+        if w is 1 and (item t of tabIds) is frontActive then set isActive to "1"
+        set end of out to ((item w of winIds) as text) & "\t" & (t as text) & "\t" & ((item t of tabIds) as text) & "\t" & isActive & "\t" & (item t of titles) & "\t" & (item t of urls)
+    end repeat
+end repeat
+set AppleScript's text item delimiters to "\n"
+return out as text
 '''
 
 
