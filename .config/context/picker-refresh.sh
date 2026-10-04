@@ -174,8 +174,14 @@ if [ -x "$PANELD" ]; then
     # on the workspace and paneld re-arms it on every dismissal anyway.
     # `windows` since 2026-09-20 (Spec L), LAST: its rows ARE the focused
     # workspace's windows, so they follow it more directly than anything
-    # else here -- but it also re-produces at every reveal (`refresh` +
-    # `on_reveal_key`), so a stale arm costs it nothing and it pays last.
+    # else here -- and it pays last. NOT TRUE ANY MORE that "it also
+    # re-produces at every reveal, so a stale arm costs it nothing": the
+    # `refresh` and `on_reveal_key` were removed 2026-09-21 so the panel can
+    # be hammered (see pickers.toml's `windows` comment), so it serves
+    # exactly the list it was armed with. A workspace change re-arms it here
+    # and a dismissal re-arms it, but a focus change or a new window INSIDE
+    # the workspace you are sitting in does not -- that is backlog N15
+    # (docs/BACKLOG.md in context-based-mac), found 2026-10-04.
     #
     # `chrome-tabs` added 2026-09-27, SECOND (right after `switcher`) -- THE
     # missing piece of that whole night's cmd-backtick debugging. Its rows
