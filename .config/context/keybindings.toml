@@ -128,6 +128,10 @@ key = "space-shift-p"
 description = "terminal context picker (herdr sessions)"
 
 [[group.binding]]
+key = "space-shift-u"
+description = "downloads picker: tab selects files, enter chooses a workspace to move them to"
+
+[[group.binding]]
 key = "space-?"
 description = "this keybindings reference"
 

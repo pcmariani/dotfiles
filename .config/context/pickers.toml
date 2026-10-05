@@ -411,6 +411,32 @@ no_input   = true
 # takes every panel's compose down.
 action = [ { bind = "enter", verb = "focus-window", default = true } ]
 
+[[picker]]
+name     = "downloads"
+# N2.2 stage 2 (2026-10-04). The newest completed downloads, newest first, one
+# row per file. tab toggles, Enter STAGES the toggled files and opens the
+# `send-files` panel -- the workspaces picker with `--default file-move-to` --
+# and choosing a workspace there moves them (`context file-move`: reference/,
+# then downloads/, then the workspace root, whichever already exists; never
+# overwriting). Nothing moves until a workspace is chosen, and Escape on either
+# panel leaves every file where it was.
+#
+# `context pick --rows --source downloads` reads ~/Downloads, not the focused
+# workspace, so there is no `scoped` and no root file. `refresh` reloads the
+# list at reveal (paneld pokes f12) so a download that finished since the last
+# arm is in it.
+producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source downloads"
+refresh  = true
+# --notify so a failure (paneld missing, the staging unwritable) reaches the
+# screen: the panel discards stdout.
+consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept downloads"
+fields   = "value-tab-display"
+multi    = true
+cursor_row = 1
+# ONE LINE: an inline TOML table may not span lines, and a parse error here
+# takes every panel's compose down.
+action = [ { bind = "enter", verb = "stage-files", after = "close", default = true } ]
+
 # THE KEYBINDINGS HELPER -- space-?, through `paneld toggle keybindings` --
 # is NOT a picker. Built overnight 2026-09-23 as an fzf-based picker first;
 # the user's actual ask, clarified after seeing it, was a static,

@@ -388,6 +388,40 @@ screen         = "LG HDR WQHD"
 # change it -- unlike font_size/inset/line_height, which need a restart.
 reveal_delay_ms = 300
 
+# The downloads picker (N2.2 stage 2, 2026-10-04). Summoned by space-shift-u,
+# which Karabiner routes to `paneld toggle downloads` -- like files, config-files
+# and apps, so this hotkey is never pressed; it is set explicitly only because
+# the field would default to f18, which a retired rule once used. The picker's
+# Enter stages the toggled files and opens `send-files` (below).
+[[panel]]
+name    = "downloads"
+hotkey  = "hyper-f15"
+compose = "context pick-command downloads --title 'Downloads: tab selects, enter chooses a workspace'"
+width   = 912
+height  = 420
+screen  = "LG HDR WQHD"
+arm     = true
+# The same reload-at-reveal files/picker/move use: compose() binds f12 to a
+# reload-sync of the producer, so a download that finished since the last arm
+# is listed. Idempotent, safe to poke twice.
+on_reveal_key = "f12"
+
+# Where the staged downloads go. Not summoned by any chord: the downloads
+# picker opens it with `paneld show send-files` after staging. It is the
+# `workspaces` picker with `--default file-move-to`, exactly as `move` is with
+# `--default move`, so Enter here means "move the staged files into this
+# workspace" and every other key keeps its workspaces meaning. A distinct
+# --socket, like move's, so its reload poke cannot land in another panel.
+[[panel]]
+name    = "send-files"
+hotkey  = "hyper-f13"
+compose = "context pick-command workspaces --default file-move-to --title 'Move the selected files to a workspace' --socket /Users/petermariani/.local/state/context/send-files.sock"
+width   = 912
+height  = 420
+screen  = "LG HDR WQHD"
+arm     = true
+on_reveal_key = "f12"
+
 [[panel]]
 name    = "keybindings"
 # A static keybindings reference, paged by `less` -- NOT a picker (see

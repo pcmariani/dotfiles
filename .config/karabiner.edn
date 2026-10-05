@@ -745,6 +745,17 @@
                  ;; the key and its title are waiting on eyes.
                  [:!Sa [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle apps"]]
 
+                 ;; THE DOWNLOADS PICKER (N2.2 stage 2, 2026-10-04): the
+                 ;; newest completed downloads, tab to toggle several, Enter
+                 ;; opens a workspace picker and the files move into that
+                 ;; workspace (reference/, else downloads/, else its root).
+                 ;; space-shift-u because the shift family is the pickers (f
+                 ;; files, c config, a apps) and shift-d is taken by the
+                 ;; Chrome detach-and-move chord. A placeholder until the
+                 ;; keybind brainstorm settles the whole set. Written with the
+                 ;; user at the machine; waiting on eyes.
+                 [:!Su [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle downloads"]]
+
                  ;; THE KEYBINDINGS HELPER (2026-09-23). space-? for "what
                  ;; can I press" -- a read-only reference, like the other
                  ;; three picker chords above. `:!Sslash` is shift-slash,
