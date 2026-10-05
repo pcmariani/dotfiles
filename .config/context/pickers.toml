@@ -109,6 +109,14 @@ action = [
   # `room` enters rather than shadows. That is what makes the key safe to
   # press by reflex, which is the whole reason it keeps the same shape.
   { bind = "alt-t",  verb = "move-room", after = "close", from_query = true },
+  # CHOOSE A FOLDER for the files staged by the downloads picker (N2.2 stage 3,
+  # 2026-10-05): records this workspace on the staging and opens the
+  # `send-files-folder` panel, a list of the workspace's root and every folder
+  # under it. Meaningful only on the `send-files` door, where Enter is the quick
+  # cascade (reference/, downloads/, root); on any other door it just says
+  # nothing is staged. alt-o and not alt-f: alt-f is fzf's own forward-word, and
+  # the config validator refuses it.
+  { bind = "alt-o",  verb = "file-move-choose-folder", after = "close" },
 ]
 
 [[picker]]
@@ -436,6 +444,28 @@ cursor_row = 1
 # ONE LINE: an inline TOML table may not span lines, and a parse error here
 # takes every panel's compose down.
 action = [ { bind = "enter", verb = "stage-files", after = "close", default = true } ]
+
+[[picker]]
+name     = "send-files-folder"
+# N2.2 stage 3 (2026-10-05): the optional second half of the downloads route.
+# The workspace chosen with alt-o is recorded on the staging
+# (~/.local/state/context/file-move.pending); this lists that workspace's root
+# first, then every folder under it (`fd`, depth 5, the files-ignore file).
+# Enter moves the staged files into the highlighted folder, which must lie
+# inside the workspace root (`context file-move-into` refuses anything else and
+# never creates a folder). The producer READS the staging and never consumes it.
+#
+# `refresh` is required, not decoration: the panel is armed in the background
+# BEFORE anything is staged, so its arm-time list is empty, and the reveal
+# reload (paneld pokes f12) is what fills it for the workspace just chosen.
+producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source workspace-folders"
+refresh  = true
+consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept send-files-folder"
+fields   = "value-tab-display"
+multi    = false
+cursor_row = 1
+# ONE LINE: an inline TOML table may not span lines.
+action = [ { bind = "enter", verb = "file-move-into", after = "close", default = true } ]
 
 # THE KEYBINDINGS HELPER -- space-?, through `paneld toggle keybindings` --
 # is NOT a picker. Built overnight 2026-09-23 as an fzf-based picker first;

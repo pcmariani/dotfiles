@@ -422,6 +422,21 @@ screen  = "LG HDR WQHD"
 arm     = true
 on_reveal_key = "f12"
 
+# The optional folder step of the downloads route (N2.2 stage 3, 2026-10-05).
+# Opened by `paneld show send-files-folder` after alt-o on `send-files`; never
+# summoned by a chord, so the hotkey is a placeholder (see `send-files`).
+[[panel]]
+name    = "send-files-folder"
+hotkey  = "hyper-f11"
+compose = "context pick-command send-files-folder --title 'Move the files into a folder'"
+width   = 912
+height  = 420
+screen  = "LG HDR WQHD"
+arm     = true
+# REQUIRED: the arm-time list is empty (nothing is staged yet), so this reload
+# at reveal is what fills it. Idempotent and safe to poke twice.
+on_reveal_key = "f12"
+
 [[panel]]
 name    = "keybindings"
 # A static keybindings reference, paged by `less` -- NOT a picker (see
