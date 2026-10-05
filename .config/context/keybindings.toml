@@ -132,6 +132,10 @@ key = "space-shift-u"
 description = "downloads picker: tab selects files, enter chooses the folder to move them to (a workspace first when this one has no root)"
 
 [[group.binding]]
+key = "space-shift-m"
+description = "transfer files: Marta with ~/Downloads on the left and this workspace's root on the right"
+
+[[group.binding]]
 key = "space-?"
 description = "this keybindings reference"
 

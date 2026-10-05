@@ -1511,6 +1511,22 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "m",
+            "modifiers" : {
+              "mandatory" : [ "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context --notify transfer-files"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "slash",
             "modifiers" : {
               "mandatory" : [ "left_shift" ]

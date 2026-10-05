@@ -262,6 +262,13 @@ if.app-id = 'com.mitchellh.ghostty'
 if.window-title-regex-substring = 'context-picker'
 run = 'layout floating'
 
+# Marta is the transfer-files surface (`context transfer-files`, space-shift-m):
+# a short-lived two-pane window that should float over the workspace rather
+# than take a tile. Every Marta window, not just that verb's.
+[[on-window-detected]]
+if.app-id = 'org.yanex.marta'
+run = 'layout floating'
+
 # 'main' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 # 'main' binding mode must be always presented

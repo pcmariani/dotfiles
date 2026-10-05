@@ -756,6 +756,15 @@
                  ;; user at the machine; waiting on eyes.
                  [:!Su [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle downloads"]]
 
+                 ;; TRANSFER FILES (2026-10-04 prototype): Marta, a two-pane
+                 ;; file manager, in a new window with ~/Downloads on the left
+                 ;; and this workspace's root on the right. The user selects
+                 ;; and moves in Marta; the picker route above is the thing
+                 ;; being compared against. --notify so a refusal (a rootless
+                 ;; workspace, Marta not installed) is visible, not silent.
+                 ;; space-shift-m is a placeholder for the keybind brainstorm.
+                 [:!Sm [:context "--notify transfer-files"]]
+
                  ;; THE KEYBINDINGS HELPER (2026-09-23). space-? for "what
                  ;; can I press" -- a read-only reference, like the other
                  ;; three picker chords above. `:!Sslash` is shift-slash,
