@@ -129,7 +129,7 @@ description = "terminal context picker (herdr sessions)"
 
 [[group.binding]]
 key = "space-shift-u"
-description = "downloads picker: tab selects files, enter chooses a workspace to move them to"
+description = "downloads picker: tab selects files, enter chooses the folder to move them to (a workspace first when this one has no root)"
 
 [[group.binding]]
 key = "space-?"

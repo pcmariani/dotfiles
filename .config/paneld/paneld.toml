@@ -406,16 +406,18 @@ arm     = true
 # is listed. Idempotent, safe to poke twice.
 on_reveal_key = "f12"
 
-# Where the staged downloads go. Not summoned by any chord: the downloads
-# picker opens it with `paneld show send-files` after staging. It is the
-# `workspaces` picker with `--default file-move-to`, exactly as `move` is with
-# `--default move`, so Enter here means "move the staged files into this
-# workspace" and every other key keeps its workspaces meaning. A distinct
+# Which workspace the staged downloads go to, for a ROOTLESS workspace only (in
+# a rooted one the downloads picker opens `send-files-folder` directly). Not
+# summoned by any chord: the downloads picker opens it with `paneld show
+# send-files` after staging. It is the `workspaces` picker with `--default
+# file-move-choose-folder`, exactly as `move` is with `--default move`, so Enter
+# here means "choose this workspace's folder" and every other key keeps its
+# workspaces meaning. A distinct
 # --socket, like move's, so its reload poke cannot land in another panel.
 [[panel]]
 name    = "send-files"
 hotkey  = "hyper-f13"
-compose = "context pick-command workspaces --default file-move-to --title 'Move the selected files to a workspace' --socket /Users/petermariani/.local/state/context/send-files.sock"
+compose = "context pick-command workspaces --default file-move-choose-folder --title 'Choose the workspace for the files' --socket /Users/petermariani/.local/state/context/send-files.sock"
 width   = 912
 height  = 420
 screen  = "LG HDR WQHD"
@@ -423,8 +425,9 @@ arm     = true
 on_reveal_key = "f12"
 
 # The optional folder step of the downloads route (N2.2 stage 3, 2026-10-05).
-# Opened by `paneld show send-files-folder` after alt-o on `send-files`; never
-# summoned by a chord, so the hotkey is a placeholder (see `send-files`).
+# Opened by `paneld show send-files-folder`: directly from the downloads picker
+# in a rooted workspace, or after Enter on `send-files` in a rootless one.
+# Never summoned by a chord, so the hotkey is a placeholder (see `send-files`).
 [[panel]]
 name    = "send-files-folder"
 hotkey  = "hyper-f11"

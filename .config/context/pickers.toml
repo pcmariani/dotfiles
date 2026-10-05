@@ -109,14 +109,6 @@ action = [
   # `room` enters rather than shadows. That is what makes the key safe to
   # press by reflex, which is the whole reason it keeps the same shape.
   { bind = "alt-t",  verb = "move-room", after = "close", from_query = true },
-  # CHOOSE A FOLDER for the files staged by the downloads picker (N2.2 stage 3,
-  # 2026-10-05): records this workspace on the staging and opens the
-  # `send-files-folder` panel, a list of the workspace's root and every folder
-  # under it. Meaningful only on the `send-files` door, where Enter is the quick
-  # cascade (reference/, downloads/, root); on any other door it just says
-  # nothing is staged. alt-o and not alt-f: alt-f is fzf's own forward-word, and
-  # the config validator refuses it.
-  { bind = "alt-o",  verb = "file-move-choose-folder", after = "close" },
 ]
 
 [[picker]]
@@ -422,12 +414,18 @@ action = [ { bind = "enter", verb = "focus-window", default = true } ]
 [[picker]]
 name     = "downloads"
 # N2.2 stage 2 (2026-10-04). The newest completed downloads, newest first, one
-# row per file. tab toggles, Enter STAGES the toggled files and opens the
-# `send-files` panel -- the workspaces picker with `--default file-move-to` --
-# and choosing a workspace there moves them (`context file-move`: reference/,
-# then downloads/, then the workspace root, whichever already exists; never
-# overwriting). Nothing moves until a workspace is chosen, and Escape on either
-# panel leaves every file where it was.
+# row per file. tab toggles, Enter STAGES the toggled files and opens the next
+# picker, which depends on the workspace you are in (2026-10-05):
+#   - a ROOTED workspace: the `send-files-folder` panel directly -- its root,
+#     then reference/, downloads/, then every other folder;
+#   - a rootless one: the `send-files` panel first (the workspaces picker with
+#     `--default file-move-choose-folder`), then `send-files-folder` for the
+#     workspace chosen there.
+# Enter in the folder picker moves the files there (`context file-move-into`,
+# which refuses any folder outside the workspace and never overwrites or
+# creates anything). Nothing moves until a folder is chosen, and Escape on any
+# panel leaves every file where it was. To send files to a DIFFERENT workspace
+# from a rooted one, switch to it first.
 #
 # `context pick --rows --source downloads` reads ~/Downloads, not the focused
 # workspace, so there is no `scoped` and no root file. `refresh` reloads the
@@ -447,10 +445,12 @@ action = [ { bind = "enter", verb = "stage-files", after = "close", default = tr
 
 [[picker]]
 name     = "send-files-folder"
-# N2.2 stage 3 (2026-10-05): the optional second half of the downloads route.
-# The workspace chosen with alt-o is recorded on the staging
+# N2.2 (2026-10-05): the folder step of the downloads route, the only way files
+# are moved. The workspace -- the rooted one you are in, or the one chosen on
+# `send-files` -- is recorded on the staging
 # (~/.local/state/context/file-move.pending); this lists that workspace's root
-# first, then every folder under it (`fd`, depth 5, the files-ignore file).
+# first, then reference/ and downloads/ when they exist, then every other
+# folder under it (`fd`, depth 5, the files-ignore file).
 # Enter moves the staged files into the highlighted folder, which must lie
 # inside the workspace root (`context file-move-into` refuses anything else and
 # never creates a folder). The producer READS the staging and never consumes it.
