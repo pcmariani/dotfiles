@@ -449,30 +449,6 @@ step     = "/Users/petermariani/projects/context-based-mac/bin/context transfer-
 # The default verb runs AFTER the last step's accept, on the highlighted folder.
 action = [ { bind = "enter", verb = "file-move-into", after = "close", default = true } ]
 
-[[picker]]
-name     = "send-files-folder"
-# N2.2 (2026-10-05): the folder step of the downloads route, the only way files
-# are moved. The workspace -- the rooted one you are in, or the one chosen on
-# `send-files` -- is recorded on the staging
-# (~/.local/state/context/file-move.pending); this lists that workspace's root
-# first, then reference/ and downloads/ when they exist, then every other
-# folder under it (`fd`, depth 5, the files-ignore file).
-# Enter moves the staged files into the highlighted folder, which must lie
-# inside the workspace root (`context file-move-into` refuses anything else and
-# never creates a folder). The producer READS the staging and never consumes it.
-#
-# `refresh` is required, not decoration: the panel is armed in the background
-# BEFORE anything is staged, so its arm-time list is empty, and the reveal
-# reload (paneld pokes f12) is what fills it for the workspace just chosen.
-producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source workspace-folders"
-refresh  = true
-consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept send-files-folder"
-fields   = "value-tab-display"
-multi    = false
-cursor_row = 1
-# ONE LINE: an inline TOML table may not span lines.
-action = [ { bind = "enter", verb = "file-move-into", after = "close", default = true } ]
-
 # THE KEYBINDINGS HELPER -- space-?, through `paneld toggle keybindings` --
 # is NOT a picker. Built overnight 2026-09-23 as an fzf-based picker first;
 # the user's actual ask, clarified after seeing it, was a static,
