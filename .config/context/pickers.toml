@@ -413,19 +413,23 @@ action = [ { bind = "enter", verb = "focus-window", default = true } ]
 
 [[picker]]
 name     = "downloads"
-# N2.2 stage 2 (2026-10-04). The newest completed downloads, newest first, one
-# row per file. tab toggles, Enter STAGES the toggled files and opens the next
-# picker, which depends on the workspace you are in (2026-10-05):
-#   - a ROOTED workspace: the `send-files-folder` panel directly -- its root,
-#     then reference/, downloads/, then every other folder;
-#   - a rootless one: the `send-files` panel first (the workspaces picker with
-#     `--default file-move-choose-folder`), then `send-files-folder` for the
-#     workspace chosen there.
-# Enter in the folder picker moves the files there (`context file-move-into`,
-# which refuses any folder outside the workspace and never overwrites or
-# creates anything). Nothing moves until a folder is chosen, and Escape on any
-# panel leaves every file where it was. To send files to a DIFFERENT workspace
+# N2.2 (2026-10-05). The newest completed downloads, newest first, one row per
+# file, and the WHOLE move in this one panel: tab toggles, Enter swaps the list
+# IN PLACE -- no second panel -- under a header that names the step:
+#   Downloads -> [Choose Workspace, a rootless workspace only] ->
+#   Destination Folder . N files -> workspace
+# Enter at the last step moves the files into the highlighted folder (`context
+# file-move-into`, which refuses any folder outside the workspace and never
+# overwrites or creates anything). Nothing moves until then, and Escape at any
+# step leaves every file where it was. To send files to a DIFFERENT workspace
 # from a rooted one, switch to it first.
+#
+# `step` is what makes this work: compose() binds Enter and double-click to
+# `<step> --fzf-pid $PPID --current={1} -- {+1}` through fzf's `transform`, and
+# `context transfer-step` answers with the next fzf actions (see
+# context/transfer.py and docs/superpowers/specs/2026-10-04-downloads-single-
+# panel-design.md). A step path with a space needs double quotes inside the
+# string; this one has none.
 #
 # `context pick --rows --source downloads` reads ~/Downloads, not the focused
 # workspace, so there is no `scoped` and no root file. `refresh` reloads the
@@ -441,7 +445,9 @@ multi    = true
 cursor_row = 1
 # ONE LINE: an inline TOML table may not span lines, and a parse error here
 # takes every panel's compose down.
-action = [ { bind = "enter", verb = "stage-files", after = "close", default = true } ]
+step     = "/Users/petermariani/projects/context-based-mac/bin/context transfer-step"
+# The default verb runs AFTER the last step's accept, on the highlighted folder.
+action = [ { bind = "enter", verb = "file-move-into", after = "close", default = true } ]
 
 [[picker]]
 name     = "send-files-folder"
