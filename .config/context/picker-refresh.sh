@@ -95,7 +95,11 @@ TMP="$PRE.$$"
 # (picker.prerendered.live) from the SAME render as the main cache below --
 # one `context pick` call producing two files rather than two renders. The
 # switcher's `workspaces`-sharing producers (pickers.toml) read that file on
-# both the arm and the reveal poke; this is the only place it is written.
+# both the arm and the reveal poke. `context enter` writes the same two files
+# itself, before it exits (2026-10-15, so the arm that follows a cmd-tab pick
+# reads fresh rows), which makes this render the SECOND writer of the same
+# bytes in the common case: see the switcher rearm below.
+LIVE_SUM_BEFORE=$(/usr/bin/cksum < "$PRE.live" 2>/dev/null)
 if "$CTX" pick --rows --source contexts \
         --also-live "$STATE/picker.prerendered.live" >"$TMP" 2>/dev/null \
         && [ -s "$TMP" ]; then
@@ -201,7 +205,22 @@ if [ -x "$PANELD" ]; then
     # backgrounds its own slow work (poll.py/active-now.py) the same way, so
     # it is cheap enough to not need to wait behind the two agent-status-join
     # panels either.
+    LIVE_SUM_AFTER=$(/usr/bin/cksum < "$PRE.live" 2>/dev/null)
     for panel in switcher chrome-tabs move files search windows; do
+        # SKIP THE SWITCHER'S REARM WHEN ITS ROWS DID NOT CHANGE (2026-10-15).
+        # `context enter` already rewrote picker.prerendered.live before the
+        # switcher's surface exited, so the arm that followed the pick read
+        # these exact rows; rearming it again ~1s later only throws away a
+        # good armed surface and leaves it `arming` for 400ms, which is
+        # exactly when the next quick cmd-tab press arrives and is eaten
+        # (paneld.log, 2026-10-15: the hook's rearm landed after every
+        # armSettled). A workspace change that did NOT come through `enter`
+        # (a click, an app raising) changes the rows, so it still rearms.
+        if [ "$panel" = switcher ] && [ -n "$LIVE_SUM_AFTER" ] \
+                && [ "$LIVE_SUM_BEFORE" = "$LIVE_SUM_AFTER" ]; then
+            dbg "SWITCHER-REARM-SKIPPED rows unchanged since enter wrote them"
+            continue
+        fi
         "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
 fi
