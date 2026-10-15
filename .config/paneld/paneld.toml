@@ -277,7 +277,7 @@ compose        = "context pick-command switcher --socket /Users/petermariani/.lo
 # the same `sendKey` path -- but it is untested, not verified.
 # If cmd-tab ever "does nothing" intermittently, remove this line first.
 on_reveal_key = "f12"
-width          = 881
+width          = 837
 height         = 420
 # 16 -> 18, the user's own ask ("increase the font of the switcher by 2
 # points"), switcher-only. Needs a daemon restart to take effect, not
