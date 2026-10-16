@@ -2104,7 +2104,7 @@
           },
           "to" : [ {
             "mouse_key" : {
-              "vertical_wheel" : -64
+              "vertical_wheel" : 64
             }
           } ],
           "conditions" : [ {
@@ -2119,7 +2119,7 @@
           },
           "to" : [ {
             "mouse_key" : {
-              "vertical_wheel" : 64
+              "vertical_wheel" : -64
             }
           } ],
           "conditions" : [ {

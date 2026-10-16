@@ -903,8 +903,8 @@
          :des "f-mode: scrolling"
          :rules [
                  :f-mode
-                 [:j {:mkey {:vwheel -64}}]
-                 [:k {:mkey {:vwheel 64}}]
+                 [:j {:mkey {:vwheel 64}}]
+                 [:k {:mkey {:vwheel -64}}]
                  [:h {:mkey {:hwheel 64}}]
                  [:l {:mkey {:hwheel -64}}]
                  ]
