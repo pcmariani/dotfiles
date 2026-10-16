@@ -514,3 +514,18 @@ width   = 912
 height  = 420
 screen  = "LG HDR WQHD"
 arm     = false
+
+[[panel]]
+name    = "scratch"
+# A small floating scratch pad: nvim on ~/scratch.md, autosaved. Summoned by
+# space-shift-s via `paneld toggle scratch`, like files/apps -- so this hotkey
+# is never pressed and is set explicitly only to avoid the f18 default.
+# scripts/scratch-command.sh says why the pad is a file and not a live nvim.
+hotkey  = "hyper-f13"
+compose = "/Users/petermariani/projects/context-based-mac/scripts/scratch-command.sh"
+# Deliberately small: a note, not a workspace. Pinned to the LG like every
+# other panel.
+width   = 640
+height  = 360
+screen  = "LG HDR WQHD"
+arm     = true

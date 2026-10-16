@@ -1511,6 +1511,22 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "s",
+            "modifiers" : {
+              "mandatory" : [ "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle scratch"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "slash",
             "modifiers" : {
               "mandatory" : [ "left_shift" ]
