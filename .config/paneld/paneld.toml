@@ -533,3 +533,5 @@ arm     = true
 # a click elsewhere, or working in another window, does not close the pad
 # (the user, 2026-10-16). Every other panel keeps the default, true.
 dismiss_on_blur = false
+# Option-drag anywhere on the pad moves it; it reappears where it was left.
+movable = true
