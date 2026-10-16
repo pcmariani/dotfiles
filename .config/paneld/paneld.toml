@@ -529,3 +529,7 @@ width   = 640
 height  = 360
 screen  = "LG HDR WQHD"
 arm     = true
+# Stays up until dismissed explicitly (space-shift-s again, or quit nvim) --
+# a click elsewhere, or working in another window, does not close the pad
+# (the user, 2026-10-16). Every other panel keeps the default, true.
+dismiss_on_blur = false
