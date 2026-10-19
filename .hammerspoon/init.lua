@@ -406,13 +406,9 @@ hs.hotkey.bind(
 -- renders the menu (typically well under the old fixed 400ms), and still
 -- bounded so a genuine failure returns nil instead of hanging the key.
 --
--- Moved above breakOutChromeTab (2026-09-29, whole-branch review Finding
--- 3): detachChromeTabAndMoveTo, defined below and BEFORE this function's
--- old location further down the file, now needs it too, to confirm focus
--- has actually settled on the newly-detached window before spawning
--- `context move`. Purely a relocation -- this function's own body is
--- unchanged, and everything that already called it (joinChromeTabToOtherWindow,
--- mergeChromeTabInto) still finds the same local in scope.
+-- Moved above breakOutChromeTab (2026-09-29) for detachChromeTabAndMoveTo,
+-- which was RETIRED 2026-10-19 with the send-tab picker; it stays here
+-- because joinChromeTabToOtherWindow and breakOutChromeTab still use it.
 local function pollUntil(attempt, timeoutSeconds, intervalSeconds)
   local deadline = hs.timer.secondsSinceEpoch() + timeoutSeconds
 
@@ -439,8 +435,9 @@ local BREAK_OUT_TAB_PATH = { "Tab", "Move Tab to New Window" }
 -- (`if not breakOutChromeTab() then`, or as a bare hs.hotkey.bind
 -- callback) -- Lua truncates extra return values there, so adding a
 -- second one changes nothing for detachChromeTabToWorkspace (plain
--- opt-`) or correctChromeSteal, only for a NEW caller that explicitly
--- captures it (detachChromeTabAndMoveTo, below).
+-- opt-`) or correctChromeSteal, only for a caller that explicitly
+-- captures it (detachChromeTabAndMoveTo did, until it was retired
+-- 2026-10-19).
 local function breakOutChromeTab()
   local chrome = hs.application.get("Google Chrome")
 
@@ -508,7 +505,10 @@ local function writeStealGuardMarker(windowId)
 end
 
 -- DELIBERATE-ACTION SUPPRESSION, 2026-09-30. Found live: shift-opt-`'s
--- mergeChromeTabInto() worked every time, and the steal guard undid it
+-- mergeChromeTabInto() (retired 2026-10-19 with the send-tab picker; its
+-- two callers, that and detachChromeTabAndMoveTo, are gone, so
+-- suppressStealGuard below has NO CALLER now -- kept, with its marker file
+-- and smoke test, for the next deliberate cross-workspace action) worked every time, and the steal guard undid it
 -- every time. A cross-workspace merge makes Chrome raise the destination
 -- window, AeroSpace follows focus there, exec-on-workspace-change fires,
 -- and the guard sees exactly what a link-steal looks like -- Chrome
@@ -688,93 +688,6 @@ local function detachChromeTabToWorkspace()
   return true
 end
 
--- send-tab's "0 windows here" row: detach the active tab into its own
--- new window, then move it DIRECTLY to `workspaceName` -- no further
--- picker (unlike plain opt-` / detachChromeTabToWorkspace, which shows
--- the move picker because it doesn't yet know the destination). The
--- destination is already known here; showing another picker would be a
--- second, redundant prompt.
---
--- CONTEXT_BIN: absolute path, same reasoning as PANELD_BIN above --
--- Hammerspoon does not inherit the Homebrew/asdf PATH.
-local CONTEXT_BIN = "/Users/petermariani/.local/bin/context"
-
--- Fires `context move <name> --rightmost` on whichever window is
--- currently focused, fire-and-forget like every other hs.task.new call in
--- this file -- but (2026-09-29, whole-branch review Finding 3) with a
--- callback that checks the real exit code, so a failure (the currently-
--- expected `--rightmost` deployment gap, `name` not a known workspace --
--- see cmd_move's own guard in context/commands.py -- or anything else) is
--- never silent. The CLI itself also fires a macOS notification on
--- failure (context/__main__.py's own `notifier`), but that is a separate,
--- easy-to-miss channel; this makes the failure visible right where the
--- key was pressed.
-local function runContextMoveRightmost(workspaceName)
-  hs.task.new(CONTEXT_BIN, function(exitCode, _stdOut, stdErr)
-    if exitCode ~= 0 then
-      local detail = (stdErr and stdErr ~= "") and (": " .. stdErr:gsub("%s+$", "")) or ""
-      hs.alert.show("🌐 context move " .. workspaceName .. " failed (exit " ..
-        tostring(exitCode) .. ")" .. detail)
-    end
-  end, { "move", workspaceName, "--rightmost" }):start()
-  return true
-end
-
-function detachChromeTabAndMoveTo(workspaceName)
-  local chrome = hs.application.get("Google Chrome")
-  local sourceWindow = chrome and chrome:focusedWindow()
-  local sourceId = sourceWindow and sourceWindow:id()
-
-  -- The detached window is moved with focus following it, which fires
-  -- the steal guard against a window it has never seen (see
-  -- suppressStealGuard). Single-tab windows only escaped by accident.
-  suppressStealGuard()
-
-  local ok, reason = breakOutChromeTab()
-
-  if not ok then
-    if reason ~= "single-tab" then
-      return false
-    end
-
-    -- Finding 4: a single-tab source has nothing to detach --
-    -- breakOutChromeTab already reported that specifically via
-    -- "single-tab" rather than collapsing it with every other failure
-    -- reason. Detaching a single tab from itself would be a no-op
-    -- anyway, so just move the current window directly: that is exactly
-    -- the user's intent ("send this window to workspaceName") for a
-    -- picker row they explicitly selected, not a silent do-nothing.
-    return runContextMoveRightmost(workspaceName)
-  end
-
-  -- Detach succeeded: a genuinely new window now exists. Finding 3:
-  -- confirm focus has actually settled on IT before spawning `context
-  -- move`, which acts on whichever window is CURRENTLY focused --
-  -- correctChromeSteal's own comment above measured this "focus lands on
-  -- the new window immediately" timing to NOT reliably hold for every
-  -- caller, so poll for it here instead of assuming "+0ms" again.
-  -- Matched against `sourceId` (not just "any Chrome window") so this
-  -- can't misidentify the OLD, still-open source window as the detached
-  -- one if focus briefly bounces back to it.
-  local detachedId = pollUntil(function()
-    local w = hs.window.focusedWindow()
-    if w and w:id() ~= sourceId then
-      local app = w:application()
-      if app and app:name() == "Google Chrome" then
-        return w:id()
-      end
-    end
-    return nil
-  end, 0.5, 0.02)
-
-  if not detachedId then
-    hs.alert.show("🌐 Detached tab but focus never settled on the new window")
-    return false
-  end
-
-  return runContextMoveRightmost(workspaceName)
-end
-
 -- ⌘⌃⌥D (hyper MINUS shift) → detach the tab, then pick its workspace.
 -- It cannot be hyper-shift-D: hyper already CONTAINS shift, so hyper-D and
 -- hyper-shift-D are the same chord and Hammerspoon cannot tell them apart.
@@ -790,35 +703,6 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "d", detachChromeTabToWorkspace)
 -- live; the older space-shift-d chord that used to reach this function is
 -- retired (see karabiner.edn's own history for that rule).
 hs.hotkey.bind({ "alt" }, "`", detachChromeTabToWorkspace)
-
--- shift-opt-` (2026-09-28) -- reveals the send-tab picker directly, with
--- NO chrome action first (unlike plain opt-`): the whole point of this
--- picker is computing rows BEFORE touching the tab. Confirmed this
--- session: no existing shift+option+grave binding anywhere in this file
--- or karabiner.edn -- free chord. Same non-Carbon registration path as
--- plain opt-` (Hammerspoon's own hs.hotkey.bind, not paneld's Carbon
--- RegisterEventHotKey) -- deliberately NOT registered as a paneld hotkey:
--- every existing panel whose chord includes the backtick key needed a
--- karabiner rewrite to a safe F-key first (see paneld.toml's own
--- comments on `chrome-tabs`/`switcher`/`windows`), while plain option-`
--- already proves Hammerspoon's OWN key capture handles this key directly
--- with no such rewrite.
---
--- Plain opt-` never reveals ITS picker unless Chrome is frontmost --
--- that guard lives inside breakOutChromeTab, called before anything is
--- shown. This binding has no detach step to hide behind (the whole
--- design computes the picker before touching anything), so the same
--- guard has to be explicit here instead, or this would pop the picker
--- over whatever app the user is actually in -- "acting on a window the
--- user cannot see would be a surprise, not a feature," this file's own
--- existing phrase for the identical class of guard elsewhere.
-hs.hotkey.bind({ "alt", "shift" }, "`", function()
-  local chrome = hs.application.get("Google Chrome")
-  if not chrome or not chrome:isFrontmost() then
-    return
-  end
-  hs.task.new(PANELD_BIN, nil, { "show", "send-tab" }):start()
-end)
 
 
 -- Join the active tab of the frontmost Chrome window into the OTHER Chrome
@@ -1083,8 +967,8 @@ end
 --    Incognito, which Chrome excludes from this menu by design) is a
 --    no-op, not a guess.
 -- Collects EVERY submenu entry matching targetTabTitle by the prefix rule
--- described above, not just the first. Needed by mergeChromeTabInto (see
--- its own comment, Finding 1 of the 2026-09-29 whole-branch review) to
+-- described above, not just the first. Written for mergeChromeTabInto
+-- (retired 2026-10-19; joinChromeTabToOtherWindow still uses it) to
 -- check "how many real candidates does THIS open menu show" at the exact
 -- moment of pressing, instead of trusting a separate, earlier count that
 -- can disagree with this scan (different title source, different match
@@ -1258,107 +1142,6 @@ end
 -- every bare-letter rule in karabiner.edn's space-mode block -- and reads
 -- as "other" alongside `d` for "detach".
 hs.hotkey.bind({ "cmd", "shift", "ctrl", "alt" }, "o", joinChromeTabToOtherWindow)
-
--- Merge the source tab (the focused Chrome window's active tab) directly
--- into an arbitrary EXISTING Chrome window, identified by CGWindowID --
--- the same number space `aerospace list-windows`'s own window-id and this
--- file's `chrome:focusedWindow():id()` already share (proven above in
--- joinChromeTabToOtherWindow, not re-derived here).
---
--- REFUSES rather than guesses when the target is ambiguous. Three
--- mechanisms to disambiguate were tried and the first two failed live:
--- raising the target drags real OS/AeroSpace focus along and can switch
--- the user's visible workspace; reading Chrome's own window order ONCE
--- (via AppleScript) and pressing by computed rank is a real, confirmed
--- TOCTOU race against this project's own chrome-tabs poller, which also
--- touches Chrome via AppleScript every ~20s (see this plan's
--- "Refinements over the spec" §1).
---
--- REWRITTEN 2026-09-29 (whole-branch review, Finding 1): a THIRD
--- mechanism -- an upfront AppleScript read counting windows whose exact
--- `title of active tab` equalled targetTitle, done once before the menu
--- opened -- also failed live, in a different way: it uses a different
--- title source and a different match rule than the actual press. Two
--- confirmed disagreements:
---   1. `matchCount == 0` passed the old check (only `> 1` declined), but
---      the submenu's PREFIX matcher can still find real matches -- e.g.
---      `hs.window:title()` can carry a macOS-injected annotation like
---      "High memory usage - 1.2 GB" that chromeTabTitleFromWindowTitle
---      does not strip, while AppleScript's `title of active tab` never
---      carries it, so the exact-string count can undercount or miss a
---      real collision entirely.
---   2. `matchCount == 1` does not guarantee the submenu shows only one
---      match either, because the submenu matcher is a PREFIX match, not
---      exact -- one real tab title can be a literal prefix of another's.
---
--- The fix is a SAME-INSTANT check against the exact menu that is about
--- to be pressed, with no separate read and no time gap to race against
--- (this is the same "a same-instant check has no such gap to race
--- against" reasoning task 3's own boundsCloseEnough comment used for a
--- different check, now removed along with the AppleScript read it
--- supported -- both are redundant with the scan below, and were the
--- source of the mismatch). Once the "Move Tab to Another Window" submenu
--- is open, findAllTargetWindowMenuItems collects every real entry
--- matching targetTitle by the SAME prefix rule the press itself uses.
--- Anything other than exactly one match declines.
-function mergeChromeTabInto(targetWindowId)
-  local chrome = hs.application.get("Google Chrome")
-  if not chrome then return false end
-
-  local target = hs.window(targetWindowId)
-  if not target then return false end
-
-  local targetTitle = chromeTabTitleFromWindowTitle(target:title())
-
-  local window = chrome:focusedWindow()
-  if not window then return false end
-
-  -- Before the first thing that could make Chrome raise the target (see
-  -- suppressStealGuard's own comment): a cross-workspace merge changes
-  -- the focused workspace and the guard would otherwise undo it.
-  suppressStealGuard()
-
-  dismissAnyChromeMenu()
-  hs.timer.usleep(200000)
-
-  local tab = findActiveChromeTab(window)
-  if not tab then return false end
-
-  tab:setTimeout(AX_ACTION_TIMEOUT)
-  tab:performAction("AXShowMenu")
-
-  local tabPos = tab:attributeValue("AXPosition")
-  local moveItem = pollUntil(function()
-    return findVisibleMenuItem(tabPos.x, tabPos.y, "Move Tab to Another Window")
-  end, 0.8, 0.02)
-  if not moveItem then
-    dismissAnyChromeMenu()
-    return false
-  end
-
-  moveItem:setTimeout(AX_ACTION_TIMEOUT)
-  moveItem:performAction("AXPress")
-  hs.timer.usleep(300000)
-
-  -- Poll until the submenu has rendered at least one candidate, then
-  -- judge ambiguity from THAT scan, not a separate earlier one.
-  local matches = pollUntil(function()
-    local found = findAllTargetWindowMenuItems(moveItem, targetTitle)
-    return (#found > 0) and found or nil
-  end, 0.8, 0.02)
-
-  if not matches or #matches ~= 1 then
-    dismissAnyChromeMenu()
-    hs.alert.show("🌐 Can't safely merge into \"" .. targetTitle ..
-      "\" -- another window shares this title. Use space-o manually.")
-    return false
-  end
-
-  local otherWindowItem = matches[1]
-  otherWindowItem:setTimeout(AX_ACTION_TIMEOUT)
-  otherWindowItem:performAction("AXPress")
-  return true
-end
 
 
 
