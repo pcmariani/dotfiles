@@ -106,6 +106,25 @@ if [[ -n "$HERDR_TAB_ID" ]]; then
   }
   add-zsh-hook chpwd herdr_rename_tab
   herdr_rename_tab  # set it on shell start too
+
+  # Ctrl-D / `exit` in the LAST pane of a herdr session ends the session, so
+  # the Ghostty window closes too (like `herdr session stop`, which `hss`
+  # does by hand). Without this herdr respawns a shell in $HOME and the
+  # session lives on. Added 2026-10-19; proven in a throwaway herdr:
+  # stops on the last pane, NOT with a second pane or workspace (pane list
+  # spans the session), NOT when a nested shell exits. The guard below is
+  # what keeps a nested `zsh` from stopping the session; removing it made
+  # that test fail. A pane count other than 1 (including a failed query)
+  # does nothing.
+  : ${HERDR_PANE_SHELL_PID:=$$}; export HERDR_PANE_SHELL_PID
+  herdr_stop_if_last() {
+    [[ $$ == $HERDR_PANE_SHELL_PID ]] || return 0
+    local n
+    n=$(herdr pane list 2>/dev/null | grep -o '"pane_id"' | wc -l)
+    (( n == 1 )) && ( herdr session stop "$HERDR_SESSION" >/dev/null 2>&1 & )
+    return 0
+  }
+  add-zsh-hook zshexit herdr_stop_if_last
 fi
 
 # ls after cd
