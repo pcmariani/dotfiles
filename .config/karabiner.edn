@@ -246,6 +246,25 @@
                  [:!Tl [:aerospace "focus --boundaries-action fail right"] [:!terminals]]]
          }
 
+        ;; WINDOW POSITION, 2026-10-19. ctrl = navigate (above), cmd-ctrl = MOVE
+        ;; the focused window one step (reorder/swap; the same command
+        ;; cmd-space-hjkl runs), cmd-shift-ctrl = JOIN it with its neighbour in
+        ;; that direction into a new nested container ("a zone").
+        ;; No terminal exclusion here: ctrl-hjkl is handed to herdr/nvim inside
+        ;; terminals, but cmd-ctrl and cmd-shift-ctrl are not bound there.
+        ;; `flatten-workspace-tree` (space-r) undoes a nesting.
+        {
+         :des "cmd-ctrl-hjkl moves a window; cmd-shift-ctrl-hjkl joins it with its neighbour"
+         :rules [[:!CTh [:aerospace "move left"]]
+                 [:!CTj [:aerospace "move down"]]
+                 [:!CTk [:aerospace "move up"]]
+                 [:!CTl [:aerospace "move right"]]
+                 [:!CTSh [:aerospace "join-with left"]]
+                 [:!CTSj [:aerospace "join-with down"]]
+                 [:!CTSk [:aerospace "join-with up"]]
+                 [:!CTSl [:aerospace "join-with right"]]]
+        }
+
         ; THE CONTEXT PICKER RULE IS GONE, 2026-09-05. Both halves of it are.
         ;
         ; ctrl-shift-space went first: it rewrote to hyper-P for the Ghostty

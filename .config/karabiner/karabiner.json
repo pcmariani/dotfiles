@@ -202,6 +202,97 @@
           "type" : "basic"
         } ]
       }, {
+        "description" : "cmd-ctrl-hjkl moves a window; cmd-shift-ctrl-hjkl joins it with its neighbour",
+        "manipulators" : [ {
+          "from" : {
+            "key_code" : "h",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace move left"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "j",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace move down"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "k",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace move up"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "l",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_control" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace move right"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "h",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with left"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "j",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with down"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "k",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with up"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "l",
+            "modifiers" : {
+              "mandatory" : [ "left_command", "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with right"
+          } ],
+          "type" : "basic"
+        } ]
+      }, {
         "description" : "mod-tap layers",
         "manipulators" : [ {
           "to_if_alone" : [ {
