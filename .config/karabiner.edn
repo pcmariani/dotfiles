@@ -248,32 +248,37 @@
 
         ;; WINDOW POSITION, 2026-10-19. ctrl-hjkl = navigate (above); ctrl-SHIFT-hjkl
         ;; = MOVE the focused window one step (reorder/swap, and in or out of a
-        ;; zone; the same command cmd-space-hjkl runs); space-ctrl-shift-hjkl
-        ;; (in the space-mode block below) = JOIN it with its neighbour in that
-        ;; direction into a new nested container ("a zone").
+        ;; zone; the same command cmd-space-hjkl runs); ctrl-OPT-hjkl = JOIN it
+        ;; with its neighbour in that direction into a new nested container
+        ;; ("a zone", `aerospace join-with`).
         ;; WHY NOT cmd-ctrl-hjkl, which was built first (yadm e1c1131): the
         ;; user's Keychron B1 Pro (2.4G receiver, no NKRO) never reports
         ;; left-cmd + ctrl + h at all. Measured 2026-10-19 with Karabiner's
         ;; EventViewer: no `h` event, no rule fired, while cmd-ctrl-l fired and
         ;; the MacBook keyboard worked. A physical limit, so no rule fixes it;
-        ;; the chord moved to key sets the user tested on the board.
-        ;; Both shifts are accepted (S left, R right): ctrl is the caps-lock
+        ;; the chords use key sets the user tested on the board. The board has
+        ;; no right option, so join uses LEFT option (`O`). A space-held join
+        ;; (space-ctrl-shift-hjkl, yadm 7787813) was tried and dropped: the
+        ;; space layer needs space pressed first.
+        ;; Move accepts both shifts (S left, R right): ctrl is the caps-lock
         ;; key under the left pinky, so the natural shift is the RIGHT one.
-        ;; `:!space-mode` keeps these off while space is held, so the join
-        ;; rules in the space-mode block (same keys plus space) win there.
-        ;; No terminal exclusion: ctrl-shift-hjkl is bound nowhere in
-        ;; Ghostty, nvim, herdr, Hammerspoon or AeroSpace (grepped 2026-10-19).
+        ;; No terminal exclusion: neither chord is bound anywhere in Ghostty,
+        ;; nvim, herdr, Hammerspoon or AeroSpace (grepped 2026-10-19).
         ;; `flatten-workspace-tree` (space-r) undoes a nesting.
         {
-         :des "ctrl-shift-hjkl moves a window"
-         :rules [[:!TSh [:aerospace "move left"]  [:!space-mode]]
-                 [:!TSj [:aerospace "move down"]  [:!space-mode]]
-                 [:!TSk [:aerospace "move up"]    [:!space-mode]]
-                 [:!TSl [:aerospace "move right"] [:!space-mode]]
-                 [:!TRh [:aerospace "move left"]  [:!space-mode]]
-                 [:!TRj [:aerospace "move down"]  [:!space-mode]]
-                 [:!TRk [:aerospace "move up"]    [:!space-mode]]
-                 [:!TRl [:aerospace "move right"] [:!space-mode]]]
+         :des "ctrl-shift-hjkl moves a window; ctrl-opt-hjkl joins it with its neighbour"
+         :rules [[:!TSh [:aerospace "move left"]]
+                 [:!TSj [:aerospace "move down"]]
+                 [:!TSk [:aerospace "move up"]]
+                 [:!TSl [:aerospace "move right"]]
+                 [:!TRh [:aerospace "move left"]]
+                 [:!TRj [:aerospace "move down"]]
+                 [:!TRk [:aerospace "move up"]]
+                 [:!TRl [:aerospace "move right"]]
+                 [:!TOh [:aerospace "join-with left"]]
+                 [:!TOj [:aerospace "join-with down"]]
+                 [:!TOk [:aerospace "join-with up"]]
+                 [:!TOl [:aerospace "join-with right"]]]
         }
 
         ; THE CONTEXT PICKER RULE IS GONE, 2026-09-05. Both halves of it are.
@@ -708,20 +713,6 @@
                  [:down_arrow  [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action stop down"]]
                  [:up_arrow    [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
                  [:right_arrow [:aerospace "focus right"]]
-
-                 ;; JOIN, 2026-10-19: space + ctrl + shift + hjkl joins the
-                 ;; focused window with its neighbour into a nested container
-                 ;; (`aerospace join-with`). Both shifts, as for move above.
-                 ;; Space must be down FIRST (this layer's hold timing); the
-                 ;; plain ctrl-shift-hjkl move rule stands down while it is.
-                 [:!TSh [:aerospace "join-with left"]]
-                 [:!TSj [:aerospace "join-with down"]]
-                 [:!TSk [:aerospace "join-with up"]]
-                 [:!TSl [:aerospace "join-with right"]]
-                 [:!TRh [:aerospace "join-with left"]]
-                 [:!TRj [:aerospace "join-with down"]]
-                 [:!TRk [:aerospace "join-with up"]]
-                 [:!TRl [:aerospace "join-with right"]]
 
                  [:hyphen [:aerospace "resize smart -200"]]
                  [:equal_sign [:aerospace "resize smart +200"]]
