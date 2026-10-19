@@ -202,93 +202,133 @@
           "type" : "basic"
         } ]
       }, {
-        "description" : "cmd-ctrl-hjkl moves a window; cmd-shift-ctrl-hjkl joins it with its neighbour",
+        "description" : "ctrl-shift-hjkl moves a window",
         "manipulators" : [ {
           "from" : {
             "key_code" : "h",
             "modifiers" : {
-              "mandatory" : [ "left_command", "left_control" ]
+              "mandatory" : [ "left_control", "left_shift" ]
             }
           },
           "to" : [ {
             "shell_command" : "/opt/homebrew/bin/aerospace move left"
           } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
+          } ],
           "type" : "basic"
         }, {
           "from" : {
             "key_code" : "j",
             "modifiers" : {
-              "mandatory" : [ "left_command", "left_control" ]
+              "mandatory" : [ "left_control", "left_shift" ]
             }
           },
           "to" : [ {
             "shell_command" : "/opt/homebrew/bin/aerospace move down"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
           "from" : {
             "key_code" : "k",
             "modifiers" : {
-              "mandatory" : [ "left_command", "left_control" ]
+              "mandatory" : [ "left_control", "left_shift" ]
             }
           },
           "to" : [ {
             "shell_command" : "/opt/homebrew/bin/aerospace move up"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
           "from" : {
             "key_code" : "l",
             "modifiers" : {
-              "mandatory" : [ "left_command", "left_control" ]
+              "mandatory" : [ "left_control", "left_shift" ]
             }
           },
           "to" : [ {
             "shell_command" : "/opt/homebrew/bin/aerospace move right"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
           "from" : {
             "key_code" : "h",
             "modifiers" : {
-              "mandatory" : [ "left_command", "left_control", "left_shift" ]
+              "mandatory" : [ "left_control", "right_shift" ]
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace join-with left"
+            "shell_command" : "/opt/homebrew/bin/aerospace move left"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
           "from" : {
             "key_code" : "j",
             "modifiers" : {
-              "mandatory" : [ "left_command", "left_control", "left_shift" ]
+              "mandatory" : [ "left_control", "right_shift" ]
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace join-with down"
+            "shell_command" : "/opt/homebrew/bin/aerospace move down"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
           "from" : {
             "key_code" : "k",
             "modifiers" : {
-              "mandatory" : [ "left_command", "left_control", "left_shift" ]
+              "mandatory" : [ "left_control", "right_shift" ]
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace join-with up"
+            "shell_command" : "/opt/homebrew/bin/aerospace move up"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
           "from" : {
             "key_code" : "l",
             "modifiers" : {
-              "mandatory" : [ "left_command", "left_control", "left_shift" ]
+              "mandatory" : [ "left_control", "right_shift" ]
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace join-with right"
+            "shell_command" : "/opt/homebrew/bin/aerospace move right"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         } ]
@@ -1425,6 +1465,134 @@
           },
           "to" : [ {
             "shell_command" : "/opt/homebrew/bin/aerospace focus right"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "h",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with left"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "j",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with down"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "k",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with up"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "l",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "left_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with right"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "h",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "right_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with left"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "j",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "right_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with down"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "k",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "right_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with up"
+          } ],
+          "conditions" : [ {
+            "name" : "space-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "l",
+            "modifiers" : {
+              "mandatory" : [ "left_control", "right_shift" ]
+            }
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/aerospace join-with right"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
