@@ -519,3 +519,19 @@ arm     = true
 dismiss_on_blur = false
 # Option-drag anywhere on the pad moves it; it reappears where it was left.
 movable = true
+
+[[panel]]
+name    = "teardown"
+# The confirm for workspace tear-down (spec 2026-10-19-workspace-teardown).
+# Summoned by space-shift-x through scripts/reveal-teardown.sh, so this hotkey
+# is never pressed and is set explicitly only to avoid the f18 default.
+hotkey  = "hyper-f12"
+compose = "context pick-command teardown --title 'Tear down this workspace'"
+width   = 912
+height  = 300
+screen  = "LG HDR WQHD"
+# NOT armed, deliberately: an armed panel is pre-drawn from rows produced at
+# the last workspace change, and a confirm for the WRONG workspace is the one
+# thing this panel must never show. Its rows are produced when it is shown, and
+# the producer announces its own row count (paneld:rows:N).
+arm     = false

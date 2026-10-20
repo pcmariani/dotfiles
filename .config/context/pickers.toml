@@ -519,3 +519,22 @@ no_input   = true
 # removal (2026-09-21): a reveal-time reload discards every chord step
 # taken before the panel appears, which is exactly wrong for a held,
 # hammerable switcher. See that panel's own comment for the full account.
+
+[[picker]]
+name       = "teardown"
+# Workspace tear-down (spec 2026-10-19-workspace-teardown). The rows are the
+# PLAN for the focused workspace, one per window plus a header; every row's
+# value is the workspace name, so Enter on any of them means "tear this
+# workspace down". The consumer re-plans from live state and refuses unless the
+# workspace is still the focused one; Esc leaves empty stdin, which pick-accept
+# treats as a no-op.
+producer   = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source teardown"
+consumer   = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept teardown"
+fields     = "value-tab-display"
+multi      = false
+cursor_row = 1
+# A confirm, not a search: nothing to type.
+no_input   = true
+# ONE LINE: an inline TOML table may not span lines, and a parse error here
+# takes every panel's compose down.
+action = [ { bind = "enter", verb = "teardown", default = true } ]
