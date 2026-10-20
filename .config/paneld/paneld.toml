@@ -535,3 +535,7 @@ screen  = "LG HDR WQHD"
 # thing this panel must never show. Its rows are produced when it is shown, and
 # the producer announces its own row count (paneld:rows:N).
 arm     = false
+# Invisible until the producer announces its row count, then shown already the
+# right height: unarmed, it would otherwise appear at the 300pt floor and visibly
+# shrink (the user, 2026-10-20). Needs paneld's hold_for_rows (a3bb922).
+hold_for_rows = true
