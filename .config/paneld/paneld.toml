@@ -299,7 +299,7 @@ cycle          = true
 # this list is read when the chord is pressed, so it is at most the length of
 # the hold old.
 native         = "list"
-producer       = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source windows"
+producer       = "paneld:windows"
 commit         = "/opt/homebrew/bin/aerospace focus --window-id {key}"
 # The rows are only good for the open that asked for them: a tap faster than
 # the producer must not act on the last open's list (toggling between two
