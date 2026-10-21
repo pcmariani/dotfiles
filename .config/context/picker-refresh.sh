@@ -206,7 +206,14 @@ if [ -x "$PANELD" ]; then
     # it is cheap enough to not need to wait behind the two agent-status-join
     # panels either.
     LIVE_SUM_AFTER=$(/usr/bin/cksum < "$PRE.live" 2>/dev/null)
-    for panel in switcher chrome-tabs move files search windows; do
+    # ONLY THE SWITCHER IS RE-ARMED HERE (2026-10-20). The other panels (chrome-tabs,
+    # move, files, search, windows) went in this loop right behind it, and their
+    # surface builds landed while the switcher was arming for the user's next
+    # press: 13 of 42 switcher arms outlasted paneld's 400 ms settle and 2
+    # presses were lost. They are re-armed by picker-rearm-others.sh once
+    # switching has gone quiet; see that script for the numbers and the cost.
+    # The order comments above still say why each of those panels is re-armed.
+    for panel in switcher; do
         # SKIP THE SWITCHER'S REARM WHEN ITS ROWS DID NOT CHANGE (2026-10-15).
         # `context enter` already rewrote picker.prerendered.live before the
         # switcher's surface exited, so the arm that followed the pick read
@@ -223,6 +230,12 @@ if [ -x "$PANELD" ]; then
         fi
         "$PANELD" rearm "$panel" >/dev/null 2>&1 || true
     done
+    # Detached, so the hook's own timing and lock are unchanged.
+    REARM_OTHERS="${REARM_OTHERS:-$HOME/.config/context/picker-rearm-others.sh}"
+    if [ -x "$REARM_OTHERS" ]; then
+        STATE="$STATE" PANELD="$PANELD" "$REARM_OTHERS" >/dev/null 2>&1 </dev/null &
+        dbg "REARM-OTHERS scheduled"
+    fi
 fi
 
 # Hold the lock a moment longer than the render, so a burst of focus events
