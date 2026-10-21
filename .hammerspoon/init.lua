@@ -671,38 +671,23 @@ end
 -- `aerospace list-windows --focused` agreeing -- so `move`, which acts on
 -- the focused window, acts on the window we just made.
 --
--- Absolute path because Hammerspoon does not inherit the Homebrew PATH.
--- hs.task rather than hs.execute so this never blocks the main thread.
-local PANELD_BIN =
-  "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld"
 
-local function detachChromeTabToWorkspace()
-  -- Only offer the picker if a tab actually left. Otherwise this key on a
-  -- single-tab window would pop the picker and move the window you were
-  -- already in -- not what the key says it does.
-  if not breakOutChromeTab() then
-    return false
-  end
-
-  hs.task.new(PANELD_BIN, nil, { "show", "move" }):start()
-  return true
+-- 2026-10-21: opt-` and cmd-ctrl-alt-d NO LONGER LIVE HERE. opt-` is paneld's
+-- own chord now (the `move-tab` panel), because a mover that cycles needs
+-- every press of the chord, and a Hammerspoon bind that detaches on each press
+-- would break out a second tab on the second step. paneld runs
+-- paneldBreakOutChromeTab() through `hs -c` as that panel's `before_open`: the
+-- tab is broken out, then the panel opens on the new window. cmd-ctrl-alt-d,
+-- which called `paneld show move`, is gone with it: `show` means nothing to a
+-- native panel. Rollback is init.lua.bak in the scratchpad of that session, or
+-- yadm history.
+--
+-- "yes" when a tab left (a new window now holds focus), "no" for every reason it
+-- did not -- Chrome not frontmost, not running, a single-tab window.
+function paneldBreakOutChromeTab()
+  local ok = breakOutChromeTab()
+  return ok and "yes" or "no"
 end
-
--- ⌘⌃⌥D (hyper MINUS shift) → detach the tab, then pick its workspace.
--- It cannot be hyper-shift-D: hyper already CONTAINS shift, so hyper-D and
--- hyper-shift-D are the same chord and Hammerspoon cannot tell them apart.
--- Dropping shift is what keeps this in the same `d` mnemonic family while
--- staying a distinct binding.
-hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "d", detachChromeTabToWorkspace)
-
--- opt-` (2026-09-28) → same action, fitting the emerging cmd=switch/opt=move
--- pattern one tier down from `windows` (cmd-esc/opt-esc): cmd-backtick
--- switches the focused Chrome window's tabs, so opt-backtick moves one.
--- Registered directly by Hammerspoon, no Karabiner rewrite needed -- unlike
--- cmd-`, plain option-` is not a macOS-reserved chord. Confirmed working
--- live; the older space-shift-d chord that used to reach this function is
--- retired (see karabiner.edn's own history for that rule).
-hs.hotkey.bind({ "alt" }, "`", detachChromeTabToWorkspace)
 
 
 -- Join the active tab of the frontmost Chrome window into the OTHER Chrome

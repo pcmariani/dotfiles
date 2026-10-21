@@ -24,35 +24,59 @@ name    = "move"
 # cmd-opt-shift-f15 rewrite from `move`'s PREVIOUS hotkey, shift-cmd-esc,
 # is still sitting there unused too).
 hotkey  = "opt-esc"
-# TASK 7: composes the same `workspaces` picker the now-retired `picker`
-# panel used to (see the note at the top of this file), with `--default
-# move` so this door's Enter means `move` instead of `enter` -- compose()
-# writes that override into the consumer (picker_cli.py), and it overrides
-# ONLY the default (Enter) key. ctrl-t still means `room` here, not
-# `move-room` -- the relearn agreed 2026-09-13, see pickers.toml.
-compose = "context pick-command workspaces --default move --title 'Move Window to Workspace' --socket /Users/petermariani/.local/state/context/move.sock"
-width   = 912
-height  = 420
+hotkey_reverse = "opt-shift-esc"
+# NATIVE PURE SWITCHER, 2026-10-21 (the user: "I actually never type in that
+# panel and I never use the other commands, so let's make it a pure switcher.
+# The current space-e picker will suffice for other functions"). Hold opt, tap
+# to cycle the workspaces, release to send the focused window there. The old
+# definition -- compose = "context pick-command workspaces --default move ...",
+# width 912, height 420, arm = true, on_reveal_key = "f12", with alt-t
+# (move-room) and a type-to-filter box -- is in yadm history; space-e keeps
+# those functions. The rows are the switcher's (recency order from AeroSpace's
+# own events, agent-status glyphs from the same cache and refresh); only the
+# commit and the held key differ. `--` ends the options so a workspace named
+# like a flag cannot be read as one; focus follows the window, as `context move`
+# always did.
+cycle   = true
+native  = "list"
+producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --cached"
+refresh = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --refresh-now"
+commit  = "/opt/homebrew/bin/aerospace move-node-to-workspace --focus-follows-window -- {key}"
+order_by = "workspace-recency"
+refresh_on_focus = true
+hold    = "opt"
+font    = "Iosevka Nerd Font Mono"
+font_size = 18
 # PINNED TO THE LG, 2026-09-16 (same mechanism the retired `picker` panel
-# used, and `switcher` below still uses): without this the panel follows
-# keyboard focus (PanelController.swift:107 falls back to NSScreen.main).
+# used, and `switcher` below still uses).
 screen  = "LG HDR WQHD"
-arm     = true
+reveal_delay_ms = 50
 
-# At reveal, paneld presses F12 in this panel's live pty. compose() binds F12 to
-# `reload-sync(picker-rows.sh)`, so the agent-status cell refreshes ~200ms into
-# the open -- while you are already reading -- and the keypress itself still
-# only reveals a pre-drawn surface.
-#
-# F12 and not ctrl-n: ctrl-n is one of fzf's own defaults for `down`. f12
-# resolves to macOS keycode 0x6F in libghostty's pinned table, so sendKey will
-# not take its silent false path.
-#
-# IDEMPOTENT POKES ONLY. A late press lands in whatever pty is live when it
-# arrives, so nothing with side effects may ever be bound here -- no verb, no
-# execute-silent, nothing that writes. A reload is safe because running it
-# twice is harmless.
-on_reveal_key = "f12"
+# opt-backtick: the same mover for a Chrome TAB. The tab is broken out into a
+# window of its own first (Hammerspoon's paneldBreakOutChromeTab, through
+# `hs -c`), then this panel moves that window like `move` does. It used to be a
+# Hammerspoon bind that called `paneld show move` after detaching; a cycling
+# mover needs every press of its chord, and a bind that detaches on each press
+# would break out a second tab on the second step. `before_open` says yes only
+# when a tab actually left -- not in Chrome, or a window with one tab, and the
+# cycle is cancelled with nothing moved. A release before it answers waits.
+[[panel]]
+name    = "move-tab"
+hotkey  = "opt-`"
+hotkey_reverse = "opt-shift-`"
+cycle   = true
+native  = "list"
+producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --cached"
+refresh = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --refresh-now"
+before_open = "[ \"$(/opt/homebrew/bin/hs -c 'paneldBreakOutChromeTab()' | tail -1)\" = yes ]"
+commit  = "/opt/homebrew/bin/aerospace move-node-to-workspace --focus-follows-window -- {key}"
+order_by = "workspace-recency"
+refresh_on_focus = true
+hold    = "opt"
+font    = "Iosevka Nerd Font Mono"
+font_size = 18
+screen  = "LG HDR WQHD"
+reveal_delay_ms = 50
 [[panel]]
 name    = "search"
 # One list of workspaces, files and apps, dispatched by row kind (Spec I, the

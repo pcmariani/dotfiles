@@ -44,7 +44,7 @@ set -u
 : "${FAST_PANELS:=}"
 : "${CHROME_PY:=$HOME/.local/share/mise/installs/python/3.12/bin/python3}"
 : "${CHROME_ACTIVE_NOW:=$HOME/.config/context/chrome-tabs/active-now.py}"
-: "${SLOW_PANELS:=move search}"
+: "${SLOW_PANELS:=search}"
 
 TOKEN="$STATE/rearm-others.token"
 ME="$$"
