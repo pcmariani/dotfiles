@@ -92,7 +92,11 @@ name    = "switcher"
 # that fzf panel and are kept for the history of WHY the chord and release work
 # the way they do; the notes on arm/reveal/f12 no longer apply.
 native         = "list"
-producer       = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live"
+producer       = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --cached"
+# The agent-status glyphs live in a cache file that only the workspace hook
+# rewrote; the fzf panel refreshed it at every reveal, so this does too (about
+# 0.4 s, in the background; the panel redraws when it lands). 2026-10-21.
+refresh        = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --refresh-now"
 commit         = "/Users/petermariani/projects/context-based-mac/bin/context enter {key}"
 order_by       = "workspace-recency"
 refresh_on_focus = true
