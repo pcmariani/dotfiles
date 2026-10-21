@@ -321,9 +321,13 @@ screen         = "LG HDR WQHD"
 # the timing and that they might not want this at all. PER-PANEL on purpose:
 # the default is 150 and cmd-tab keeps it, because 300ms of invisibility on
 # the most-pressed key here would be a bad trade nobody asked for.
-# Read where the timer is scheduled, so `paneld reload windows` is enough to
+# 50 since 2026-10-21 (the user's trial: "it doesn't have to be zero, but really
+# short"; was 300). A live list draws when its rows land, about 80 ms after the
+# chord, so below that this number changes little; 0 is allowed for a native
+# panel and draws at the chord. Read where the timer is
+# scheduled, so `paneld reload windows` is enough to
 # change it -- unlike font_size/inset/line_height, which need a restart.
-reveal_delay_ms = 300
+reveal_delay_ms = 50
 
 # The downloads picker (N2.2, 2026-10-04). Summoned by space-shift-u, which
 # Karabiner routes to `paneld toggle downloads` -- like files, config-files and
@@ -434,7 +438,7 @@ screen  = "LG HDR WQHD"
 # is even drawn without this, and this is a newly-claimed chord with no
 # hammering behavior observed yet. Reversible: `paneld reload chrome-tabs`
 # after changing this number.
-reveal_delay_ms = 300
+reveal_delay_ms = 50
 # ON_EMPTY, 2026-09-28: a real macOS notification instead of an empty
 # switcher panel when this workspace has no Chrome windows at all. Runs
 # synchronously, bounded by paneld's own short timeout, right as the
