@@ -97,7 +97,12 @@ producer       = "/Users/petermariani/projects/context-based-mac/scripts/picker-
 # rewrote; the fzf panel refreshed it at every reveal, so this does too (about
 # 0.4 s, in the background; the panel redraws when it lands). 2026-10-21.
 refresh        = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --refresh-now"
-commit         = "/Users/petermariani/projects/context-based-mac/bin/context enter {key}"
+# Focus is done by paneld itself (the same window choice `context enter` makes,
+# in about 60 ms, no Python); `enter --after-focus` then does the slow
+# follow-up (empty-workspace placement and startup, MRU record) without ever
+# switching, so a quick cmd-tab and back cannot be undone. 2026-10-21.
+focus          = "workspace"
+after_commit   = "/Users/petermariani/projects/context-based-mac/bin/context enter --after-focus {key}"
 order_by       = "workspace-recency"
 refresh_on_focus = true
 hold           = "cmd"
