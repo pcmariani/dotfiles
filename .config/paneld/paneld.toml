@@ -301,6 +301,10 @@ cycle          = true
 native         = "list"
 producer       = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source windows"
 commit         = "/opt/homebrew/bin/aerospace focus --window-id {key}"
+# The rows are only good for the open that asked for them: a tap faster than
+# the producer must not act on the last open's list (toggling between two
+# windows would pick the one you are already on).
+live_rows      = true
 hold           = "cmd"
 font           = "Iosevka Nerd Font Mono"
 font_size      = 18
@@ -406,16 +410,26 @@ cycle          = true
 # producer/consumer live outside the context package entirely (see
 # pickers.toml's own comment on the 2026-09-09 "this tool knows nothing
 # about Chrome" decision).
-compose = "context pick-command chrome-tabs"
-width   = 912
-height  = 420
+# NATIVE, 2026-10-21 -- see `switcher` and `windows`. producer-native.sh reads
+# what is already known (its header says who keeps it current) instead of
+# firing and waiting on active-now.py as producer.sh did at arm time; the old
+# fzf definition (compose = "context pick-command chrome-tabs", width 912,
+# height 420, arm = true) is in yadm history. The value of a row is
+# "win_id:index", which activate-one.sh takes whole. on_empty (below) runs only
+# once the rows have landed and there are none.
+native    = "list"
+producer  = "/Users/petermariani/.config/context/chrome-tabs/producer-native.sh"
+commit    = "/Users/petermariani/.config/context/chrome-tabs/activate-one.sh {key}"
+live_rows = true
+hold      = "cmd"
+font      = "Iosevka Nerd Font Mono"
+font_size = 18
 # PINNED TO THE LG, 2026-09-28 -- the user's own explicit override, same
 # reasoning as `windows` above (this panel matches its design one tier
 # down: the focused Chrome window's tabs instead of the focused
 # workspace's windows, so it inherited the same follow-focus choice,
 # which the user chose to override for consistency instead).
 screen  = "LG HDR WQHD"
-arm     = true
 # Same as `windows`: a tap-or-hammered-sequence commits before the panel
 # is even drawn without this, and this is a newly-claimed chord with no
 # hammering behavior observed yet. Reversible: `paneld reload chrome-tabs`

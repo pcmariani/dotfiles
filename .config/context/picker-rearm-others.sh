@@ -41,7 +41,9 @@ set -u
 : "${QUIET_FAST:=0.5}"
 : "${QUIET_SLOW:=1.2}"
 : "${SPACING:=0.12}"
-: "${FAST_PANELS:=chrome-tabs}"
+: "${FAST_PANELS:=}"
+: "${CHROME_PY:=$HOME/.local/share/mise/installs/python/3.12/bin/python3}"
+: "${CHROME_ACTIVE_NOW:=$HOME/.config/context/chrome-tabs/active-now.py}"
 : "${SLOW_PANELS:=move search}"
 
 TOKEN="$STATE/rearm-others.token"
@@ -65,6 +67,15 @@ rearm_all() {
 /bin/sleep "$QUIET_FAST"
 newest || exit 0
 rearm_all "$FAST_PANELS"
+
+# chrome-tabs is a native panel now, so there is nothing to arm: what it reads
+# at the keypress is fresh.tsv, which says which Chrome windows (and which of
+# their tabs is active) are in the workspace you ended on. Recompute it now
+# that switching has gone quiet. One run, in the background; active-now.py's
+# own lock turns a second one into a no-op.
+if [ -x "$CHROME_PY" ] && [ -f "$CHROME_ACTIVE_NOW" ]; then
+    ("$CHROME_PY" "$CHROME_ACTIVE_NOW" >/dev/null 2>&1 &) </dev/null >/dev/null 2>&1
+fi
 
 # The slow tier waits until QUIET_SLOW after the call, not after the fast tier.
 /bin/sleep "$(awk -v slow="$QUIET_SLOW" -v fast="$QUIET_FAST" -v n="$(echo $FAST_PANELS | wc -w)" -v sp="$SPACING" \
