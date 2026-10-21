@@ -41,7 +41,7 @@ set -u
 : "${QUIET_FAST:=0.5}"
 : "${QUIET_SLOW:=1.2}"
 : "${SPACING:=0.12}"
-: "${FAST_PANELS:=windows chrome-tabs}"
+: "${FAST_PANELS:=chrome-tabs}"
 : "${SLOW_PANELS:=move search}"
 
 TOKEN="$STATE/rearm-others.token"

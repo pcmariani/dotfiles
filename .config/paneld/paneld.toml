@@ -291,10 +291,19 @@ name           = "windows"
 hotkey         = "cmd-esc"
 hotkey_reverse = "shift-cmd-esc"
 cycle          = true
-compose        = "context pick-command windows"
-arm            = true
-width          = 300
-height         = 420
+# NATIVE, 2026-10-21 -- the same kind as `switcher` (see its comment): paneld
+# draws the rows itself, no fzf, no libghostty, no re-arm. The producer runs at
+# each open, so the list is the live one (the old `arm`-time staleness note
+# above no longer applies). Commit is a bare `focus --window-id`: the Python
+# verb's "still in this workspace" check guarded a list armed minutes earlier;
+# this list is read when the chord is pressed, so it is at most the length of
+# the hold old.
+native         = "list"
+producer       = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source windows"
+commit         = "/opt/homebrew/bin/aerospace focus --window-id {key}"
+hold           = "cmd"
+font           = "Iosevka Nerd Font Mono"
+font_size      = 18
 # PINNED TO THE LG, 2026-09-28 -- the user's own explicit override of this
 # panel's original design (it used to deliberately follow keyboard focus,
 # "it lists the windows of the workspace you are LOOKING at, so it has to
