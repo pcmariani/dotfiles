@@ -733,52 +733,12 @@
                  ;; Ghostty moved off shift-T 2026-09-01 to free that key for
                  ;; the coming tab picker. space-enter reads well for "open a
                  ;; terminal here" and was unbound.
-                 ;; The FILES picker, scoped to the focused workspace's root.
-                 ;; `fd` respects .gitignore, so a project root is ~89 records
-                 ;; and a client root ~2,652 rather than 63,346. Selecting a
-                 ;; file hands it to macOS `open`, which does whatever that
-                 ;; file type's own default handler does.
-                 ;;
-                 ;; A rootless workspace correctly gets "nowhere to look":
-                 ;; unlike `terminal`, a files picker genuinely needs a root.
-                 ;;
-                 ;; `:run`, NOT a chord paneld registers. The two workspace
-                 ;; pickers are plain chords (cmd-esc, shift-cmd-esc) so Carbon
-                 ;; gets them directly, but this one is a space-mode entry --
-                 ;; and a layer cannot hand Carbon a chord it did not itself
-                 ;; receive, so it drives paneld over its control socket
-                 ;; instead. Costs a shell round trip on a key pressed far
-                 ;; less often than ctrl-space was.
-                 ;;
-                 ;; Through reveal-files.sh since 2026-09-19 (Spec E
-                 ;; amendment), not `paneld toggle files` directly: in a
-                 ;; rootless workspace the script banners "<ws> has no folder"
-                 ;; and does NOT show the panel; otherwise it is exactly
-                 ;; `paneld toggle files`. It reads the root file the panel's
-                 ;; own arm wrote, so it costs a `cat`, not a Python start.
-                 [:!Sf [:run "/Users/petermariani/projects/context-based-mac/scripts/reveal-files.sh"]]
-
-                 ;; The CONFIG files picker -- ~/.config, fixed scope, from
-                 ;; wherever you are. Separate from space-shift-f because that
-                 ;; one is scoped to the focused workspace, so reaching
-                 ;; contexts.toml through it means leaving what you were doing,
-                 ;; landing on whichever monitor the workspace gets, and coming
-                 ;; back. This needs no workspace switch at all.
-                 [:!Sc [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle config-files"]]
-
-                 ;; The APPLICATIONS picker (Spec H, 2026-09-19) -- the third
-                 ;; member of the shift family: shift-f files, shift-c config,
-                 ;; shift-a apps. Bare `a` above is `slot a`, which
-                 ;; resolves to `ai` by default (Spec M A2, 2026-09-21; it
-                 ;; was `enter ai` until then). THIS KEY IS WHY the slot
-                 ;; block has no `!Sa` set-key: both would be shift-a in the
-                 ;; space layer, and the slot block is declared first, so it
-                 ;; would have shadowed this picker. Rows are
-                 ;; installed app names; Enter is `open -a`. Directly to
-                 ;; `paneld toggle`, like config-files and unlike files: there
-                 ;; is no rootless case to guard. Written while the user slept;
-                 ;; the key and its title are waiting on eyes.
-                 [:!Sa [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle apps"]]
+                 ;; space-shift-f (files), space-shift-c (config files) and space-shift-a
+                 ;; (apps) were RETIRED 2026-10-21: the user reaches all of them from
+                 ;; the unified search picker (space-e), and wants no separate panels.
+                 ;; Their definitions are in yadm history before this commit. Note
+                 ;; space-shift-a is therefore FREE: the slot block above skipped a
+                 ;; `!Sa` set-key only because this key was taken.
 
                  ;; THE DOWNLOADS PICKER (N2.2 stage 2, 2026-10-04): the
                  ;; newest completed downloads, tab to toggle several, Enter

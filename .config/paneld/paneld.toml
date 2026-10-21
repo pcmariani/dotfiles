@@ -54,100 +54,6 @@ arm     = true
 # twice is harmless.
 on_reveal_key = "f12"
 [[panel]]
-name    = "files"
-# Summoned by space-shift-f, which Karabiner routes to `paneld toggle files`
-# over the control socket -- a space-mode layer cannot hand Carbon a chord it
-# did not receive itself.
-#
-# So this hotkey is NEVER PRESSED, and it is set explicitly because the field
-# defaults to `f18` when omitted -- and karabiner.edn's retired "context
-# picker" rule used f18, so inheriting that default would re-grab a key with
-# history. hyper-f20 needs all four modifiers plus a key most keyboards do not
-# have.
-hotkey  = "hyper-f20"
-compose = "context pick-command files"
-width   = 912
-height  = 420
-# PINNED TO THE LG, 2026-09-28 -- the user's own request: every panel
-# should appear in the same fixed place, not just the three that
-# originally declared this (move, switcher, and formerly the retired
-# `picker`). This one had no documented reason to be unpinned; it simply
-# never got the line. Same mechanism as `move`'s own `screen` comment.
-screen  = "LG HDR WQHD"
-# ARMED, like every other panel, since 2026-09-19 (Spec E amendment). This
-# was `arm = false` from 2026-09-09 to 2026-09-18 on the argument that the
-# rows depend on which workspace is focused and rearming on every workspace
-# change would "run fd over a client root constantly". Measured 2026-09-19:
-# the whole producer (Python + fd) is 123ms, fd alone 17ms, and
-# picker-refresh.sh already runs a 150-330ms herdr fan-out on every workspace
-# change -- while the arm-at-reveal path cost a surface build plus the 400ms
-# settle timer before that 123ms even started, which the user called slow.
-#
-# So: armed here, re-armed by picker-refresh.sh on every workspace change (its
-# rearm loop names `files`), and RELOADED at reveal through on_reveal_key
-# below, so a file created since the last workspace change is in the list.
-# paneld defers a rearm while the panel is visible or a verb is running
-# (PanelStateMachine.rearmRequested), so a workspace change while this is
-# open rebuilds at dismiss, never under the user -- same as `picker`.
-#
-# A rootless workspace: the producer emits nothing and removes its root file
-# (no banner from a background arm); the KEYPRESS, scripts/reveal-files.sh,
-# banners and keeps the panel closed. `arm` is read at construction, so a
-# change here needs a kickstart, not `paneld reload`.
-arm     = true
-# The same reload-at-reveal `picker` and `move` use: the daemon sends this key
-# when the panel is shown, compose() binds it to reload-sync of the producer.
-# Nothing with side effects may be bound here; a reload is safe because
-# running it twice is harmless.
-on_reveal_key = "f12"
-
-[[panel]]
-name    = "config-files"
-# Summoned by space-shift-c via `paneld toggle`, like the files picker -- so
-# this hotkey is never pressed and is set explicitly only to avoid the f18
-# default. See the files panel above.
-hotkey  = "hyper-f19"
-compose = "context pick-command config-files"
-width   = 912
-height  = 420
-# PINNED TO THE LG, 2026-09-28 -- see the `files` panel's own comment
-# above; same reasoning, same oversight, same fix.
-screen  = "LG HDR WQHD"
-arm     = true
-
-[[panel]]
-name    = "apps"
-# Launch an installed application (Spec H, the sibling's
-# docs/superpowers/specs/2026-09-19-applications-picker-design.md). Summoned
-# by space-shift-a via `paneld toggle apps`, like files and config-files -- so
-# this hotkey is never pressed and is set explicitly only to avoid the f18
-# default. See the files panel above.
-hotkey  = "hyper-f17"
-# A bare `context`, like every compose line here. It is resolved ONCE, by
-# /bin/sh under the LaunchAgent's PATH (~/.local/bin first; the plist is
-# written by paneld's script/install.sh), at daemon boot and on `paneld reload
-# apps`. The pipeline it emits is absolute (app-rows.sh | fzf | xargs open -a),
-# so the reveal never searches PATH.
-compose = "context pick-command apps"
-width   = 912
-height  = 420
-# PINNED TO THE LG, 2026-09-28 -- REVERSES the note this comment used to
-# make ("not pinned, unlike the three workspace panels"). The user's own
-# explicit call: every panel appears in the same fixed place, full stop,
-# not just the ones whose rows happen to be workspace-independent. Armed
-# like the rest, and re-armed on every dismissal by the state machine --
-# but NOT by picker-refresh.sh on workspace change, because the rows do
-# not depend on the workspace. `arm` is read at construction, so a change
-# here needs a kickstart.
-screen  = "LG HDR WQHD"
-arm     = true
-# The same reload-at-reveal the other pickers use: the daemon sends f12 when
-# the panel is shown, compose() binds it to reload-sync of the 20ms producer.
-# Nothing with side effects may be bound here; running a reload twice is
-# harmless.
-on_reveal_key = "f12"
-
-[[panel]]
 name    = "search"
 # One list of workspaces, files and apps, dispatched by row kind (Spec I, the
 # sibling's docs/superpowers/specs/2026-09-19-unified-search-picker-design.md).
@@ -179,6 +85,19 @@ on_reveal_key = "f12"
 
 [[panel]]
 name    = "switcher"
+# NATIVE since 2026-10-21: paneld draws this panel itself, no terminal and no
+# fzf. The old definition (compose = "context pick-command switcher ...",
+# on_reveal_key = "f12", width 837, height 420, arm = true) is in yadm history
+# before this commit; restoring it is the rollback. The comments below describe
+# that fzf panel and are kept for the history of WHY the chord and release work
+# the way they do; the notes on arm/reveal/f12 no longer apply.
+native         = "list"
+producer       = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live"
+commit         = "/Users/petermariani/projects/context-based-mac/bin/context enter {key}"
+order_by       = "workspace-recency"
+refresh_on_focus = true
+hold           = "cmd"
+font           = "Iosevka Nerd Font Mono"
 # cmd-tab, taken from the Dock by karabiner.edn and rewritten to cmd-f18.
 # The `to` binding KEEPS cmd deliberately: release-to-commit depends on the
 # modifier still being physically down and visible to a local NSEvent
@@ -210,7 +129,6 @@ cycle          = true
 # The stale figure survived here for an hour while the block 30 lines down
 # correctly called it stale -- one file disagreeing with itself, which is what
 # a number with no date attached buys you. The sibling session caught it.
-compose        = "context pick-command switcher --socket /Users/petermariani/.local/state/context/switcher.sock"
 
 # AGENT STATUS GLYPHS, via the arm/refresh split. Added 2026-09-11 at the
 # user's explicit request -- "I'd really like to have that" -- REVERSING a
@@ -276,9 +194,6 @@ compose        = "context pick-command switcher --socket /Users/petermariani/.lo
 # untested. Low risk now that Enter is known not to be eaten -- both travel
 # the same `sendKey` path -- but it is untested, not verified.
 # If cmd-tab ever "does nothing" intermittently, remove this line first.
-on_reveal_key = "f12"
-width          = 837
-height         = 420
 # 16 -> 18, the user's own ask ("increase the font of the switcher by 2
 # points"), switcher-only. Needs a daemon restart to take effect, not
 # `paneld reload switcher` -- see the `windows` panel's comment on
@@ -289,7 +204,6 @@ font_size      = 18
 # pressed most by reflex and least by reading, so a fixed location matters
 # more here than anywhere else.
 screen         = "LG HDR WQHD"
-arm            = true
 
 # The window switcher -- option-cmd-backtick holds and cycles the FOCUSED
 # workspace's windows in MRU order, release focuses the pick. The sibling's
@@ -362,6 +276,7 @@ arm            = true
 #
 # `height` stays a FLOOR: the producer emits `paneld:rows:N` and the window
 # sizes down to the list.
+
 [[panel]]
 name           = "windows"
 hotkey         = "cmd-esc"
