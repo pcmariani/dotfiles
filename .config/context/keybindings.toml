@@ -62,16 +62,20 @@ key = "cmd-tab (hold, release to commit)"
 description = "cycle AeroSpace workspaces"
 
 [[group.binding]]
-key = "opt-cmd-` (hold, release to commit)"
-description = "cycle this workspace's windows"
+key = "cmd-esc (hold, release to commit)"
+description = "cycle this workspace's windows (shift-cmd-esc cycles backward)"
 
 [[group.binding]]
-key = "cmd-esc"
-description = "workspace picker (paneld)"
+key = "cmd-` (hold, release to commit)"
+description = "cycle this workspace's Chrome tabs"
 
 [[group.binding]]
-key = "cmd-shift-esc"
-description = "move the focused window to a picked workspace"
+key = "opt-esc (hold, release to commit)"
+description = "move the focused window to another workspace (shift-opt-esc cycles backward)"
+
+[[group.binding]]
+key = "opt-` (hold, release to commit)"
+description = "break the active Chrome tab out into its own window, then move it to another workspace"
 
 [[group]]
 name = "Window state"
@@ -112,24 +116,16 @@ key = "space-e"
 description = "search: every workspace, every file under this root, every app"
 
 [[group.binding]]
-key = "space-shift-f"
-description = "files picker, scoped to this workspace's root"
-
-[[group.binding]]
-key = "space-shift-c"
-description = "config files picker (~/.config)"
-
-[[group.binding]]
-key = "space-shift-a"
-description = "applications picker"
-
-[[group.binding]]
-key = "space-shift-p"
-description = "terminal context picker (herdr sessions)"
-
-[[group.binding]]
 key = "space-shift-u"
 description = "downloads picker: tab selects files, enter chooses the folder to move them to (a workspace first when this one has no root)"
+
+[[group.binding]]
+key = "space-shift-x"
+description = "tear down this workspace: close its windows one by one (each app's own save prompt), end its herdr session, land on the previous workspace"
+
+[[group.binding]]
+key = "space-shift-s"
+description = "scratch pad (nvim on ~/scratch.md)"
 
 [[group.binding]]
 key = "space-?"
@@ -172,10 +168,6 @@ description = "reload Hammerspoon"
 [[group.binding]]
 key = "space-d"
 description = "detach the active Chrome tab into its own window"
-
-[[group.binding]]
-key = "space-shift-d"
-description = "detach the Chrome tab, then open the move picker"
 
 [[group.binding]]
 key = "space-o"
