@@ -38,6 +38,10 @@ key = "alt-x (in space-e)"
 description = "unpin the highlighted workspace's slot digit"
 
 [[group.binding]]
+key = "ctrl-t (in space-e)"
+description = "create a temp workspace named after what you typed (a name that exists is entered instead)"
+
+[[group.binding]]
 key = "space-tab"
 description = "cycle this workspace's windows (DFS order, wraps)"
 
