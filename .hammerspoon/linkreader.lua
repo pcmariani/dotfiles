@@ -61,6 +61,9 @@ M.MESSAGES = {
   [18] = "No link is waiting",
   [19] = "The link was refused",
   [20] = "The link panel is not available",
+  [21] = "No Chrome window of the right profile for that workspace",
+  [22] = "The Chrome extension is not connected for that profile (see context bridge status)",
+  [23] = "The Chrome profiles could not be matched to the windows",
 }
 M.FALLBACK_MESSAGE = "Sending the link failed"
 
