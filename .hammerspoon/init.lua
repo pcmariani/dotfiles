@@ -1289,3 +1289,9 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "[", splitKey(-1))
 --     focusChromeTarget("ChatGPT")
 --   end
 -- )
+
+-----------------------------------------------------------
+-- Three-finger swipe up opens the unified picker (`paneld toggle search`).
+-- See swipe.lua; needs Mission Control's three-finger swipe moved to four.
+-----------------------------------------------------------
+require("swipe").start()
