@@ -114,6 +114,35 @@ step     = "/Users/petermariani/projects/context-based-mac/bin/context transfer-
 # The default verb runs AFTER the last step's accept, on the highlighted folder.
 action = [ { bind = "enter", verb = "file-move-into", after = "close", default = true } ]
 
+[[picker]]
+name     = "link-to"
+# Link routing, phase 1 (2026-10-23; specs/2026-10-23-link-routing-design.md).
+# `context link-send URL` stages a link and toggles this panel; the rows are the
+# workspaces that have a Chrome window (none at all unless a link is pending).
+# Enter on one commits at once when it has a single kind of window; with both a
+# regular and an Incognito window the list swaps in place to those two rows
+# (`context link-step`, built like the downloads panel's transfer-step) and the
+# second Enter commits `link-commit -- WS:KIND`. Esc leaves the link pending
+# until it expires.
+#
+# `refresh = true` is REQUIRED: without it compose emits no f12 reload bind, and
+# a panel armed in the background (with nothing pending, so no rows) and then
+# opened by `link-send` would never load them -- paneld pokes f12 at reveal.
+# `header` replaces the downloads panel's "Downloads" label. The --notify on the
+# consumer is what puts a failure (Chrome down, extension off, no window) on the
+# screen: the panel discards stdout.
+producer = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source link-to"
+refresh  = true
+consumer = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept link-to"
+fields   = "value-tab-display"
+multi    = false
+cursor_row = 1
+# ONE LINE: an inline TOML table may not span lines, and a parse error here
+# takes every panel's compose down.
+step     = "/Users/petermariani/projects/context-based-mac/bin/context link-step"
+header   = "Send link to workspace"
+action = [ { bind = "enter", verb = "link-commit", default = true } ]
+
 # THE KEYBINDINGS HELPER -- space-?, through `paneld toggle keybindings` --
 # is NOT a picker. Built overnight 2026-09-23 as an fzf-based picker first;
 # the user's actual ask, clarified after seeing it, was a static,

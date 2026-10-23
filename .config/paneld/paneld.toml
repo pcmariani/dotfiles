@@ -517,3 +517,24 @@ arm     = false
 # right height: unarmed, it would otherwise appear at the 300pt floor and visibly
 # shrink (the user, 2026-10-20). Needs paneld's hold_for_rows (a3bb922).
 hold_for_rows = true
+
+# The link-to panel (link routing, phase 1, 2026-10-23). Opened by
+# `context link-send URL`, which stages the link and runs `paneld toggle
+# link-to` -- so this hotkey is never pressed and is set explicitly only to
+# avoid the f18 default (hyper-f17 was free: karabiner.edn does not use it and
+# no other panel does). Armed in the background with nothing pending (no rows),
+# and loaded at reveal by the f12 poke that `on_reveal_key` sends: the picker
+# has `refresh = true` for that, and without the poke the armed list would
+# stay empty. Enter lists the Chrome workspaces; on one with both a regular and
+# an Incognito window it asks which (`context link-step`), then opens the link.
+# A NEW PANEL NEEDS A DAEMON RESTART to exist (`paneld reload` re-reads only
+# panels it already has): launchctl kickstart -k "gui/$(id -u)/dev.paneld.paneld".
+[[panel]]
+name    = "link-to"
+hotkey  = "hyper-f17"
+compose = "context pick-command link-to --title 'Send link to workspace'"
+width   = 912
+height  = 300
+screen  = "LG HDR WQHD"
+arm     = true
+on_reveal_key = "f12"
