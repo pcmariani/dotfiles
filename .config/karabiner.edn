@@ -69,9 +69,6 @@
 
  ;; define application identifiers
  :applications {
-                :chrome ["^com\\.google\\.Chrome$"]
-                :chrome-canary [ "^com\\.google\\.Chrome\\.canary$"]
-                :chromes ["^com\\.google\\.Chrome$" "^com\\.google\\.Chrome\\.canary$"]
                 ;; Apps that OWN ctrl-hjkl and must never have it taken away.
                 ;; Ghostty holds herdr, whose own binding walks panes and then
                 ;; hands off to AeroSpace; Neovide is nvim in its own window
@@ -136,16 +133,9 @@
          ;; side-agnostic. Right COMMAND is deliberately not handled: the
          ;; forward chord works, which proves left cmd is the one in use.
          ;;
-         ;; THE `move` PICKER, 2026-09-26. option-cmd-` now opens `move`
-         ;; (move focused window to another workspace) instead of `windows`
-         ;; -- see the next note for where `windows` went. `move` is a plain
-         ;; toggle, not a cycle panel, so it needs only ONE hotkey; the
-         ;; pre-existing shift variant (cmd-opt-shift-f15) is simply unused
-         ;; now, not removed, since nothing else claims option-cmd-shift-`.
-         ;; Rewritten to cmd-opt-f15 for the same Carbon-registration reason
-         ;; as every other chord in this block -- unchanged from when this
-         ;; rewrite served `windows`, only the CONSUMING panel changed (see
-         ;; paneld.toml's `move` panel).
+         ;; option-cmd-` was rewritten to cmd-opt-f15 here for the `move` panel
+         ;; until 2026-10-23; the mover is opt-esc now, registered by paneld
+         ;; directly, so the three rewrites are gone.
          ;;
          ;; THE WINDOW SWITCHER MOVED TO cmd-esc, 2026-09-26 (the user's own
          ;; request: cmd-tab/cmd-esc/cmd-backtick as workspace/window/
@@ -187,9 +177,6 @@
          :rules [[:!Ctab  :!Cf18]
                  [:!CStab :!CSf18]
                  [:!CRtab :!CSf18]
-                 [:!COgrave_accent_and_tilde  :!COf15]
-                 [:!COSgrave_accent_and_tilde :!COSf15]
-                 [:!CORgrave_accent_and_tilde :!COSf15]
                  [:!Cgrave_accent_and_tilde  :!Cf13]
                  [:!CSgrave_accent_and_tilde :!CSf13]
                  [:!CRgrave_accent_and_tilde :!CSf13]]
@@ -785,24 +772,6 @@
                  ;; is unused in this layer (the only other `[:n ...]` is in
                  ;; chrome-mode, a different layer).
                  [:n [:run "/Users/petermariani/.config/aerospace/new-finder.sh"]]
-
-                 ;; space-shift-P was `context pin --add`, freed when a
-                 ;; context's Chrome state became RECORDED on leaving rather
-                 ;; than declared. It now shows the terminal context picker.
-                 ;;
-                 ;; It sends hyper-P, which is the PRIVATE global hotkey of the
-                 ;; isolated Ghostty instance configured by
-                 ;; ~/.config/context/picker.ghostty. Deliberately not hyper-T,
-                 ;; which is the user's own quick-terminal dropdown (space-t),
-                 ;; and not plain space-p, which is `workspace personal`.
-                 ;;
-                 ;; Karabiner drives this, not Hammerspoon, so the picker's
-                 ;; driver is never also its observer -- the contention that
-                 ;; made two earlier latency harnesses unusable.
-                 ;; [:!Sp [:!!p]] -- retired 2026-09-05 with the Ghostty
-                 ;; picker instance that owned hyper-P. paneld answers
-                 ;; ctrl-space directly, which is one chord and no layer.
-
                  ]
 
          }
