@@ -1113,3 +1113,7 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt" }, "[", splitKey(-1))
 -- See swipe.lua; needs Mission Control's three-finger swipe moved to four.
 -----------------------------------------------------------
 require("swipe").start()
+
+-- Opt + right-click on a link in Slack sends it to the link-to panel.
+-- See linkreader.lua.
+require("linkreader").start()
