@@ -95,16 +95,24 @@ end
 local function prepare(app)
   local pid = app:pid()
   if pid == preparedPid then return end
-  preparedPid = pid
   hs.axuielement.applicationElement(app).AXManualAccessibility = true
+  -- Remembered only once the set went through: an error above (guarded lets
+  -- the click pass) leaves it unset, so the next click tries again.
+  preparedPid = pid
 end
 
 local function send(url)
-  hs.task.new(M.CONTEXT, function(code)
+  local task = hs.task.new(M.CONTEXT, function(code)
     if code ~= 0 then
       hs.alert.show(M.MESSAGES[code] or M.FALLBACK_MESSAGE, 3)
     end
-  end, { "link-send", "--source", M.SOURCE, "--", url }):start()
+  end, { "link-send", "--source", M.SOURCE, "--", url })
+  -- A task that never launched has no exit code to alert on, and the click is
+  -- already swallowed: say so rather than lose the link in silence.
+  local ok, started = pcall(function() return task and task:start() end)
+  if not ok or not started then
+    hs.alert.show(M.FALLBACK_MESSAGE, 3)
+  end
 end
 
 local function onMouse(e)
@@ -149,6 +157,9 @@ end
 function M.start()
   M.stop()
   preparedPid = nil
+  -- A hung Slack accessibility call would otherwise block the tap (and every
+  -- click behind it) for the default ~6 s. 0.15 s is far above a normal answer.
+  pcall(function() hs.axuielement.systemWideElement():setTimeout(0.15) end)
   local types = hs.eventtap.event.types
   _G.__linkReaderTap = hs.eventtap.new({ types.rightMouseDown, types.rightMouseUp }, guarded)
   _G.__linkReaderTap:start()
