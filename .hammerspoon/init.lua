@@ -653,15 +653,25 @@ end
 -- native panel. Rollback is init.lua.bak in the scratchpad of that session, or
 -- yadm history.
 --
--- "yes" when a tab left (a new window now holds focus), "no" for every reason it
--- did not -- Chrome not frontmost, not running, a single-tab window.
+-- "yes" when a tab left (a new window now holds focus) or the window has a single
+-- tab (the window itself moves), "no" when Chrome is not frontmost or not running.
+--
+-- A single-tab window has nothing to break out, so the window itself is what
+-- moves (what opt-esc does): "single-tab" counts as yes in both functions, and
+-- the panel's commit then moves the focused window as it is.
 function paneldBreakOutChromeTab()
-  local ok = breakOutChromeTab()
-  return ok and "yes" or "no"
+  local chrome, reason = breakOutBlocker()
+
+  if chrome then
+    return chrome:selectMenuItem(BREAK_OUT_TAB_PATH) and "yes" or "no"
+  end
+
+  return reason == "single-tab" and "yes" or "no"
 end
 
 function paneldCanBreakOutChromeTab()
-  return breakOutBlocker() and "yes" or "no"
+  local chrome, reason = breakOutBlocker()
+  return (chrome or reason == "single-tab") and "yes" or "no"
 end
 
 

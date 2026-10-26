@@ -56,13 +56,17 @@ reveal_delay_ms = 50
 # opt-backtick: the same mover for a Chrome TAB, but nothing happens to the tab
 # until a workspace is chosen (2026-10-25; it used to break the tab out first
 # and then move the new window). `before_open` only asks Hammerspoon whether a
-# tab CAN leave (paneldCanBreakOutChromeTab: Chrome frontmost, a window with
-# more than one tab) -- it changes nothing, so a cancelled cycle (Esc) leaves
-# the tab where it was. `commit` then breaks the tab out
+# tab CAN leave (paneldCanBreakOutChromeTab: Chrome frontmost) -- it changes
+# nothing, so a cancelled cycle (Esc) leaves the tab where it was. `commit`
+# then breaks the tab out
 # (paneldBreakOutChromeTab, through `hs -c`; the panel is non-activating so
 # Chrome is still frontmost) and, only when that answered yes, moves the new
-# window, which holds focus, to the chosen workspace. A release before
-# `before_open` answers waits.
+# window, which holds focus, to the chosen workspace. A window with a single
+# tab has nothing to break out: it answers yes anyway and the window itself
+# moves, as opt-esc does. A release before
+# `before_open` answers waits. No `\"` inside these two strings: paneld's reader
+# keeps backslashes literally (before 2026-10-25 the quoted form made the test
+# `[ \"yes\" = yes ]`, always false, so this key never opened).
 [[panel]]
 name    = "move-tab"
 hotkey  = "opt-`"
@@ -71,8 +75,8 @@ cycle   = true
 native  = "list"
 producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --cached"
 refresh = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --refresh-now"
-before_open = "[ \"$(/opt/homebrew/bin/hs -c 'paneldCanBreakOutChromeTab()' | tail -1)\" = yes ]"
-commit  = "[ \"$(/opt/homebrew/bin/hs -c 'paneldBreakOutChromeTab()' | tail -1)\" = yes ] && /opt/homebrew/bin/aerospace move-node-to-workspace --focus-follows-window -- {key}"
+before_open = "[ $(/opt/homebrew/bin/hs -c 'paneldCanBreakOutChromeTab()' | tail -1) = yes ]"
+commit  = "[ $(/opt/homebrew/bin/hs -c 'paneldBreakOutChromeTab()' | tail -1) = yes ] && /opt/homebrew/bin/aerospace move-node-to-workspace --focus-follows-window -- {key}"
 order_by = "workspace-recency"
 refresh_on_focus = true
 refresh_on_agents = true
