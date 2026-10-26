@@ -19,6 +19,7 @@ set -u
 : "${CHROME_TABS_STATE:=$HOME/.local/state/context/chrome-tabs}"
 : "${AEROSPACE:=/opt/homebrew/bin/aerospace}"
 : "${HS_BIN:=/opt/homebrew/bin/hs}"
+: "${OSASCRIPT_BIN:=/usr/bin/osascript}"   # tests stub the front-window query
 : "${TIMEOUT_BIN:=/opt/homebrew/bin/timeout}"
 : "${GUARD_ARMED:=0}"          # 0 = observe/dry-run only, 1 = real corrections
 : "${STALENESS_LIMIT:=60}"     # seconds -- see design doc's staleness reasoning
@@ -127,10 +128,15 @@ in_startup_grace_period() {
 
 # Prints one of: known | unknown | untrustworthy
 #
-# "known": this exact (window, url) pair is in a fresh cache -- a real,
-# deliberate focus change, not a steal.
-# "unknown": cache is fresh but has no row matching this (window, url) --
-# likely a just-created tab.
+# "known": this exact (window, url) pair, or this window's tab id (when
+# Chrome gave one), is in a fresh cache -- a real, deliberate focus change,
+# not a steal. The tab id matters because a tab that redirects ON ITS OWN
+# (a sign-in chain running in a background tab) changes url but keeps its
+# id, and the cache can be STALENESS_LIMIT old: matching on url alone read
+# that as a stolen link and detached the tab (2026-10-25, 35 corrections,
+# mostly auth redirects). A stolen link opens a NEW tab, so its id is new.
+# "unknown": cache is fresh but has no row matching either -- likely a
+# just-created tab.
 # "untrustworthy": cache is missing, unreadable, or older than
 # STALENESS_LIMIT -- treated the same as "known" (do nothing), because an
 # untrustworthy cache cannot support a correction decision either way.
@@ -141,11 +147,12 @@ in_startup_grace_period() {
 # misfire on ordinary switches into a background window (design doc
 # review finding #2).
 cache_status() {
-    local win_id="$1" url="$2"
+    local win_id="$1" url="$2" tab_id="${3:-}"
     [ -f "$CACHE" ] || { echo untrustworthy; return; }
-    python3 - "$CACHE" "$win_id" "$url" "$STALENESS_LIMIT" <<'PYEOF'
+    python3 - "$CACHE" "$win_id" "$url" "$STALENESS_LIMIT" "$tab_id" <<'PYEOF'
 import json, sys, time
 cache_path, win_id, url, staleness_limit = sys.argv[1], sys.argv[2], sys.argv[3], float(sys.argv[4])
+tab_id = sys.argv[5]
 try:
     data = json.load(open(cache_path))
 except (OSError, json.JSONDecodeError):
@@ -156,7 +163,8 @@ if polled_at is None or (time.time() - polled_at) > staleness_limit:
     print("untrustworthy")
     sys.exit()
 for t in data.get("tabs", []):
-    if t.get("win") == win_id and t.get("url") == url:
+    if t.get("win") == win_id and (
+            t.get("url") == url or (tab_id and t.get("tab_id") == tab_id)):
         print("known")
         sys.exit()
 print("unknown")
@@ -190,16 +198,16 @@ current_app() {
 # Single targeted query for window 1's (frontmost's) id and active tab
 # URL -- ~0.2s measured, not the ~0.5-0.85s of enumerating every window,
 # because this now runs on EVERY workspace change, not just a switcher
-# reveal. Prints "windowId<TAB>url" on success, nothing on failure (Chrome
+# reveal. Prints "windowId<TAB>url<TAB>tabId" on success, nothing on failure (Chrome
 # not running, no windows, etc). Window 1 is, by construction, whichever
 # window Chrome just raised -- the same one that caused this callback to
 # fire in the first place (see the design doc's mechanism section).
 chrome_front_window_url() {
-    /usr/bin/osascript -e '
+    "$OSASCRIPT_BIN" -e '
 tell application "Google Chrome"
     if (count of windows) is 0 then return ""
     set w to window 1
-    return ((id of w) as text) & "\t" & (URL of active tab of w)
+    return ((id of w) as text) & "\t" & (URL of active tab of w) & "\t" & ((id of active tab of w) as text)
 end tell' 2>/dev/null
 }
 
@@ -225,7 +233,7 @@ run_correction() {
 }
 
 main() {
-    local prev_ws current_app_name front_win_url win_id url decision
+    local prev_ws current_app_name front_win_url win_id url tab_id decision
 
     prev_ws=$(read_last_workspace)
     current_app_name=$(current_app)
@@ -251,6 +259,10 @@ main() {
     fi
     win_id=${front_win_url%%$'\t'*}
     url=${front_win_url#*$'\t'}
+    tab_id=""
+    case "$url" in
+        *$'\t'*) tab_id=${url##*$'\t'}; url=${url%$'\t'*} ;;
+    esac
 
     if is_reentrant_echo "$win_id"; then
         dbg "ECHO recognized for window=$win_id, skipping correction"
@@ -264,7 +276,7 @@ main() {
         return 0
     fi
 
-    decision=$(cache_status "$win_id" "$url")
+    decision=$(cache_status "$win_id" "$url" "$tab_id")
     if [ "$decision" != "unknown" ]; then
         dbg "window=$win_id url=$url cache_status=$decision, no correction"
         write_last_workspace "$(current_workspace)"
