@@ -82,10 +82,18 @@ case "$first_line" in
     *) fail "the more-recently-visited tab did not outrank the active-but-stale one: $out" ;;
 esac
 case "$second_line" in
-    *"▸ "*"Active Tab, visited long ago"*) ;;
+    *"●"*"Active Tab, visited long ago"*) ;;
     *) fail "the active tab's marker did not survive it ranking below the alternate: $out" ;;
 esac
 ok "pure MRU: a recently-visited tab outranks the active tab, which still keeps its marker"
+case "$first_line" in
+    *$'\007\033[2m'*) ;;
+    *) fail "row 1 (the tab you are on) is not dimmed: $first_line" ;;
+esac
+case "$second_line" in
+    *$'\007\033[2m'*) fail "row 2 carries the whole-row dim: $second_line" ;;
+esac
+ok "row 1 is dimmed whole, row 2 is not"
 
 # Check 2: with no scoring data at all (fresh machine), ties are broken by
 # cache/enumeration order, same as any other tie -- there is no more
@@ -137,11 +145,12 @@ switcher_log.LOG_FILE = switcher_log.STATE_DIR / 'switcher.debug.log'
 raise SystemExit(rank.main())
 ")"
 case "$out" in
-    *"▸ "*"Really active now"*) ;;
+    *"●"*"Really active now"*) ;;
     *) fail "CHROME_FRESH_PAIRS did not move the marker onto the really-active tab: $out" ;;
 esac
-case "$out" in
-    *"▸ "*"Stale-active"*) fail "the stale cache flag still carries the marker too: $out" ;;
+stale_line=$(echo "$out" | grep "Stale-active")
+case "$stale_line" in
+    *●*) fail "the stale cache flag still carries the marker too: $out" ;;
 esac
 ok "CHROME_FRESH_PAIRS overrides a stale cache active flag's marker"
 
@@ -256,7 +265,7 @@ case "$first_line" in
     *) fail "a recently-visited non-active tab did not outrank both windows' older active tabs: $out" ;;
 esac
 case "$first_line" in
-    *▸*) fail "a non-active tab must not carry the active marker: $first_line" ;;
+    *●*) fail "a non-active tab must not carry the active marker: $first_line" ;;
 esac
 ok "a recently-visited non-active tab outranks another window's active tab -- no group-first special case"
 

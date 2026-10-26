@@ -48,9 +48,14 @@ check("okta by sso host", t.app_for("https://sso.boomi.com/app/UserHome?session_
 
 # one display row
 row = t.columns("Gmail", "Inbox (1)", "https://mail.google.com/mail/u/1/#inbox")
-check("columns pad app and description", row[:16], "Gmail" + " " * 11)
-check("three spaces after the app, even the longest", t.columns("Google Sheets", "x", "u")[:16], "Google Sheets   ")
-check("three spaces after a cut description", t.columns("", "d" * 60, "u")[16:63].endswith("…   "), True)
+check("columns pad app and description", row[:18], "Gmail" + " " * 13)
+check("five spaces after the app, even the longest", t.columns("Google Sheets", "x", "u")[:18], "Google Sheets" + " " * 5)
+check("five spaces after a cut description", t.columns("", "d" * 60, "u")[18:67].endswith("…" + " " * 5), True)
+# the row after the icon: mark column, five spaces, then the columns
+plain = t.row(False, "T", False)
+check("hidden tab: blank mark column then the gap", plain, " " + " " + " " * 5 + "T")
+check("active tab: dot mark", t.row(True, "T", False)[:2], " ●")
+check("current row dimmed whole", t.row(True, "T", True), "\033[2m" + " ●" + " " * 5 + "T" + "\033[0m")
 if fails:
     print("\n".join("FAIL: " + f for f in fails), file=sys.stderr)
     sys.exit(1)

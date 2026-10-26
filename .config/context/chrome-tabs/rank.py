@@ -95,7 +95,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from switcher_log import log
 from favicons import icon_path_for
-from tab_label import app_for, columns, describe
+from tab_label import app_for, columns, describe, row as display_row
 
 STATE_DIR = Path.home() / ".local/state/context/chrome-tabs"
 CACHE_FILE = STATE_DIR / "cache.json"
@@ -207,14 +207,13 @@ def main():
             else "no candidates ranked -- empty picker" if candidates == []
             else "no tabs at all")
 
-    for _, tab in ranked:
-        marker = "▸" if is_active(tab) else " "
+    for n, (_, tab) in enumerate(ranked):
         app = app_for(tab["url"])
         text = columns(app, describe(tab["title"], app), tab["url"])
         # The icon request leads the display; "" when Chrome has no favicon for
         # the tab, which still reserves the column (paneld's ListRow.icon).
         icon = f"\033]icon;{icon_path_for(tab['url'])}\007"
-        print(f"{tab['win']}\t{tab['index']}\t{icon}{marker} {text}")
+        print(f"{tab['win']}\t{tab['index']}\t{icon}{display_row(is_active(tab), text, n == 0)}")
     return 0
 
 
