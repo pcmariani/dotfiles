@@ -435,19 +435,22 @@ local BREAK_OUT_TAB_PATH = { "Tab", "Move Tab to New Window" }
 -- opt-`) or correctChromeSteal, only for a caller that explicitly
 -- captures it (detachChromeTabAndMoveTo did, until it was retired
 -- 2026-10-19).
-local function breakOutChromeTab()
+-- Returns chrome, nil when a tab can leave its window right now, else nil and
+-- the reason. Changes nothing: paneld's opt-` panel asks it before it opens
+-- (paneldCanBreakOutChromeTab) and the break-out itself runs later, on commit.
+local function breakOutBlocker()
   local chrome = hs.application.get("Google Chrome")
 
   if not chrome then
     hs.alert.show("🌐 Chrome is not running")
-    return false, "no-chrome"
+    return nil, "no-chrome"
   end
 
   -- The menu acts on the frontmost window's active tab. Acting while
   -- something else holds focus would silently break out a tab the user
   -- cannot see.
   if not chrome:isFrontmost() then
-    return false, "not-frontmost"
+    return nil, "not-frontmost"
   end
 
   local item = chrome:findMenuItem(BREAK_OUT_TAB_PATH)
@@ -457,12 +460,22 @@ local function breakOutChromeTab()
     -- UI-language change lands here. Say so out loud: a key that silently
     -- does nothing is the expensive failure, not the noisy one.
     hs.alert.show("🌐 Chrome has no 'Move Tab to New Window' menu item")
-    return false, "no-menu-item"
+    return nil, "no-menu-item"
   end
 
   -- Single-tab window: nothing to break out. Silent, like `space-t`.
   if not item.enabled then
-    return false, "single-tab"
+    return nil, "single-tab"
+  end
+
+  return chrome
+end
+
+local function breakOutChromeTab()
+  local chrome, reason = breakOutBlocker()
+
+  if not chrome then
+    return false, reason
   end
 
   return chrome:selectMenuItem(BREAK_OUT_TAB_PATH)
@@ -630,9 +643,12 @@ end
 -- 2026-10-21: opt-` and cmd-ctrl-alt-d NO LONGER LIVE HERE. opt-` is paneld's
 -- own chord now (the `move-tab` panel), because a mover that cycles needs
 -- every press of the chord, and a Hammerspoon bind that detaches on each press
--- would break out a second tab on the second step. paneld runs
--- paneldBreakOutChromeTab() through `hs -c` as that panel's `before_open`: the
--- tab is broken out, then the panel opens on the new window. cmd-ctrl-alt-d,
+-- would break out a second tab on the second step. 2026-10-25: the panel opens
+-- FIRST and nothing leaves the window until a workspace is chosen. paneld
+-- runs paneldCanBreakOutChromeTab() through `hs -c` as `before_open` (a gate
+-- that changes nothing) and paneldBreakOutChromeTab() as part of `commit`: the
+-- tab is broken out into a window of its own, which holds focus, then moved to
+-- the chosen workspace. Esc leaves the tab where it was. cmd-ctrl-alt-d,
 -- which called `paneld show move`, is gone with it: `show` means nothing to a
 -- native panel. Rollback is init.lua.bak in the scratchpad of that session, or
 -- yadm history.
@@ -642,6 +658,10 @@ end
 function paneldBreakOutChromeTab()
   local ok = breakOutChromeTab()
   return ok and "yes" or "no"
+end
+
+function paneldCanBreakOutChromeTab()
+  return breakOutBlocker() and "yes" or "no"
 end
 
 

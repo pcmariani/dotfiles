@@ -53,14 +53,16 @@ font_size = 18
 screen  = "LG HDR WQHD"
 reveal_delay_ms = 50
 
-# opt-backtick: the same mover for a Chrome TAB. The tab is broken out into a
-# window of its own first (Hammerspoon's paneldBreakOutChromeTab, through
-# `hs -c`), then this panel moves that window like `move` does. It used to be a
-# Hammerspoon bind that called `paneld show move` after detaching; a cycling
-# mover needs every press of its chord, and a bind that detaches on each press
-# would break out a second tab on the second step. `before_open` says yes only
-# when a tab actually left -- not in Chrome, or a window with one tab, and the
-# cycle is cancelled with nothing moved. A release before it answers waits.
+# opt-backtick: the same mover for a Chrome TAB, but nothing happens to the tab
+# until a workspace is chosen (2026-10-25; it used to break the tab out first
+# and then move the new window). `before_open` only asks Hammerspoon whether a
+# tab CAN leave (paneldCanBreakOutChromeTab: Chrome frontmost, a window with
+# more than one tab) -- it changes nothing, so a cancelled cycle (Esc) leaves
+# the tab where it was. `commit` then breaks the tab out
+# (paneldBreakOutChromeTab, through `hs -c`; the panel is non-activating so
+# Chrome is still frontmost) and, only when that answered yes, moves the new
+# window, which holds focus, to the chosen workspace. A release before
+# `before_open` answers waits.
 [[panel]]
 name    = "move-tab"
 hotkey  = "opt-`"
@@ -69,8 +71,8 @@ cycle   = true
 native  = "list"
 producer = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --cached"
 refresh = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --refresh-now"
-before_open = "[ \"$(/opt/homebrew/bin/hs -c 'paneldBreakOutChromeTab()' | tail -1)\" = yes ]"
-commit  = "/opt/homebrew/bin/aerospace move-node-to-workspace --focus-follows-window -- {key}"
+before_open = "[ \"$(/opt/homebrew/bin/hs -c 'paneldCanBreakOutChromeTab()' | tail -1)\" = yes ]"
+commit  = "[ \"$(/opt/homebrew/bin/hs -c 'paneldBreakOutChromeTab()' | tail -1)\" = yes ] && /opt/homebrew/bin/aerospace move-node-to-workspace --focus-follows-window -- {key}"
 order_by = "workspace-recency"
 refresh_on_focus = true
 refresh_on_agents = true
