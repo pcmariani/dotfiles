@@ -1011,7 +1011,7 @@ end
 -- (a fresh `go back` after the join still reached the earlier URL).
 local AX_ACTION_TIMEOUT = 0.2
 
-local function joinChromeTabToOtherWindow()
+local function joinChromeTabViaMenu()
   local chrome = hs.application.get("Google Chrome")
 
   if not chrome then
@@ -1104,6 +1104,53 @@ local function joinChromeTabToOtherWindow()
 
   otherWindowItem:setTimeout(AX_ACTION_TIMEOUT)
   otherWindowItem:performAction("AXPress")
+  return true
+end
+
+-- The join through the Chrome bridge (2026-10-26): `context chrome-join` has
+-- the extension move the tab itself, so nothing is clicked and no menu opens.
+-- The menu route above is the fallback for when the bridge cannot do it: the
+-- extension not reloaded yet (it answers "unknown command"), a profile with no
+-- extension, a workspace the resolver refuses. Exit 0 = moved. Exit 17 = it
+-- MAY have moved and could not be confirmed: do NOT fall back then, the menu
+-- route would act a second time on whatever is now focused. Any other code
+-- means nothing moved.
+local CHROME_JOIN_BIN = os.getenv("HOME") .. "/.local/bin/context"
+local CHROME_JOIN_UNKNOWN_OUTCOME = 17
+local chromeJoinTask = nil -- held so the task is not collected while it runs
+
+local function joinChromeTabToOtherWindow()
+  local chrome = hs.application.get("Google Chrome")
+
+  if not chrome then
+    hs.alert.show("🌐 Chrome is not running")
+    return false
+  end
+
+  -- Same guard as the menu route: never act on a window the user cannot see.
+  if not chrome:isFrontmost() then
+    return false
+  end
+
+  chromeJoinTask = hs.task.new(CHROME_JOIN_BIN, function(code)
+    if code == 0 then
+      return
+    end
+
+    if code == CHROME_JOIN_UNKNOWN_OUTCOME then
+      hs.alert.show("🌐 The tab may have moved; look before pressing again", 3)
+      return
+    end
+
+    joinChromeTabViaMenu()
+  end, { "chrome-join" })
+
+  local ok, started = pcall(function() return chromeJoinTask and chromeJoinTask:start() end)
+
+  if not ok or not started then
+    joinChromeTabViaMenu()
+  end
+
   return true
 end
 
