@@ -41,9 +41,9 @@ check("never empty", t.describe("Gmail", "Gmail"), "Gmail")
 # url truncation
 long = "https://example.com/" + "a" * 100
 check("short url untouched", t.shorten_url("https://example.com/x"), "https://example.com/x")
-check("exactly 50 untouched", t.shorten_url("h" * 50), "h" * 50)
-check("51 cut to 50 plus ellipsis", t.shorten_url("h" * 51), "h" * 50 + "…")
-check("long url", t.shorten_url(long), long[:50] + "…")
+check("exactly 35 untouched", t.shorten_url("h" * 35), "h" * 35)
+check("36 cut to 35 plus ellipsis", t.shorten_url("h" * 36), "h" * 35 + "…")
+check("long url", t.shorten_url(long), long[:35] + "…")
 check("okta by sso host", t.app_for("https://sso.boomi.com/app/UserHome?session_hint=AUTHENTICATED"), "Okta")
 
 # one display row
@@ -53,9 +53,9 @@ check("five spaces after the app, even the longest", t.columns("Google Sheets", 
 check("five spaces after a cut description", t.columns("", "d" * 60, "u")[18:67].endswith("…" + " " * 5), True)
 # the row after the icon: mark column, five spaces, then the columns
 plain = t.row(False, "T", False)
-check("hidden tab: blank mark column then the gap", plain, " " + " " + " " * 5 + "T")
-check("active tab: dot mark", t.row(True, "T", False)[:2], " ●")
-check("current row dimmed whole", t.row(True, "T", True), "\033[2m" + " ●" + " " * 5 + "T" + "\033[0m")
+check("hidden tab: blank mark column then the gap", plain, " " * 3 + " " + " " * 5 + "T")
+check("active tab: dot mark", t.row(True, "T", False)[:4], "   ●")
+check("current row dimmed whole", t.row(True, "T", True), "\033[2m" + "   ●" + " " * 5 + "T" + "\033[0m")
 if fails:
     print("\n".join("FAIL: " + f for f in fails), file=sys.stderr)
     sys.exit(1)
