@@ -6,9 +6,9 @@ fzf:
     <win_id>\t<index>\t<marker> <title, padded/elided to TITLE_WIDTH>  <dimmed url>
 
 The recency itself is never shown (2026-09-25, the user: "we don't need"
-it) -- it still drives ranking, just not the display. Title is the thing
-to focus on, so it gets the fixed-width column; the url gets its own
-column after it, dimmed (SGR faint, matching picker-rows.sh's own
+it) -- it still drives ranking, just not the display. 2026-10-25 the row is
+three columns -- the tab's app, a description, the url cut at 80
+characters (tab_label.py) -- the url dimmed (SGR faint, matching picker-rows.sh's own
 dim_on/dim_off convention) so it reads as supporting detail, not the
 main line.
 
@@ -94,6 +94,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from switcher_log import log
+from tab_label import app_for, columns, describe
 
 STATE_DIR = Path.home() / ".local/state/context/chrome-tabs"
 CACHE_FILE = STATE_DIR / "cache.json"
@@ -207,8 +208,9 @@ def main():
 
     for _, tab in ranked:
         marker = "▸" if is_active(tab) else " "
-        title = elide(tab["title"], TITLE_WIDTH)
-        print(f"{tab['win']}\t{tab['index']}\t{marker} {title}  {DIM_ON}{tab['url']}{DIM_OFF}")
+        app = app_for(tab["url"])
+        text = columns(app, describe(tab["title"], app), tab["url"])
+        print(f"{tab['win']}\t{tab['index']}\t{marker} {text}")
     return 0
 
 
