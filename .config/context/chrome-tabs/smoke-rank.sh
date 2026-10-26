@@ -33,6 +33,9 @@ run_rank() {
 import sys, pathlib
 sys.path.insert(0, '$HERE')
 import rank
+import favicons
+favicons.CHROME_DIR = '$TMP/no-chrome'
+favicons.CACHE_DIR = '$TMP/favicons'
 rank.CACHE_FILE = pathlib.Path('$TMP/cache.json')
 rank.FRECENCY_FILE = pathlib.Path('$TMP/frecency.json')
 import switcher_log
@@ -123,6 +126,9 @@ out="$(CHROME_FRESH_PAIRS="W1	t2" env python3 -c "
 import sys, pathlib
 sys.path.insert(0, '$HERE')
 import rank
+import favicons
+favicons.CHROME_DIR = '$TMP/no-chrome'
+favicons.CACHE_DIR = '$TMP/favicons'
 rank.CACHE_FILE = pathlib.Path('$TMP/cache.json')
 rank.FRECENCY_FILE = pathlib.Path('$TMP/frecency.json')
 import switcher_log
@@ -191,6 +197,9 @@ out="$(CHROME_FRESH_PAIRS="$(printf 'W1\tt1\nW2\tt2')" env python3 -c "
 import sys, pathlib
 sys.path.insert(0, '$HERE')
 import rank
+import favicons
+favicons.CHROME_DIR = '$TMP/no-chrome'
+favicons.CACHE_DIR = '$TMP/favicons'
 rank.CACHE_FILE = pathlib.Path('$TMP/cache.json')
 rank.FRECENCY_FILE = pathlib.Path('$TMP/frecency.json')
 import switcher_log
@@ -231,6 +240,9 @@ out="$(CHROME_FRESH_PAIRS="$(printf 'W1\tt1\nW2\tt2')" env python3 -c "
 import sys, pathlib
 sys.path.insert(0, '$HERE')
 import rank
+import favicons
+favicons.CHROME_DIR = '$TMP/no-chrome'
+favicons.CACHE_DIR = '$TMP/favicons'
 rank.CACHE_FILE = pathlib.Path('$TMP/cache.json')
 rank.FRECENCY_FILE = pathlib.Path('$TMP/frecency.json')
 import switcher_log
@@ -262,6 +274,9 @@ out="$(CHROME_FRESH_PAIRS="" env python3 -c "
 import sys, pathlib
 sys.path.insert(0, '$HERE')
 import rank
+import favicons
+favicons.CHROME_DIR = '$TMP/no-chrome'
+favicons.CACHE_DIR = '$TMP/favicons'
 rank.CACHE_FILE = pathlib.Path('$TMP/cache.json')
 rank.FRECENCY_FILE = pathlib.Path('$TMP/frecency.json')
 import switcher_log
@@ -271,5 +286,50 @@ raise SystemExit(rank.main())
 ")"
 [ -z "$out" ] || fail "expected an empty picker for a confirmed-empty workspace, got: [$out]"
 ok "a present-but-empty CHROME_FRESH_PAIRS scopes to nothing, not to every tab"
+
+# Check 8 -- every row leads with paneld's icon request (ESC ] icon ; PATH BEL):
+# the cached favicon's path when Chrome has one for the tab, empty (the column is
+# still reserved) when it has none. A fake Chrome directory, never the real one.
+python3 -c "
+import json, os, sqlite3, time
+now = time.time()
+os.makedirs('$TMP/chrome8/Default')
+c = sqlite3.connect('$TMP/chrome8/Default/Favicons')
+c.execute('create table icon_mapping(id integer primary key, page_url longvarchar, icon_id integer)')
+c.execute('create table favicon_bitmaps(id integer primary key, icon_id integer, width integer, image_data blob)')
+c.execute(\"insert into icon_mapping(page_url, icon_id) values ('https://has-icon.example/', 1)\")
+c.execute('insert into favicon_bitmaps(icon_id, width, image_data) values (1, 32, ?)', (b'\\x89PNG\\r\\n\\x1a\\nx',))
+c.commit()
+json.dump({'polled_at': now, 'front_win': 'W1', 'tabs': [
+    {'win': 'W1', 'index': 1, 'tab_id': 't1', 'active': False, 'title': 'Has an icon', 'url': 'https://has-icon.example/'},
+    {'win': 'W1', 'index': 2, 'tab_id': 't2', 'active': False, 'title': 'No icon', 'url': 'https://no-icon.example/'},
+]}, open('$TMP/cache.json', 'w'))
+json.dump({'https://has-icon.example/': {'count': 1, 'last_seen': now, 'title': 'x'}}, open('$TMP/frecency.json', 'w'))
+"
+out="$(env -u CHROME_FRESH_PAIRS python3 -c "
+import sys, pathlib
+sys.path.insert(0, '$HERE')
+import rank
+import favicons
+favicons.CHROME_DIR = '$TMP/chrome8'
+favicons.CACHE_DIR = '$TMP/favicons8'
+rank.CACHE_FILE = pathlib.Path('$TMP/cache.json')
+rank.FRECENCY_FILE = pathlib.Path('$TMP/frecency.json')
+import switcher_log
+switcher_log.STATE_DIR = pathlib.Path('$TMP')
+switcher_log.LOG_FILE = switcher_log.STATE_DIR / 'switcher.debug.log'
+raise SystemExit(rank.main())
+")"
+first="$(echo "$out" | sed -n 1p | cut -f3)"
+second="$(echo "$out" | sed -n 2p | cut -f3)"
+case "$first" in
+    $'\033]icon;'"$TMP/favicons8/"*".png"$'\007'*"Has an icon"*) ;;
+    *) fail "a tab with a favicon must lead with its cached png path, got: $(printf %q "$first")" ;;
+esac
+case "$second" in
+    $'\033]icon;\007'*"No icon"*) ;;
+    *) fail "a tab with no favicon must lead with an empty icon request, got: $(printf %q "$second")" ;;
+esac
+ok "rows lead with the icon request: the png path when Chrome has one, empty (column kept) when not"
 
 echo "smoke-rank: $pass checks passed"

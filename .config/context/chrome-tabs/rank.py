@@ -94,6 +94,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from switcher_log import log
+from favicons import icon_path_for
 from tab_label import app_for, columns, describe
 
 STATE_DIR = Path.home() / ".local/state/context/chrome-tabs"
@@ -210,7 +211,10 @@ def main():
         marker = "▸" if is_active(tab) else " "
         app = app_for(tab["url"])
         text = columns(app, describe(tab["title"], app), tab["url"])
-        print(f"{tab['win']}\t{tab['index']}\t{marker} {text}")
+        # The icon request leads the display; "" when Chrome has no favicon for
+        # the tab, which still reserves the column (paneld's ListRow.icon).
+        icon = f"\033]icon;{icon_path_for(tab['url'])}\007"
+        print(f"{tab['win']}\t{tab['index']}\t{icon}{marker} {text}")
     return 0
 
 
