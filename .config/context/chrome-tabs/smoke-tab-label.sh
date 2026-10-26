@@ -41,13 +41,16 @@ check("never empty", t.describe("Gmail", "Gmail"), "Gmail")
 # url truncation
 long = "https://example.com/" + "a" * 100
 check("short url untouched", t.shorten_url("https://example.com/x"), "https://example.com/x")
-check("exactly 80 untouched", t.shorten_url("h" * 80), "h" * 80)
-check("81 cut to 80 plus ellipsis", t.shorten_url("h" * 81), "h" * 80 + "…")
-check("long url", t.shorten_url(long), long[:80] + "…")
+check("exactly 50 untouched", t.shorten_url("h" * 50), "h" * 50)
+check("51 cut to 50 plus ellipsis", t.shorten_url("h" * 51), "h" * 50 + "…")
+check("long url", t.shorten_url(long), long[:50] + "…")
+check("okta by sso host", t.app_for("https://sso.boomi.com/app/UserHome?session_hint=AUTHENTICATED"), "Okta")
 
 # one display row
 row = t.columns("Gmail", "Inbox (1)", "https://mail.google.com/mail/u/1/#inbox")
-check("columns pad app and description", row[:14], "Gmail         ")
+check("columns pad app and description", row[:16], "Gmail" + " " * 11)
+check("three spaces after the app, even the longest", t.columns("Google Sheets", "x", "u")[:16], "Google Sheets   ")
+check("three spaces after a cut description", t.columns("", "d" * 60, "u")[16:63].endswith("…   "), True)
 if fails:
     print("\n".join("FAIL: " + f for f in fails), file=sys.stderr)
     sys.exit(1)

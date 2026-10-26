@@ -1,6 +1,6 @@
 """The text of one chrome-tabs row, left of the active-tab marker's column:
 
-    <app>  <description>  <url, cut at 80 characters>
+    <app>   <description>   <url, cut at 50 characters>
 
 (2026-10-25, the user: "column 1: the tab's app (if there is one), col 2:
 description, col 3: url".) The app comes from the URL alone, by host and, for
@@ -15,9 +15,10 @@ Add an app by adding a line to APPS (host, optional path prefix, name).
 import re
 from urllib.parse import urlsplit
 
-APP_WIDTH = 14          # "Google Sheets" is the longest name, 13
+GAP = 3                 # least spaces between two columns (2026-10-26, the user)
+APP_WIDTH = 13          # "Google Sheets" is the longest name, 13
 DESCRIPTION_WIDTH = 44
-URL_LIMIT = 80          # characters kept, then an ellipsis
+URL_LIMIT = 50          # characters kept, then an ellipsis (was 80)
 
 DIM_ON = "\033[2m"
 DIM_OFF = "\033[0m"
@@ -39,6 +40,8 @@ APPS = [
     ("claude.ai", "", "Claude"),
     ("github.com", "", "GitHub"),
     ("app.slack.com", "", "Slack"),
+    ("sso.boomi.com", "", "Okta"),
+    ("boomi.okta.com", "", "Okta"),
 ]
 
 _EMAIL = re.compile(r"^\S+@\S+\.\S+$")
@@ -78,11 +81,12 @@ def shorten_url(url):
 
 
 def _fit(text, width):
+    """`text` padded or cut to `width` characters, then GAP spaces."""
     if len(text) <= width:
-        return text.ljust(width)
-    return text[: width - 1] + "…"
+        return text.ljust(width) + " " * GAP
+    return text[: width - 1] + "…" + " " * GAP
 
 
 def columns(app, description, url):
-    return (f"{_fit(app, APP_WIDTH)}{_fit(description, DESCRIPTION_WIDTH)}  "
+    return (f"{_fit(app, APP_WIDTH)}{_fit(description, DESCRIPTION_WIDTH)}"
             f"{DIM_ON}{shorten_url(url)}{DIM_OFF}")
