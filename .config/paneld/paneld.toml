@@ -501,7 +501,9 @@ arm     = true
 # a click elsewhere, or working in another window, does not close the pad
 # (the user, 2026-10-16). Every other panel keeps the default, true.
 dismiss_on_blur = false
-# Option-drag anywhere on the pad moves it; it reappears where it was left.
+# Grab a border (8 pt thick): drag across it to resize, along it to move, a corner
+# always resizes (2026-10-27). Option-drag anywhere still moves it, and option +
+# right-drag resizes. It reappears where it was left.
 movable = true
 
 [[panel]]
