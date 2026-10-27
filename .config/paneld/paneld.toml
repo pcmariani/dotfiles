@@ -504,6 +504,9 @@ dismiss_on_blur = false
 # Grab a border (8 pt thick): drag across it to resize, along it to move, a corner
 # always resizes (2026-10-27). Option-drag anywhere still moves it, and option +
 # right-drag resizes. It reappears where it was left.
+# Side padding to match the top and bottom (inset 6 + padding_y 8 = 14 pt each
+# way; the sides were inset 6 + the library's 2). 2026-10-27, the user.
+padding_x = 8
 movable = true
 
 [[panel]]
