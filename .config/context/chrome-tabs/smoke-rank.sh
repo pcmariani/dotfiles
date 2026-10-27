@@ -65,9 +65,10 @@ raise SystemExit(rank.main())
 python3 -c "
 import json, time
 now = time.time()
-json.dump({'polled_at': now, 'front_win': 'W1', 'tabs': [
+json.dump({'polled_at': now, 'front_win': None, 'tabs': [
     {'win': 'W1', 'index': 1, 'tab_id': 't1', 'active': True, 'title': 'Active Tab, visited long ago', 'url': 'https://active.example'},
     {'win': 'W1', 'index': 2, 'tab_id': 't2', 'active': False, 'title': 'Recently visited alternate', 'url': 'https://recent.example'},
+    {'win': 'W2', 'index': 1, 'tab_id': 't9', 'active': True, 'title': 'Other window tab', 'url': 'https://other.example'},
 ]}, open('$TMP/cache.json', 'w'))
 json.dump({
     'https://active.example': {'count': 1, 'last_seen': now - 3600, 'title': 'Active Tab'},
@@ -127,10 +128,11 @@ now = time.time()
 json.dump({'polled_at': now - 5, 'front_win': 'W1', 'tabs': [
     {'win': 'W1', 'index': 1, 'tab_id': 't1', 'active': True, 'title': 'Stale-active (you just left this)', 'url': 'https://stale.example'},
     {'win': 'W1', 'index': 2, 'tab_id': 't2', 'active': False, 'title': 'Really active now', 'url': 'https://real.example'},
+    {'win': 'W2', 'index': 1, 'tab_id': 't9', 'active': True, 'title': 'Other window tab', 'url': 'https://other.example'},
 ]}, open('$TMP/cache.json', 'w'))
 "
 rm -f "$TMP/frecency.json"
-out="$(CHROME_FRESH_PAIRS="W1	t2" env python3 -c "
+out="$(CHROME_FRESH_PAIRS="$(printf 'W1\tt2\nW2\tt9')" env python3 -c "
 import sys, pathlib
 sys.path.insert(0, '$HERE')
 import rank
@@ -153,6 +155,52 @@ case "$stale_line" in
     *●*) fail "the stale cache flag still carries the marker too: $out" ;;
 esac
 ok "CHROME_FRESH_PAIRS overrides a stale cache active flag's marker"
+
+# Check 3b (2026-10-27, the user: "only have the dot if there's more than one
+# chrome window"): a workspace with ONE Chrome window shows no dot on any row,
+# TWO windows show it on each window's showing tab. Same fixture both times,
+# only the scope differs.
+python3 -c "
+import json, time
+now = time.time()
+json.dump({'polled_at': now, 'front_win': None, 'tabs': [
+    {'win': 'W1', 'index': 1, 'tab_id': 't1', 'active': True, 'title': 'Solo window tab', 'url': 'https://solo.example'},
+    {'win': 'W2', 'index': 1, 'tab_id': 't9', 'active': True, 'title': 'Other window tab', 'url': 'https://other.example'},
+]}, open('$TMP/cache.json', 'w'))
+"
+rm -f "$TMP/frecency.json"
+fresh_run() {
+    CHROME_FRESH_PAIRS="$1" env python3 -c "
+import sys, pathlib
+sys.path.insert(0, '$HERE')
+import rank
+import favicons
+favicons.CHROME_DIR = '$TMP/no-chrome'
+favicons.CACHE_DIR = '$TMP/favicons'
+rank.CACHE_FILE = pathlib.Path('$TMP/cache.json')
+rank.FRECENCY_FILE = pathlib.Path('$TMP/frecency.json')
+import switcher_log
+switcher_log.STATE_DIR = pathlib.Path('$TMP')
+switcher_log.LOG_FILE = switcher_log.STATE_DIR / 'switcher.debug.log'
+raise SystemExit(rank.main())
+"
+}
+out="$(fresh_run "$(printf 'W1\tt1')")"
+case "$out" in
+    *●*) fail "one Chrome window in scope still shows a dot: $out" ;;
+esac
+case "$out" in
+    *"Solo window tab"*) ;;
+    *) fail "the one-window run lost its row: $out" ;;
+esac
+case "$out" in
+    *"Other window tab"*) fail "a window outside the scope leaked in: $out" ;;
+esac
+ok "one Chrome window in scope: no dot"
+out="$(fresh_run "$(printf 'W1\tt1\nW2\tt9')")"
+dots=$(printf '%s\n' "$out" | grep -c "●")
+[ "$dots" = 2 ] || fail "two windows should show two dots, got $dots: $out"
+ok "two Chrome windows in scope: a dot on each window's showing tab"
 
 # Check 4: pure MRU, not frecency -- changed live 2026-09-25 on the user's
 # own call after using it ("frecency isn't accurate... what we really

@@ -207,13 +207,16 @@ def main():
             else "no candidates ranked -- empty picker" if candidates == []
             else "no tabs at all")
 
+    # The dot only tells one window's showing tab from another's, so a single
+    # window gets none (2026-10-27, the user).
+    show_mark = len({t["win"] for t in candidates}) > 1
     for n, (_, tab) in enumerate(ranked):
         app = app_for(tab["url"])
         text = columns(app, describe(tab["title"], app), tab["url"])
         # The icon request leads the display; "" when Chrome has no favicon for
         # the tab, which still reserves the column (paneld's ListRow.icon).
         icon = f"\033]icon;{icon_path_for(tab['url'])}\007"
-        print(f"{tab['win']}\t{tab['index']}\t{icon}{display_row(is_active(tab), text, n == 0)}")
+        print(f"{tab['win']}\t{tab['index']}\t{icon}{display_row(is_active(tab), text, n == 0, show_mark)}")
     return 0
 
 

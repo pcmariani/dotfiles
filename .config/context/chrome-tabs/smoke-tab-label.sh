@@ -51,11 +51,12 @@ row = t.columns("Gmail", "Inbox (1)", "https://mail.google.com/mail/u/1/#inbox")
 check("columns pad app and description", row[:18], "Gmail" + " " * 13)
 check("five spaces after the app, even the longest", t.columns("Google Sheets", "x", "u")[:18], "Google Sheets" + " " * 5)
 check("five spaces after a cut description", t.columns("", "d" * 60, "u")[18:67].endswith("…" + " " * 5), True)
-# the row after the icon: mark column, five spaces, then the columns
+# the row after the icon: mark column, ONE space, then the columns
 plain = t.row(False, "T", False)
-check("hidden tab: blank mark column then the gap", plain, " " * 3 + " " + " " * 5 + "T")
-check("active tab: dot mark", t.row(True, "T", False)[:4], "   ●")
-check("current row dimmed whole", t.row(True, "T", True), "\033[2m" + "   ●" + " " * 5 + "T" + "\033[0m")
+check("hidden tab: blank mark column then one space", plain, " " * 3 + " " + " " + "T")
+check("active tab: dot mark, one space", t.row(True, "T", False), "   ● T")
+check("current row dimmed whole", t.row(True, "T", True), "\033[2m" + "   ● T" + "\033[0m")
+check("single window: no dot, same layout", t.row(True, "T", False, show_mark=False), " " * 3 + " " + " " + "T")
 if fails:
     print("\n".join("FAIL: " + f for f in fails), file=sys.stderr)
     sys.exit(1)

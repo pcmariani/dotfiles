@@ -16,6 +16,7 @@ import re
 from urllib.parse import urlsplit
 
 AFTER_ICON = 3          # spaces between the favicon and the mark (2026-10-26, the user: two more)
+MARK_GAP = 1            # spaces between the mark and the app name (2026-10-27, the user: "only one space")
 GAP = 5                 # spaces between two columns, as in the workspace picker (2026-10-26, the user: breathing room)
 APP_WIDTH = 13          # "Google Sheets" is the longest name, 13
 DESCRIPTION_WIDTH = 44
@@ -25,7 +26,9 @@ DIM_ON = "\033[2m"
 DIM_OFF = "\033[0m"
 
 # The tab showing in its window. The same dot the workspace picker uses for
-# "has something"; blank for a hidden tab.
+# "has something"; blank for a hidden tab, and blank for every tab when the
+# workspace has only one Chrome window (2026-10-27, the user: the dot only
+# tells windows apart, so one window needs none).
 ACTIVE_MARK = "●"
 
 # (host, path prefix or "", app). Host must match exactly or be a subdomain of
@@ -97,9 +100,12 @@ def columns(app, description, url):
             f"{DIM_ON}{shorten_url(url)}{DIM_OFF}")
 
 
-def row(active, text, current):
+def row(active, text, current, show_mark=True):
     """The display after the icon request: a mark column, then `text`. The
     current tab (the one you are on, row 1) is dimmed whole, as the workspace
-    picker dims the workspace you stand in."""
-    body = f"{' ' * AFTER_ICON}{ACTIVE_MARK if active else ' '}{' ' * GAP}{text}"
+    picker dims the workspace you stand in. `show_mark` False keeps the column
+    (blank) so the text stays where it is; rank.py passes it only when the
+    tabs listed span more than one Chrome window."""
+    mark = ACTIVE_MARK if active and show_mark else " "
+    body = f"{' ' * AFTER_ICON}{mark}{' ' * MARK_GAP}{text}"
     return f"{DIM_ON}{body}{DIM_OFF}" if current else body
