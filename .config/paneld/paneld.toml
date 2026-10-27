@@ -486,7 +486,7 @@ on_empty = "/Users/petermariani/.config/context/chrome-tabs/empty-check.sh"
 [[panel]]
 name    = "scratch"
 # A small floating scratch pad: nvim on ~/scratch.md, autosaved. Summoned by
-# space-shift-s via `paneld toggle scratch`, like files/apps -- so this hotkey
+# space-x via `paneld toggle scratch`, like files/apps -- so this hotkey
 # is never pressed and is set explicitly only to avoid the f18 default.
 # scripts/scratch-command.sh says why the pad is a file and not a live nvim.
 hotkey  = "hyper-f13"

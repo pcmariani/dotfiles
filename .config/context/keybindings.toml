@@ -128,7 +128,7 @@ key = "space-shift-x"
 description = "tear down this workspace: close its windows one by one (each app's own save prompt), end its herdr session, land on the previous workspace"
 
 [[group.binding]]
-key = "space-shift-s"
+key = "space-x"
 description = "scratch pad (nvim on ~/scratch.md)"
 
 [[group.binding]]

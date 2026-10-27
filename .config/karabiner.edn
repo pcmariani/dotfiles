@@ -738,12 +738,14 @@
                  ;; user at the machine; waiting on eyes.
                  [:!Su [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle downloads"]]
 
-                 ;; THE SCRATCH PAD (2026-10-16). space-shift-s: a small
+                 ;; THE SCRATCH PAD (2026-10-16). space-x (moved from space-shift-s
+                 ;; 2026-10-27, the user; plain `x` was free in the space layer,
+                 ;; grepped; tear-down keeps space-shift-x): a small
                  ;; floating nvim on ~/scratch.md, autosaved. A paneld panel
                  ;; rather than a Neovide/TextEdit window because the panel is
                  ;; pre-armed (one frame to show) and AeroSpace never sees it.
                  ;; See scripts/scratch-command.sh. Waiting on eyes.
-                 [:!Ss [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle scratch"]]
+                 [:x [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle scratch"]]
 
                  ;; WORKSPACE TEAR-DOWN (2026-10-19). space-shift-x opens a confirm
                  ;; listing every window of THIS workspace; Enter closes them one at

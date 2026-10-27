@@ -1562,10 +1562,7 @@
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "s",
-            "modifiers" : {
-              "mandatory" : [ "left_shift" ]
-            }
+            "key_code" : "x"
           },
           "to" : [ {
             "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle scratch"
