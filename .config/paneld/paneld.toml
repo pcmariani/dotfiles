@@ -509,6 +509,11 @@ dismiss_on_blur = false
 padding_x = 8
 # cmd-minus / cmd-equal change the font size, one point a press (2026-10-27,
 # the user). Kept across hide/show until the daemon restarts, then font_size again.
+# Iosevka like Ghostty and the native panels, thickened like Ghostty.app
+# (font-thicken-strength 128): thin default strokes read as grey (the user,
+# 2026-10-27, "gray and boring").
+font_family  = "Iosevka Nerd Font Mono"
+font_thicken = 128
 font_adjustable = true
 movable = true
 
