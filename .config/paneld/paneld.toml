@@ -507,6 +507,9 @@ dismiss_on_blur = false
 # Side padding to match the top and bottom (inset 6 + padding_y 8 = 14 pt each
 # way; the sides were inset 6 + the library's 2). 2026-10-27, the user.
 padding_x = 8
+# cmd-minus / cmd-equal change the font size, one point a press (2026-10-27,
+# the user). Kept across hide/show until the daemon restarts, then font_size again.
+font_adjustable = true
 movable = true
 
 [[panel]]
