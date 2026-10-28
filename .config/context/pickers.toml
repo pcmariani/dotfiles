@@ -67,6 +67,19 @@ action = [
   # The key reaches pick-accept as `--key alt-x`, not in the data -- see
   # compose()'s keep/reload chain. A change here needs `paneld reload search`.
   { bind = "alt-x", verb = { W = "slot-clear" }, after = "reload" },
+  # SET a digit: highlight a workspace, press alt-1 .. alt-9, and `space-<n>`
+  # now enters it (a digit it already held moves; one another workspace held is
+  # taken, and the notification says from whom). One line per digit because the
+  # digit is part of the verb's name. The footer shows them as one hint.
+  { bind = "alt-1", verb = { W = "slot-set-1" }, after = "reload" },
+  { bind = "alt-2", verb = { W = "slot-set-2" }, after = "reload" },
+  { bind = "alt-3", verb = { W = "slot-set-3" }, after = "reload" },
+  { bind = "alt-4", verb = { W = "slot-set-4" }, after = "reload" },
+  { bind = "alt-5", verb = { W = "slot-set-5" }, after = "reload" },
+  { bind = "alt-6", verb = { W = "slot-set-6" }, after = "reload" },
+  { bind = "alt-7", verb = { W = "slot-set-7" }, after = "reload" },
+  { bind = "alt-8", verb = { W = "slot-set-8" }, after = "reload" },
+  { bind = "alt-9", verb = { W = "slot-set-9" }, after = "reload" },
   # CREATE A TEMP WORKSPACE from what you typed, and go there. Type a name that
   # matches nothing and press ctrl-t; a name that already resolves is entered
   # instead of shadowed, so the key is safe to press by reflex. compose() puts
