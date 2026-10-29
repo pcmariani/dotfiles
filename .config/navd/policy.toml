@@ -7,7 +7,7 @@
 [catcher]
 # Register the chords as Carbon hotkeys. false = the daemon runs but Karabiner
 # stays the catcher (the dark-launch state).
-enabled = false
+enabled = true
 
 [chords]
 # Modifier for h/j/k/l, matched exactly: "ctrl" or "alt".
@@ -48,7 +48,7 @@ refresh_interval_ms = 2000
 [timeouts]
 # Deadlines in milliseconds.
 # AeroSpace request (socket or CLI).
-aerospace_ms = 300
+aerospace_ms = 800
 # `herdr session list` probe; on timeout the key passes through.
 herdr_probe_ms = 300
 # Client connecting to the daemon socket; failure falls back to AeroSpace.
