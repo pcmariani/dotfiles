@@ -15,11 +15,17 @@
 # THE NVIM HALF IS NOT HERE. A pane running nvim gets the chord forwarded into
 # it, and herdr-splits.nvim owns everything from there -- including the hop to
 # AeroSpace, via the `at_edge` hook in ~/.config/nvim/plugin/herdr-splits-nvim.lua,
-# which calls ~/.config/nvim/lua/config/aerospace-edge.lua (the one nvim definition of
-# the flags, shared with Neovide's ctrl-hjkl in lua/config/neovide-nav.lua). Both
-# halves are required: nvim's
+# which calls ~/.config/nvim/lua/config/aerospace-edge.lua (shared with Neovide's
+# ctrl-hjkl in lua/config/neovide-nav.lua). Both halves are required: nvim's
 # plugin calls `herdr pane focus` DIRECTLY (herdr.lua:110) and never returns
 # through this script, so a herdr-only fix would leave nvim panes wrapping.
+#
+# THE WINDOW HALF IS `navd focus <dir>`. What happens at the edge of a workspace
+# (which directions cross onto the next monitor, that "no window that way" is a
+# no-op and never a wrap) is decided in ONE place, ~/.config/navd/policy.toml,
+# and every caller (this script, nvim's hook, Neovide, the Karabiner rule) asks
+# navd instead of carrying its own copy of the AeroSpace flags. `navd focus`
+# works with no daemon running: it falls back to a direct AeroSpace call.
 #
 # Usage: nav-fallthrough.sh <left|down|up|right>
 
@@ -28,7 +34,7 @@ set -u
 dir="${1:?usage: nav-fallthrough.sh <left|down|up|right>}"
 
 HERDR="${HERDR_BIN_PATH:-/opt/homebrew/bin/herdr}"
-AEROSPACE="/opt/homebrew/bin/aerospace"
+NAVD="${NAVD_BIN:-/Users/petermariani/.local/bin/navd}"  # NAVD_BIN: tests only
 
 # Must match nav_key_* in the plugin's generated herdr-splits.conf, because
 # these are forwarded to nvim and its plugin matches on the chord it receives.
@@ -40,23 +46,6 @@ case "$dir" in
     *) echo "nav-fallthrough.sh: unknown direction: $dir" >&2; exit 2 ;;
 esac
 
-# j/k CROSS THE MONITOR BOUNDARY, h/l DELIBERATELY DO NOT. Added 2026-09-11 to
-# match space-hjkl and the ctrl-hjkl rule in ~/.config/karabiner.edn, which
-# this script has to agree with: the reported symptom was "space-j focuses a
-# window below even if it is on another workspace on another monitor, but
-# ctrl-j does not". Directional `focus` defaults --boundaries to `workspace`,
-# so without this flag the hand-off stopped at the workspace edge. The monitors
-# are stacked vertically, so only up/down ever needs to leave the workspace.
-#
-# A PLAIN STRING, EXPANDED UNQUOTED, and not an array: the shebang is
-# /bin/bash, which on macOS is 3.2, where "${arr[@]}" on an EMPTY array under
-# `set -u` aborts with "unbound variable". The word splitting here is the point
-# and is safe because the value is a fixed literal with no input in it.
-case "$dir" in
-    down|up) BOUNDS="--boundaries all-monitors-outer-frame" ;;
-    *)       BOUNDS="" ;;
-esac
-
 # HERDR_ACTIVE_PANE_ID, not `--current`. A keybind's shell command does NOT run
 # inside a pane, so it gets no HERDR_PANE_ID and `--current` cannot resolve.
 # Herdr injects HERDR_ACTIVE_PANE_ID for exactly this case (see the custom
@@ -66,7 +55,7 @@ PANE="${HERDR_ACTIVE_PANE_ID:-}"
 # No pane to reason about -- go straight out to the window manager rather than
 # doing nothing.
 if [ -z "$PANE" ]; then
-    exec "$AEROSPACE" focus $BOUNDS --boundaries-action fail "$dir"
+    exec "$NAVD" focus "$dir"
 fi
 
 # A pane running vim/nvim owns its own navigation. Forward the chord and stop:
@@ -96,8 +85,8 @@ fi
 # and the symptom is leaving herdr when you meant to move inside it.
 if printf '%s' "$edges" | grep -q "\"$dir\":true"; then
     # At the herdr edge. Hand off to the window manager; if there is no window
-    # that way either, `fail` makes it a no-op rather than a wrap.
-    exec "$AEROSPACE" focus $BOUNDS --boundaries-action fail "$dir"
+    # that way either, navd makes it a no-op rather than a wrap.
+    exec "$NAVD" focus "$dir"
 fi
 
 exec "$HERDR" pane focus --direction "$dir" --pane "$PANE"

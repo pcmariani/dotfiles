@@ -1,0 +1,57 @@
+# navd policy. Copy to ~/.config/navd/policy.toml (or point NAVD_POLICY at it).
+# Every key is shown at its default. A missing file, an empty file and this
+# file all behave the same. An unknown key, a wrong type or a bad value makes
+# the whole file invalid: `navd check` reports it and the daemon ignores the
+# file (logging why) and runs on the defaults.
+
+[catcher]
+# Register the chords as Carbon hotkeys. false = the daemon runs but Karabiner
+# stays the catcher (the dark-launch state).
+enabled = false
+
+[chords]
+# Modifier for h/j/k/l, matched exactly: "ctrl" or "alt".
+modifier = "ctrl"
+
+[boundaries]
+# What happens at the edge of the focused workspace, per direction.
+# "workspace" stops at the workspace edge; "all-monitors-outer-frame" continues
+# onto the neighbouring monitor. Never wraps.
+left = "workspace"
+right = "workspace"
+down = "all-monitors-outer-frame"
+up = "all-monitors-outer-frame"
+
+[aerospace]
+# CLI used when the socket is missing, slow, or answers another version.
+bin = "/opt/homebrew/bin/aerospace"
+# serverVersionAndHash the wire client accepts; anything else uses the CLI.
+expected_server = "0.21.3-Beta d56e1637c3a1ed660d0cadd7534e94fb3218d1c3"
+
+[herdr]
+# Used to ask `herdr session list --json` whether a workspace has a session.
+bin = "/opt/homebrew/bin/herdr"
+
+[gate]
+# Bundle ids where the chords are passed through untouched.
+exclude_apps = []
+# Apps with their own ctrl-hjkl mapping (Neovide's nvim).
+inner_nav_apps = ["com.neovide.neovide"]
+# Terminals that pass the chords through while their workspace has a running
+# herdr session (herdr navigates inside, then hands off).
+herdr_hosted_apps = ["com.mitchellh.ghostty"]
+
+[daemon]
+# How often the daemon re-reads herdr session state, in milliseconds.
+refresh_interval_ms = 2000
+
+[timeouts]
+# Deadlines in milliseconds.
+# AeroSpace request (socket or CLI).
+aerospace_ms = 300
+# `herdr session list` probe; on timeout the key passes through.
+herdr_probe_ms = 300
+# Client connecting to the daemon socket; failure falls back to AeroSpace.
+client_connect_ms = 100
+# Client waiting for the daemon's reply; no fallback (avoids a double move).
+client_reply_ms = 400
