@@ -61,6 +61,9 @@
              ;; the picker's launch path.
              :run "%s"
              :aerospace "/opt/homebrew/bin/aerospace %s"
+             ;; navd's client: `navd focus <dir>` asks the daemon, or calls AeroSpace
+             ;; itself when no daemon answers. Absolute path, like the others.
+             :navd "/Users/petermariani/.local/bin/navd %s"
              ;; Absolute path for the same reason as :run above — a hotkey gets
              ;; PATH=/usr/bin:/bin:/usr/sbin:/sbin, where python3 is 3.9 and has
              ;; no tomllib. bin/context re-execs the right interpreter itself.
@@ -205,32 +208,20 @@
         ;; above). Right control is deliberately unhandled, matching how the
         ;; switcher leaves right command to the Dock.
         ;;
-        ;; `--boundaries-action fail` makes "no window that way" a silent
-        ;; no-op instead of a wrap, so a direction key never sends you
-        ;; backwards -- the same rule the other two layers follow.
-        ;; j/k CROSS THE MONITOR BOUNDARY, h/l DELIBERATELY DO NOT, matching
-        ;; space-hjkl below. Added 2026-09-11: the two disagreed, and the
-        ;; symptom the user reported was "space-j focuses a window below even
-        ;; if it is on another workspace on another monitor, but ctrl-j does
-        ;; not". Directional `focus` defaults `--boundaries` to `workspace`, so
-        ;; without the flag ctrl-j stops at the workspace edge. The monitors
-        ;; are stacked vertically (1 = LG HDR WQHD above 2 = Built-in Retina),
-        ;; so only up/down ever needs to leave the workspace -- putting the
-        ;; flag on h/l too would let a sideways press jump monitors wherever
-        ;; the frames overlap.
-        ;;
-        ;; THE SAME CHANGE IS NEEDED IN TWO MORE PLACES, because this rule is
-        ;; off inside terminals: ~/.config/herdr/nav-fallthrough.sh and, for nvim
-        ;; (the herdr plugin's `at_edge` hook AND Neovide's own mapping), the one
-        ;; shared definition in ~/.config/nvim/lua/config/aerospace-edge.lua.
-        ;; All three must agree or ctrl-j behaves differently depending on
-        ;; which app happens to hold focus.
+        ;; The window move itself is `navd focus <dir>`: which directions cross onto
+        ;; the next monitor, and that "no window that way" is a silent no-op and never
+        ;; a wrap, are decided in ONE place, ~/.config/navd/policy.toml. The other
+        ;; callers (~/.config/herdr/nav-fallthrough.sh and nvim's
+        ;; ~/.config/nvim/lua/config/aerospace-edge.lua) ask navd too, so ctrl-j
+        ;; behaves the same whichever app holds focus. Before 2026-10-29 each carried
+        ;; its own copy of the flags and they had to be kept in agreement by hand.
+        ;; tests/test_nav_flags_single_source.py fails if a flag creeps back.
         {
          :des "ctrl-hjkl navigates windows outside the terminal"
-         :rules [[:!Th [:aerospace "focus --boundaries-action fail left"]  [:!terminals]]
-                 [:!Tj [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action fail down"]  [:!terminals]]
-                 [:!Tk [:aerospace "focus --boundaries all-monitors-outer-frame --boundaries-action fail up"]    [:!terminals]]
-                 [:!Tl [:aerospace "focus --boundaries-action fail right"] [:!terminals]]]
+         :rules [[:!Th [:navd "focus left"]  [:!terminals :!navd_catching]]
+                 [:!Tj [:navd "focus down"]  [:!terminals :!navd_catching]]
+                 [:!Tk [:navd "focus up"]    [:!terminals :!navd_catching]]
+                 [:!Tl [:navd "focus right"] [:!terminals :!navd_catching]]]
          }
 
         ;; WINDOW POSITION, 2026-10-19. ctrl-hjkl = navigate (above); ctrl-SHIFT-hjkl

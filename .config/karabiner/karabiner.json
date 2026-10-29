@@ -112,11 +112,15 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries-action fail left"
+            "shell_command" : "/Users/petermariani/.local/bin/navd focus left"
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_unless",
             "bundle_identifiers" : [ "^com\\.mitchellh\\.ghostty$", "^com\\.neovide\\.neovide$" ]
+          }, {
+            "name" : "navd_catching",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
@@ -127,11 +131,15 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries all-monitors-outer-frame --boundaries-action fail down"
+            "shell_command" : "/Users/petermariani/.local/bin/navd focus down"
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_unless",
             "bundle_identifiers" : [ "^com\\.mitchellh\\.ghostty$", "^com\\.neovide\\.neovide$" ]
+          }, {
+            "name" : "navd_catching",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
@@ -142,11 +150,15 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries all-monitors-outer-frame --boundaries-action fail up"
+            "shell_command" : "/Users/petermariani/.local/bin/navd focus up"
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_unless",
             "bundle_identifiers" : [ "^com\\.mitchellh\\.ghostty$", "^com\\.neovide\\.neovide$" ]
+          }, {
+            "name" : "navd_catching",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         }, {
@@ -157,11 +169,15 @@
             }
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/aerospace focus --boundaries-action fail right"
+            "shell_command" : "/Users/petermariani/.local/bin/navd focus right"
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_unless",
             "bundle_identifiers" : [ "^com\\.mitchellh\\.ghostty$", "^com\\.neovide\\.neovide$" ]
+          }, {
+            "name" : "navd_catching",
+            "value" : 1,
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         } ]
