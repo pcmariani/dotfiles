@@ -19,6 +19,7 @@ set -u
 : "${CHROME_TABS_STATE:=$HOME/.local/state/context/chrome-tabs}"
 : "${AEROSPACE:=/opt/homebrew/bin/aerospace}"
 : "${HS_BIN:=/opt/homebrew/bin/hs}"
+: "${CONTEXT_BIN:=$HOME/.local/bin/context}"
 : "${OSASCRIPT_BIN:=/usr/bin/osascript}"   # tests stub the front-window query
 : "${TIMEOUT_BIN:=/opt/homebrew/bin/timeout}"
 : "${GUARD_ARMED:=0}"          # 0 = observe/dry-run only, 1 = real corrections
@@ -226,10 +227,38 @@ run_correction() {
     fi
     (
         trap '/bin/rmdir "'"$LOCKDIR"'" 2>/dev/null' EXIT
-        "$TIMEOUT_BIN" 5 "$HS_BIN" -c "correctChromeSteal('$prev_ws')" \
-            >> "$DBG" 2>&1
+        do_correction "$prev_ws"
     ) &
     disown
+}
+
+# The correction itself, synchronous so a test can call it. First try to move
+# the stolen tab into the Chrome window the user's own workspace already has
+# (`context chrome-reclaim`, no new window, history kept); only when that
+# refuses, break the tab out into a new window as before (cbm-002: a link
+# clicked in Slack made a separate window although one existed). Exit 17 means
+# the tab MAY have moved and 124 is the timeout: doing the break-out then could
+# act twice, so neither does anything more. A missing `context` is exit 127 and
+# so falls back, which keeps today's behavior the worst case.
+do_correction() {
+    local prev_ws="$1" rc
+    "$TIMEOUT_BIN" 8 "$CONTEXT_BIN" chrome-reclaim --workspace "$prev_ws" \
+        >> "$DBG" 2>&1
+    rc=$?
+    case "$rc" in
+        0)
+            dbg "RECLAIMED the tab into the Chrome window of workspace=$prev_ws"
+            "$AEROSPACE" workspace "$prev_ws" >> "$DBG" 2>&1
+            ;;
+        17|124)
+            dbg "reclaim outcome unknown (exit $rc), not breaking the tab out"
+            ;;
+        *)
+            dbg "reclaim refused (exit $rc), breaking the tab out instead"
+            "$TIMEOUT_BIN" 5 "$HS_BIN" -c "correctChromeSteal('$prev_ws')" \
+                >> "$DBG" 2>&1
+            ;;
+    esac
 }
 
 main() {
