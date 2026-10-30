@@ -8,7 +8,7 @@
 # used to live here. The `workspaces` picker itself is not gone: the
 # search/"everything" picker (space-e) already covers workspaces, and `move`
 # below still composes the same picker with `--default move`.
-# 2026-10-30 (cbm-040): Menlo on every switcher and the picker (`search`) so they match; needs a daemon restart. Was Iosevka Nerd Font Mono 18, line 1.2 (the default). The user tried 16 at 1.5 ("let's try menlo 16 with 1.5 spacing"), found it too small, and asked for 18 at 1.8.
+# 2026-10-30 (cbm-040): Menlo on every switcher and the picker (`search`) so they match; needs a daemon restart. Was Iosevka Nerd Font Mono 18, line 1.2 (the default). The user tried 16 at 1.5 ("let's try menlo 16 with 1.5 spacing"), found it too small, then 18 at 1.8 too, and asked for 20 at 1.8.
 [[panel]]
 name    = "move"
 # opt-esc as of 2026-09-28 (the user's own request: cmd is the switch
@@ -48,7 +48,7 @@ refresh_on_focus = true
 refresh_on_agents = true
 hold    = "opt"
 font    = "Menlo"
-font_size = 18
+font_size = 20
 line_height = 1.8
 # PINNED TO THE LG, 2026-09-16 (same mechanism the retired `picker` panel
 # used, and `switcher` below still uses).
@@ -84,14 +84,14 @@ refresh_on_focus = true
 refresh_on_agents = true
 hold    = "opt"
 font    = "Menlo"
-font_size = 18
+font_size = 20
 line_height = 1.8
 screen  = "LG HDR WQHD"
 reveal_delay_ms = 50
 [[panel]]
 name    = "search"
 font_family = "Menlo"
-font_size = 18
+font_size = 20
 line_height = 1.8
 # One list of workspaces, files and apps, dispatched by row kind (Spec I, the
 # sibling's docs/superpowers/specs/2026-09-19-unified-search-picker-design.md).
@@ -247,7 +247,7 @@ cycle          = true
 # `paneld reload switcher` -- see the `windows` panel's comment on
 # reveal_delay_ms for the same distinction (font_size/inset/line_height
 # vs. everything read live off the config).
-font_size      = 18
+font_size      = 20
 line_height = 1.8
 # Same pin as `move` -- see its comment for the mechanism. cmd-tab is the one
 # pressed most by reflex and least by reading, so a fixed location matters
@@ -347,7 +347,7 @@ commit         = "/opt/homebrew/bin/aerospace focus --window-id {key}"
 live_rows      = true
 hold           = "cmd"
 font           = "Menlo"
-font_size      = 18
+font_size      = 20
 line_height = 1.8
 # PINNED TO THE LG, 2026-09-28 -- the user's own explicit override of this
 # panel's original design (it used to deliberately follow keyboard focus,
@@ -468,7 +468,7 @@ commit    = "/Users/petermariani/.config/context/chrome-tabs/activate-one.sh {ke
 live_rows = true
 hold      = "cmd"
 font      = "Menlo"
-font_size = 18
+font_size = 20
 line_height = 1.8
 # PINNED TO THE LG, 2026-09-28 -- the user's own explicit override, same
 # reasoning as `windows` above (this panel matches its design one tier
