@@ -338,11 +338,18 @@
                    :afterup {:set ["space-mode" 0]}}]
 
                  ;cmd-space-mode
-                 ; note: :modi re-emits the command so a tap still reaches
-                 ; Spotlight. Beware :modifiers, which goku silently drops.
+                 ; A cmd-space TAP opens the unified search picker (paneld toggle
+                 ; search), replacing Spotlight (2026-11-02, was space-e). Nothing
+                 ; re-emits cmd-space, so Spotlight never sees it. Both the tap
+                 ; and the roll case (another key within the delay) run it, as
+                 ; both used to send cmd-space. Undo: put back
+                 ;   {:alone {:key :spacebar :modi :left_command :halt true}
+                 ;    :delayed {:canceled {:key :spacebar :modi :left_command}}
+                 ; (:modi re-emits the command; beware :modifiers, which goku
+                 ; silently drops.)
                  [:!Cspacebar nil [:!a-mode :!d-mode :!f-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
-                  {:alone {:key :spacebar :modi :left_command :halt true}
-                   :delayed {:canceled {:key :spacebar :modi :left_command}}
+                  {:alone [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"]
+                   :delayed {:canceled [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"]}
                    :held {:set ["cmd-space-mode" 1] :repeat false}
                    :afterup {:set ["cmd-space-mode" 0]}}]
                  ]
@@ -426,7 +433,7 @@
                  ;; cmd-tab, space-shift-f and space-shift-a are untouched.
                  ;; Written with the user at the keyboard but unseen; the door
                  ;; and the kind glyphs (· file, ⌘ app) are the user's call.
-                 [:e [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"]]
+                 ;; space-e MOVED to cmd-space 2026-11-02 (see the cmd-space rule below); `e` is free.
                  ;; `c` IS FREE AGAIN. The chrome-tabs picker (space-c,
                  ;; 2026-09-25 morning) was replaced the same day by a real
                  ;; control-tab switcher -- see the "workspace switcher"

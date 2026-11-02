@@ -636,9 +636,7 @@
           "type" : "basic"
         }, {
           "to_if_alone" : [ {
-            "modifiers" : [ "left_command" ],
-            "key_code" : "spacebar",
-            "halt" : true
+            "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"
           } ],
           "to_if_held_down" : [ {
             "set_variable" : {
@@ -655,8 +653,7 @@
           } ],
           "to_delayed_action" : {
             "to_if_canceled" : [ {
-              "modifiers" : [ "left_command" ],
-              "key_code" : "spacebar"
+              "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"
             } ]
           },
           "from" : {
@@ -816,19 +813,6 @@
           },
           "to" : [ {
             "shell_command" : "/Users/petermariani/projects/context-based-mac/bin/context --notify attention"
-          } ],
-          "conditions" : [ {
-            "name" : "space-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "e"
-          },
-          "to" : [ {
-            "shell_command" : "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"
           } ],
           "conditions" : [ {
             "name" : "space-mode",
