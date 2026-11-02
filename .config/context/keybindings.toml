@@ -34,11 +34,11 @@ key = "space-shift-1..9"
 description = "point this slot digit at the current workspace"
 
 [[group.binding]]
-key = "alt-x (in space-e)"
+key = "alt-x (in cmd-space)"
 description = "unpin the highlighted workspace's slot digit"
 
 [[group.binding]]
-key = "ctrl-t (in space-e)"
+key = "ctrl-t (in cmd-space)"
 description = "create a temp workspace named after what you typed (a name that exists is entered instead)"
 
 [[group.binding]]
@@ -116,7 +116,7 @@ description = "move the focused window to workspace work/ai/browser/personal"
 name = "Pickers"
 
 [[group.binding]]
-key = "space-e"
+key = "cmd-space"
 description = "search: every workspace, every file under this root, every app"
 
 [[group.binding]]
