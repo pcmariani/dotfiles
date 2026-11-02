@@ -347,9 +347,12 @@
                  ;    :delayed {:canceled {:key :spacebar :modi :left_command}}
                  ; (:modi re-emits the command; beware :modifiers, which goku
                  ; silently drops.)
+                 ; If paneld is not running `paneld toggle` exits 1 (measured:
+                 ; "paneld is not running"), and Spotlight opens instead. A WEDGED
+                 ; daemon that never answers would still hang the toggle.
                  [:!Cspacebar nil [:!a-mode :!d-mode :!f-mode :!s-mode :!v-mode :!space-mode :!cmd-space-mode]
-                  {:alone [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"]
-                   :delayed {:canceled [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search"]}
+                  {:alone [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search || /usr/bin/open -a Spotlight"]
+                   :delayed {:canceled [:run "/Users/petermariani/Applications/paneld.app/Contents/MacOS/paneld toggle search || /usr/bin/open -a Spotlight"]}
                    :held {:set ["cmd-space-mode" 1] :repeat false}
                    :afterup {:set ["cmd-space-mode" 0]}}]
                  ]
