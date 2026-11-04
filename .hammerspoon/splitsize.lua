@@ -73,6 +73,34 @@ function M.targetWidth(pct, span)
   return math.floor(span * pct / 100 + 0.5)
 end
 
+-- Pure (cbm-055, a startup `window` step). `row` is { {id=, x=, w=}, ... }
+-- (as readRow builds it), `id` a window id string, `pct` a share from 1 to 99.
+-- Returns the pixel width that makes that window `pct` percent of the row's
+-- span (leftmost edge to rightmost edge, so it is the same arithmetic for two
+-- windows or three) and the span; nil when there is nothing to split (fewer
+-- than two windows), the window is not in the row, or `pct` is not a share.
+function M.rowTarget(row, id, pct)
+  if type(pct) ~= "number" or pct < 1 or pct > 99 then
+    return nil
+  end
+  if #row < 2 then
+    return nil
+  end
+  local left, right, found = math.huge, -math.huge, false
+  for _, win in ipairs(row) do
+    left = math.min(left, win.x)
+    right = math.max(right, win.x + win.w)
+    if win.id == id then
+      found = true
+    end
+  end
+  if not found then
+    return nil
+  end
+  local span = right - left
+  return M.targetWidth(pct, span), span
+end
+
 -- ---------------------------------------------------------------------------
 -- Everything below needs Hammerspoon.
 -- ---------------------------------------------------------------------------
@@ -182,6 +210,91 @@ function M.step(direction)
     say(string.format("split: %d%%", reachedRounded))
   end
   return true, reached
+end
+
+-- A startup `window` step (cbm-055, run by `context startup` through
+-- `hs -c 'return require("splitsize").setWidth(<id>, <pct>)'`): make window
+-- `windowId` take `pct` percent of its row. Unlike `step` it works on ANY
+-- window by id, not the focused one, finds that window's workspace itself (so
+-- no workspace name is ever put into Lua by the caller), and is SILENT: no
+-- alerts, because nobody pressed a key. Never sets a frame. Returns the share
+-- of the row actually reached, in percent, or nil plus a message.
+--
+-- The window's workspace must be on screen: a hidden workspace's windows report
+-- a parked frame, so the span would be nonsense.
+function M.setWidth(windowId, pct)
+  if type(windowId) ~= "number" or windowId ~= math.floor(windowId) or windowId < 0 then
+    return nil, "setWidth: the window id must be a whole number"
+  end
+  if type(pct) ~= "number" or pct < 1 or pct > 99 then
+    return nil, "setWidth: the share must be from 1 to 99"
+  end
+  local id = string.format("%d", windowId)
+
+  local listOk, listing = aerospace(
+    "list-windows --all --format '%{window-id}|%{workspace}|%{window-layout}'")
+  if not listOk then
+    return nil, "setWidth: aerospace failed: " .. listing:gsub("%s+$", "")
+  end
+  local windows, workspace, layout = {}, nil, nil
+  for wid, ws, lay in listing:gmatch("(%d+)|([^|\n]+)|([^\n]+)") do
+    windows[#windows + 1] = { id = wid, ws = ws, layout = lay }
+    if wid == id then
+      workspace, layout = ws, lay
+    end
+  end
+  if not workspace then
+    return nil, "setWidth: window " .. id .. " not found"
+  end
+  if layout ~= "h_tiles" then
+    return nil, "setWidth: window " .. id .. " is not in a horizontal tiled row (" .. layout .. ")"
+  end
+
+  local visOk, visible = aerospace("list-workspaces --monitor all --visible --format '%{workspace}'")
+  local onScreen = false
+  if visOk then
+    for name in visible:gmatch("[^\n]+") do
+      if name == workspace then
+        onScreen = true
+      end
+    end
+  end
+  if not onScreen then
+    return nil, "setWidth: workspace " .. workspace .. " is not on screen"
+  end
+
+  local function readFrames()
+    local row = {}
+    for _, w in ipairs(windows) do
+      if w.ws == workspace and w.layout == "h_tiles" then
+        local win = hs.window(tonumber(w.id))
+        if win then
+          local f = win:frame()
+          row[#row + 1] = { id = w.id, x = f.x, w = f.w }
+        end
+      end
+    end
+    return row
+  end
+
+  local target = M.rowTarget(readFrames(), id, pct)
+  if not target then
+    return nil, "setWidth: nothing to split, or the window has no frame"
+  end
+  local ok, out = aerospace(string.format("resize width %d --window-id %s", target, id))
+  if not ok then
+    return nil, "setWidth: resize failed: " .. out:gsub("%s+$", "")
+  end
+
+  -- AeroSpace applies the width asynchronously; read the real result back.
+  hs.timer.usleep(200000)
+  local after = readFrames()
+  for _, win in ipairs(after) do
+    if win.id == id then
+      return (share(after, id))
+    end
+  end
+  return nil, "setWidth: the window vanished after the resize"
 end
 
 return M

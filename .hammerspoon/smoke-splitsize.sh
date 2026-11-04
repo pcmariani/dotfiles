@@ -59,5 +59,32 @@ eq("75% of 1436px = 1077", m.targetWidth(75, 1436), 1077)
 eq("50% of 3000px = 1500", m.targetWidth(50, 3000), 1500)
 eq("33% of 3000px = 990", m.targetWidth(33, 3000), 990)
 
+-- rowTarget (cbm-055): the pixel width that makes window `id` pct percent of
+-- its row's span (leftmost edge to rightmost edge), and that span. Rows are
+-- { {id=, x=, w=}, ... } as readRow builds them.
+local two = { { id = "1", x = 0, w = 1700 }, { id = "2", x = 1700, w = 1732 } }
+local target, span = m.rowTarget(two, "1", 40)
+eq("two windows, 40% of a 3432px span = 1373", target, 1373)
+eq("two windows span 3432px", span, 3432)
+-- three windows, not in screen order, the span starts at the leftmost edge
+-- (100) and ends at the rightmost (2100 + 1332 = 3432): 3332px, 50% = 1666
+local three = {
+  { id = "c", x = 2100, w = 1332 },
+  { id = "a", x = 100, w = 1000 },
+  { id = "b", x = 1100, w = 1000 },
+}
+target, span = m.rowTarget(three, "b", 50)
+eq("three windows, 50% of a 3332px span = 1666", target, 1666)
+eq("three windows span 3332px", span, 3332)
+eq("a one-window row has nothing to split", m.rowTarget({ { id = "1", x = 0, w = 3432 } }, "1", 40), nil)
+eq("an empty row has nothing to split", m.rowTarget({}, "1", 40), nil)
+eq("a window that is not in the row", m.rowTarget(two, "9", 40), nil)
+eq("0% is refused", m.rowTarget(two, "1", 0), nil)
+eq("100% is refused", m.rowTarget(two, "1", 100), nil)
+eq("a percent that is not a number is refused", m.rowTarget(two, "1", "40"), nil)
+eq("1% is the smallest share", m.rowTarget(two, "1", 1), 34)
+eq("99% is the largest share", m.rowTarget(two, "1", 99), 3398)
+eq("setWidth exists", type(m.setWidth), "function")
+
 io.write(string.format("\nall %d checks passed\n", pass))
 EOF
