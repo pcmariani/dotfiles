@@ -154,6 +154,10 @@ hold           = "cmd"
 # `fzf --filter` (morph_fzf, default /opt/homebrew/bin/fzf) matches it.
 morph          = "cmd-q"
 morph_rows     = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source search"
+# The footer of the native panel (cbm-061): the switcher's real keys. cmd-tab
+# steps, q is the morph above, Escape cancels. paneld refuses to load a hint
+# that names a key the panel lacks (a one-letter key must be the morph's).
+hints          = "tab Next|q Search|esc Cancel"
 font           = "Menlo"
 # cmd-tab, taken from the Dock by karabiner.edn and rewritten to cmd-f18.
 # The `to` binding KEEPS cmd deliberately: release-to-commit depends on the
