@@ -101,17 +101,19 @@ def _cap(text):
     return text if len(text) <= CAP else text[: CAP - 1] + "…"
 
 
-_SEPARATORS = (" - ", " – ", " — ")
+_SEPARATORS = (" - ", " – ", " — ", ": ")
 
 
 def split_title(title):
-    """(main, sub): the title cut at its first spaced hyphen, en dash or em dash
-    (2026-11-05, the user: "a main title and a sub title in grey"). No separator,
-    or nothing on one side of it, leaves the whole title as the main."""
-    found = [i for i in (title.find(sep) for sep in _SEPARATORS) if i >= 0]
+    """(main, sub): the title cut at its first spaced hyphen, en dash or em dash,
+    or its first colon followed by a blank (2026-11-05, the user: "a main title and
+    a sub title in grey", then "just ':' for now"; a colon with no blank after it
+    is a time or a url). No separator, or nothing on one side of it, leaves the
+    whole title as the main."""
+    found = [(i, len(sep)) for sep in _SEPARATORS for i in [title.find(sep)] if i >= 0]
     if found:
-        at = min(found)
-        main, sub = title[:at].strip(), title[at + 3:].strip()
+        at, width = min(found)
+        main, sub = title[:at].strip(), title[at + width:].strip()
         if main and sub:
             return main, sub
     return title.strip(), ""
