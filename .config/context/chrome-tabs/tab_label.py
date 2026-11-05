@@ -116,7 +116,14 @@ def _boomi_split(title):
     """Boomi platform tabs read `<account> - <page> - Boomi Enterprise Platform`:
     the page (everything between the first and last dash) is the main title, the
     account and the product the sub (2026-11-05, the user, a Boomi developer).
-    None when the title has fewer than three parts or an empty one."""
+    None when the title has fewer than three parts or an empty one.
+
+    A title boomi-title.user.js already rewrote reads `<page> — <account>` (an em
+    dash): the last em dash divides it, the page keeps any dash of its own."""
+    if " — " in title:
+        page, _, account = title.rpartition(" — ")
+        if page.strip() and account.strip():
+            return page.strip(), account.strip()
     parts = _DASH.split(title)
     if len(parts) < 3 or not all(p.strip() for p in parts):
         return None
