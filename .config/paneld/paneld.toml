@@ -130,7 +130,9 @@ name    = "switcher"
 # that fzf panel and are kept for the history of WHY the chord and release work
 # the way they do; the notes on arm/reveal/f12 no longer apply.
 native         = "list"
-producer       = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --cached"
+# --app-icons (2026-11-04, cbm-059): no app names in the last column, a blank
+# slot paneld draws one icon per window in. Remove the flag to get the names back.
+producer       = "/Users/petermariani/projects/context-based-mac/scripts/picker-rows.sh --live --cached --app-icons"
 # The agent-status glyphs live in a cache file that only the workspace hook
 # rewrote; the fzf panel refreshed it at every reveal, so this does too (about
 # 0.4 s, in the background; the panel redraws when it lands). 2026-10-21.
