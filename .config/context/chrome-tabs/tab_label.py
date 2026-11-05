@@ -118,7 +118,7 @@ def _boomi_split(title):
     account and the product the sub (2026-11-05, the user, a Boomi developer).
     None when the title has fewer than three parts or an empty one.
 
-    A title boomi-title.user.js already rewrote reads `<page> — <account>` (an em
+    A title the bridge extension's boomi-title.js already rewrote reads `<page> — <account>` (an em
     dash): the last em dash divides it, the page keeps any dash of its own."""
     if " — " in title:
         page, _, account = title.rpartition(" — ")
