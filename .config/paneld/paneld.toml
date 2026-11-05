@@ -156,10 +156,14 @@ hold           = "cmd"
 # cmd-tab then q (cbm-058): cancels the switcher and opens the native search
 # panel, which keeps focus after cmd is released. Held only while this cycle is
 # open, so cmd-q is macOS Quit again as soon as the switcher closes. Remove the
-# morph lines to drop it. morph_rows is the search picker's own producer;
-# `fzf --filter` (morph_fzf, default /opt/homebrew/bin/fzf) matches it.
+# morph lines to drop it. morph_rows is the search picker's own producer; paneld's
+# own matcher ranks it (cbm-063, search in place: the panel opens over the switcher,
+# the list changes only when you type). Enter pipes the chosen row to morph_accept,
+# the picker's own verb table (workspace, file, app); morph_hints is the footer.
 morph          = "cmd-q"
 morph_rows     = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source search"
+morph_accept   = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept search --key enter"
+morph_hints    = "↑↓ Move|⏎ Open|esc Back"
 # The footer of the native panel (cbm-061): the switcher's real keys. cmd-tab
 # steps, q is the morph above, Escape cancels. paneld refuses to load a hint
 # that names a key the panel lacks (a one-letter key must be the morph's).
