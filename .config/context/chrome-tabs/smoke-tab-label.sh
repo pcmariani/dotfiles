@@ -62,6 +62,17 @@ check("a url colon is not a separator", t.split_title("https://example.com/a"), 
 check("the earliest of colon and dash wins", t.split_title("Docs: A - B"), ("Docs", "A - B"))
 check("a dash before a colon wins", t.split_title("A - B: C"), ("A", "B: C"))
 check("a trailing colon is no split", t.split_title("Inbox:"), ("Inbox:", ""))
+# Boomi platform tabs read "<account> - <page> - Boomi Enterprise Platform": the page
+# is the main title, the account and the product the sub (2026-11-05, the user, a Boomi developer)
+BP = "https://platform.boomi.com/AtomSphere.html#build"
+check("boomi: the middle is the main", t.split_title("CSC Sugar, LLC - Process Reporting - Boomi Enterprise Platform", BP), ("Process Reporting", "CSC Sugar, LLC - Boomi Enterprise Platform"))
+check("boomi: several middle segments stay together", t.split_title("CSC Sugar, LLC - Settings - User Management - Boomi Enterprise Platform", BP), ("Settings - User Management", "CSC Sugar, LLC - Boomi Enterprise Platform"))
+check("boomi: a subdomain host counts", t.split_title("A - B - C", "https://us.platform.boomi.com/x"), ("B", "A - C"))
+check("boomi: two segments fall back to the plain split", t.split_title("Build - Boomi Enterprise Platform", BP), ("Build", "Boomi Enterprise Platform"))
+check("not boomi: three segments split at the first dash", t.split_title("A - B - C", "https://example.com/"), ("A", "B - C"))
+check("not boomi: a lookalike host does not count", t.split_title("A - B - C", "https://notplatform.boomi.com.evil.example/"), ("A", "B - C"))
+check("boomi: an empty middle falls back to the plain split", t.split_title("A -  - C", BP), ("A", "- C"))
+check("boomi columns use the rule", t.columns("", "A - B - C", BP)[:19], "B" + " " * 17 + "A")
 check("a hyphen inside a word is not a separator", t.split_title("Check-in notes"), ("Check-in notes", ""))
 check("no separator: whole title is the main", t.split_title("Project Unity Interfaces"), ("Project Unity Interfaces", ""))
 check("an empty side is no split", t.split_title("A - "), ("A -", ""))

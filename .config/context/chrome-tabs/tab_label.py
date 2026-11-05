@@ -104,12 +104,37 @@ def _cap(text):
 _SEPARATORS = (" - ", " – ", " — ", ": ")
 
 
-def split_title(title):
+_DASH = re.compile(r" [-–—] ")
+
+
+def _is_boomi_platform(url):
+    host = (urlsplit(url).hostname or "").lower()
+    return host == "platform.boomi.com" or host.endswith(".platform.boomi.com")
+
+
+def _boomi_split(title):
+    """Boomi platform tabs read `<account> - <page> - Boomi Enterprise Platform`:
+    the page (everything between the first and last dash) is the main title, the
+    account and the product the sub (2026-11-05, the user, a Boomi developer).
+    None when the title has fewer than three parts or an empty one."""
+    parts = _DASH.split(title)
+    if len(parts) < 3 or not all(p.strip() for p in parts):
+        return None
+    dashes = list(_DASH.finditer(title))
+    middle = title[dashes[0].end():dashes[-1].start()]
+    return middle.strip(), f"{parts[0].strip()} - {parts[-1].strip()}"
+
+
+def split_title(title, url=""):
     """(main, sub): the title cut at its first spaced hyphen, en dash or em dash,
     or its first colon followed by a blank (2026-11-05, the user: "a main title and
     a sub title in grey", then "just ':' for now"; a colon with no blank after it
     is a time or a url). No separator, or nothing on one side of it, leaves the
-    whole title as the main."""
+    whole title as the main. A Boomi platform tab (by its url) has its own rule."""
+    if _is_boomi_platform(url):
+        boomi = _boomi_split(title)
+        if boomi:
+            return boomi
     found = [(i, len(sep)) for sep in _SEPARATORS for i in [title.find(sep)] if i >= 0]
     if found:
         at, width = min(found)
@@ -122,7 +147,7 @@ def split_title(title):
 def columns(app, description, url):
     """Two text columns, then the dim url. A tab with an app reads `<app>
     <description>`; one without reads `<main title> <sub title>`."""
-    first, second = (app, description) if app else split_title(description)
+    first, second = (app, description) if app else split_title(description, url)
     return (f"{_fit(_cap(first), APP_WIDTH)}{_fit(_cap(second), 0)}"
             f"{DIM_ON}{shorten_url(url)}{DIM_OFF}")
 
