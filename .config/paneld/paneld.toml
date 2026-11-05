@@ -162,7 +162,7 @@ morph_rows     = "/Users/petermariani/projects/context-based-mac/bin/context pic
 # Both commands run `context`; remove the two lines (and the hint) to drop the keys.
 slot_set       = "/Users/petermariani/projects/context-based-mac/bin/context slot-set-workspace {key} {digit}"
 slot_clear     = "/Users/petermariani/projects/context-based-mac/bin/context slot-clear-workspace {key}"
-hints          = "q Open unified picker|esc Windows|` Chrome tabs|1-9 Set slot|x Clear slot"
+hints          = "q Search|esc Windows|` Chrome tabs|1-9 Set slot|x Clear slot"
 # Less top and bottom room (inset 6 + 1 = 7 pt; the default 8 gave 14, then 4 gave 10), the user, 2026-11-06.
 padding_y      = 1
 font           = "Menlo"
