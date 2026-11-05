@@ -19,7 +19,7 @@ AFTER_ICON = 3          # spaces between the favicon and the mark (2026-10-26, t
 MARK_GAP = 1            # spaces between the mark and the app name (2026-10-27, the user: "only one space")
 GAP = 5                 # spaces between two columns, as in the workspace picker (2026-10-26, the user: breathing room)
 APP_WIDTH = 13          # "Google Sheets" is the longest name, 13
-DESCRIPTION_WIDTH = 44
+CAP = 120               # characters of one title column kept, then an ellipsis (paneld cuts to its room)
 URL_LIMIT = 35          # characters kept, then an ellipsis (was 80, then 50)
 
 DIM_ON = "\033[2m"
@@ -89,14 +89,39 @@ def shorten_url(url):
 
 
 def _fit(text, width):
-    """`text` padded or cut to `width` characters, then GAP spaces."""
-    if len(text) <= width:
-        return text.ljust(width) + " " * GAP
-    return text[: width - 1] + "…" + " " * GAP
+    """`text` padded to `width`, then GAP spaces. Never cut: paneld cuts a name to
+    the room it has, and the panel is as wide as its rows ask (the producer's own
+    44-character cut hid the end of a title the panel had room for)."""
+    return text.ljust(width) + " " * GAP
+
+
+def _cap(text):
+    """A title past CAP characters ends in an ellipsis, so a runaway title cannot
+    ask the panel for a whole screen."""
+    return text if len(text) <= CAP else text[: CAP - 1] + "…"
+
+
+_SEPARATORS = (" - ", " – ", " — ")
+
+
+def split_title(title):
+    """(main, sub): the title cut at its first spaced hyphen, en dash or em dash
+    (2026-11-05, the user: "a main title and a sub title in grey"). No separator,
+    or nothing on one side of it, leaves the whole title as the main."""
+    found = [i for i in (title.find(sep) for sep in _SEPARATORS) if i >= 0]
+    if found:
+        at = min(found)
+        main, sub = title[:at].strip(), title[at + 3:].strip()
+        if main and sub:
+            return main, sub
+    return title.strip(), ""
 
 
 def columns(app, description, url):
-    return (f"{_fit(app, APP_WIDTH)}{_fit(description, DESCRIPTION_WIDTH)}"
+    """Two text columns, then the dim url. A tab with an app reads `<app>
+    <description>`; one without reads `<main title> <sub title>`."""
+    first, second = (app, description) if app else split_title(description)
+    return (f"{_fit(_cap(first), APP_WIDTH)}{_fit(_cap(second), 0)}"
             f"{DIM_ON}{shorten_url(url)}{DIM_OFF}")
 
 

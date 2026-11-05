@@ -384,9 +384,9 @@ case "$first" in
     *) fail "a tab with a favicon must lead with its cached png path, got: $(printf %q "$first")" ;;
 esac
 case "$second" in
-    $'\033]icon;\007'*"No icon"*) ;;
-    *) fail "a tab with no favicon must lead with an empty icon request, got: $(printf %q "$second")" ;;
+    $'\033]icon;symbol:globe\007'*"No icon"*) ;;
+    *) fail "a tab with no favicon must lead with the globe placeholder, got: $(printf %q "$second")" ;;
 esac
-ok "rows lead with the icon request: the png path when Chrome has one, empty (column kept) when not"
+ok "rows lead with the icon request: the png path when Chrome has one, the globe placeholder when not"
 
 echo "smoke-rank: $pass checks passed"

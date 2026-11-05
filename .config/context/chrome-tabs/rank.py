@@ -102,6 +102,7 @@ CACHE_FILE = STATE_DIR / "cache.json"
 FRECENCY_FILE = STATE_DIR / "frecency.json"
 
 TITLE_WIDTH = 50
+PLACEHOLDER_ICON = "symbol:globe"
 DIM_ON = "\033[2m"
 DIM_OFF = "\033[0m"
 
@@ -213,9 +214,9 @@ def main():
     for n, (_, tab) in enumerate(ranked):
         app = app_for(tab["url"])
         text = columns(app, describe(tab["title"], app), tab["url"])
-        # The icon request leads the display; "" when Chrome has no favicon for
-        # the tab, which still reserves the column (paneld's ListRow.icon).
-        icon = f"\033]icon;{icon_path_for(tab['url'])}\007"
+        # The icon request leads the display; the globe symbol (paneld draws it
+        # itself, as Chrome's tab strip does) when Chrome has no favicon for the tab.
+        icon = f"\033]icon;{icon_path_for(tab['url']) or PLACEHOLDER_ICON}\007"
         print(f"{tab['win']}\t{tab['index']}\t{icon}{display_row(is_active(tab), text, n == 0, show_mark)}")
     return 0
 
