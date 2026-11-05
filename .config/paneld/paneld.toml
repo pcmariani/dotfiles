@@ -147,6 +147,11 @@ order_by       = "workspace-recency"
 refresh_on_focus = true
 refresh_on_agents = true
 hold           = "cmd"
+# cmd-tab then q (cbm-058, a STUB): cancels the switcher and opens a bare search
+# field that keeps focus after cmd is released. Held only while this cycle is
+# open, so cmd-q is macOS Quit again as soon as the switcher closes. Remove the
+# line to drop the morph.
+morph          = "cmd-q"
 font           = "Menlo"
 # cmd-tab, taken from the Dock by karabiner.edn and rewritten to cmd-f18.
 # The `to` binding KEEPS cmd deliberately: release-to-commit depends on the
