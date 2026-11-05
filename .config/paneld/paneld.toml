@@ -157,7 +157,12 @@ morph_rows     = "/Users/petermariani/projects/context-based-mac/bin/context pic
 # The footer of the native panel (cbm-061): the switcher's real keys. cmd-tab
 # steps, q is the morph above, Escape cancels. paneld refuses to load a hint
 # that names a key the panel lacks (a one-letter key must be the morph's).
-hints          = "q Open unified picker|esc Windows|` Chrome tabs"
+# cbm-062: while the switcher is open, cmd-1..9 pin the highlighted row's workspace
+# to that slot and cmd-x unpins it. The panel stays open and the row's slot tag changes.
+# Both commands run `context`; remove the two lines (and the hint) to drop the keys.
+slot_set       = "/Users/petermariani/projects/context-based-mac/bin/context slot-set-workspace {key} {digit}"
+slot_clear     = "/Users/petermariani/projects/context-based-mac/bin/context slot-clear-workspace {key}"
+hints          = "q Open unified picker|esc Windows|` Chrome tabs|1-9 Set slot|x Clear slot"
 # Less top and bottom room (inset 6 + 1 = 7 pt; the default 8 gave 14, then 4 gave 10), the user, 2026-11-06.
 padding_y      = 1
 font           = "Menlo"
