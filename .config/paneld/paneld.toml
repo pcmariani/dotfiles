@@ -163,7 +163,7 @@ hold           = "cmd"
 morph          = "cmd-q"
 morph_rows     = "/Users/petermariani/projects/context-based-mac/bin/context pick --rows --source search"
 morph_accept   = "/Users/petermariani/projects/context-based-mac/bin/context --notify pick-accept search --key enter"
-morph_hints    = "↑↓ Move|⏎ Open|esc Back"
+morph_hints    = "↑↓ Move|⏎ Open|⌘P Preview|esc Back"
 # The footer of the native panel (cbm-061): the switcher's real keys. cmd-tab
 # steps, q is the morph above, Escape cancels. paneld refuses to load a hint
 # that names a key the panel lacks (a one-letter key must be the morph's).
