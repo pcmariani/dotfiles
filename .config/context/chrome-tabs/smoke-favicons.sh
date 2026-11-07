@@ -55,7 +55,27 @@ check("unknown host is empty", favicons.icon_path_for("https://nowhere.example/"
 check("chrome:// pages are empty", favicons.icon_path_for("chrome://newtab/") == "")
 check("a second lookup reuses the cached file", favicons.icon_path_for("https://other.example/x") == cached("other32"))
 check("a prefix of the host is not the host", favicons.icon_path_for("https://docs.example.com.evil/a") == "")
+batch = favicons.icon_paths_for(["https://mail.google.com/mail/u/1/#inbox", "https://nowhere.example/",
+                                 "https://docs.example.com/other/page", "https://other.example/x",
+                                 "chrome://newtab/", "https://docs.example.com.evil/a"])
+check("batch: a mapped url gets its 32 px png", batch["https://mail.google.com/mail/u/1/#inbox"] == cached("mail32"), str(batch))
+check("batch: an unmapped url is empty, still a key", batch.get("https://nowhere.example/") == "", str(batch))
+check("batch: the host fallback works", batch["https://docs.example.com/other/page"] == cached("docs16"), str(batch))
+check("batch: another profile answers", batch["https://other.example/x"] == cached("other32"), str(batch))
+check("batch: chrome:// and a lookalike host are empty",
+      batch["chrome://newtab/"] == "" and batch["https://docs.example.com.evil/a"] == "", str(batch))
+check("batch: same answers as one-by-one",
+      all(batch[u] == favicons.icon_path_for(u) for u in batch), str(batch))
+check("batch: an empty list is an empty dict", favicons.icon_paths_for([]) == {})
+opened = []
+real_connect = sqlite3.connect
+sqlite3.connect = lambda *a, **k: (opened.append(a[0]), real_connect(*a, **k))[1]
+favicons.icon_paths_for(["https://nowhere.example/", "https://nowhere.example/b", "https://nowhere.example/c"])
+sqlite3.connect = real_connect
+check("batch: each database is opened once for the whole list",
+      len(opened) == len(set(opened)) == 3, str(opened))
 favicons.CHROME_DIR = os.path.join(tmp, "missing")
+check("batch: no Chrome directory gives empty paths", favicons.icon_paths_for(["https://a.example/"]) == {"https://a.example/": ""})
 check("no Chrome directory is empty, not an error", favicons.icon_path_for("https://mail.google.com/") == "")
 
 if fails:

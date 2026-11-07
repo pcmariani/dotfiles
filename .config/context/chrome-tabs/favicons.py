@@ -83,3 +83,39 @@ def icon_path_for(url):
             except OSError:
                 return ""
     return ""
+
+
+def icon_paths_for(urls):
+    """{url: PNG path} for every url, "" for a tab Chrome has no icon for. The batch form of
+    `icon_path_for` (same lookup order, same 32 px pick): each profile's database is opened ONCE for
+    the whole list, and only for urls an earlier database did not already answer. The search list
+    asks for its first tabs this way; opening a dozen databases per tab was the cost."""
+    out = {url: "" for url in urls}
+    pending = {}
+    for url in out:
+        parts = urlsplit(url)
+        if parts.scheme in ("http", "https") and parts.hostname:
+            pending[url] = [f"{scheme}://{parts.netloc}/" for scheme in ("https", "http")]
+    for db in _databases():
+        if not pending:
+            break
+        try:
+            conn = sqlite3.connect(f"file:{db}?immutable=1", uri=True, timeout=1)
+        except (sqlite3.Error, OSError):
+            continue
+        try:
+            for url in list(pending):
+                try:
+                    icon = _icon_id(conn, url, pending[url])
+                    row = conn.execute(_BEST, (icon,)).fetchone() if icon is not None else None
+                except (sqlite3.Error, OSError):
+                    continue
+                if row and row[0] and bytes(row[0]).startswith(_PNG_MAGIC):
+                    try:
+                        out[url] = _store(bytes(row[0]))
+                    except OSError:
+                        pass
+                    del pending[url]
+        finally:
+            conn.close()
+    return out
