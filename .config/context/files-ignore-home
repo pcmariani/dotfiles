@@ -1,0 +1,11 @@
+# fd --ignore-file, gitignore format, anchored to the home folder. Applied ONLY when the
+# focused workspace has no folder and the cmd-space search falls back to searching home
+# (context/producers.py search_scope). Never read for a rooted workspace.
+#
+# The project roots are searched by the workspaces named after them, and together they hold
+# 55,000 of home's 60,000 files (measured 2026-11-07): listing them here made every open of
+# the search on `work` or `personal` take 1.8 s instead of about 0.5 s.
+/clients/
+/clients-inactive/
+/projects/
+/projects-inactive/
