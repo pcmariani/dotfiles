@@ -20,3 +20,8 @@ target/
 .cache/
 coverage/
 .terraform/
+
+# The home folder is the search scope for workspaces with no folder (work, personal, ...).
+# Anchored, so a project's own Library/ (Unity and the like) is not hidden by this line.
+# ~/Library alone is 700,000 of the home folder's 760,000 files (measured 2026-11-07).
+/Library/
